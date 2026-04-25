@@ -918,127 +918,6 @@ class Router {
                 ]
             ],
 
-            'webhook-stripe' => [
-                'controller' => 'WebhookStripe',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-payu' => [
-                'controller' => 'WebhookPayu',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-iyzico' => [
-                'controller' => 'WebhookIyzico',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-paystack' => [
-                'controller' => 'WebhookPaystack',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-razorpay' => [
-                'controller' => 'WebhookRazorpay',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-mollie' => [
-                'controller' => 'WebhookMollie',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-yookassa' => [
-                'controller' => 'WebhookYookassa',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-crypto-com' => [
-                'controller' => 'WebhookCryptoCom',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-paddle' => [
-                'controller' => 'WebhookPaddle',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-paddle-billing' => [
-                'controller' => 'WebhookPaddleBilling',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-                    'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-mercadopago' => [
-                'controller' => 'WebhookMercadopago',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
             'webhook-midtrans' => [
                 'controller' => 'WebhookMidtrans',
                 'settings' => [
@@ -1050,80 +929,14 @@ class Router {
                 ]
             ],
 
-            'webhook-flutterwave' => [
-                'controller' => 'WebhookFlutterwave',
+            'webhook-tripay' => [
+                'controller' => 'WebhookTripay',
                 'settings' => [
                     'no_authentication_check' => true,
                     'has_view' => false,
                     'no_browser_language_detection' => true,
                     'allow_indexing' => false,
 					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-lemonsqueezy' => [
-                'controller' => 'WebhookLemonsqueezy',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-myfatoorah' => [
-                'controller' => 'WebhookMyfatoorah',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-					'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-klarna' => [
-                'controller' => 'WebhookKlarna',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-                    'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-plisio' => [
-                'controller' => 'WebhookPlisio',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-                    'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-plisio-whitelabel' => [
-                'controller' => 'WebhookPlisioWhitelabel',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-                    'allow_sessions' => false,
-                ]
-            ],
-
-            'webhook-revolut' => [
-                'controller' => 'WebhookRevolut',
-                'settings' => [
-                    'no_authentication_check' => true,
-                    'has_view' => false,
-                    'no_browser_language_detection' => true,
-                    'allow_indexing' => false,
-                    'allow_sessions' => false,
                 ]
             ],
 

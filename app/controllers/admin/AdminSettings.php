@@ -17,7 +17,7 @@
 namespace Altum\Controllers;
 
 use Altum\Alerts;
-use Altum\PaymentGateways\Revolut;
+
 use Altum\Title;
 
 
@@ -55,11 +55,12 @@ class AdminSettings extends Controller {
 
         if(!Alerts::has_field_errors() && !Alerts::has_errors()) {
 
-            /* Update the database */
-            db()->where('`key`', $key)->update('settings', ['value' => $value]);
+            /* Upsert: insert if not exists, update if exists */
+            database()->query("INSERT INTO `settings` (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)", [$key, $value]);
 
             $this->after_update_settings($key);
         }
+
 
         redirect('admin/settings/' . $key);
     }
@@ -367,148 +368,6 @@ class AdminSettings extends Controller {
         }
     }
 
-    public function paddle_billing() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'api_key' => $_POST['api_key'],
-                'secret_key' => $_POST['secret_key'],
-                'client_side_token' => $_POST['client_side_token'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('paddle_billing', $value);
-        }
-    }
-
-
-    public function klarna() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'username' => $_POST['username'],
-                'password' => $_POST['password'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('klarna', $value);
-        }
-    }
-
-    public function plisio() {
-        $this->process();
-
-        if(!empty($_POST)) {
-
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['accepted_cryptocurrencies'] = array_filter(array_map('trim', $_POST['accepted_cryptocurrencies']));
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'secret_key' => $_POST['secret_key'],
-                'accepted_cryptocurrencies' => $_POST['accepted_cryptocurrencies'],
-                'default_cryptocurrency' => $_POST['default_cryptocurrency'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('plisio', $value);
-        }
-    }
-
-    public function plisio_whitelabel() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['accepted_cryptocurrencies'] = array_filter(array_map('trim', $_POST['accepted_cryptocurrencies']));
-            $_POST['payment_blocks_fee'] = (float) max(0, min($_POST['payment_blocks_fee'], 100));
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'secret_key' => $_POST['secret_key'],
-                'accepted_cryptocurrencies' => $_POST['accepted_cryptocurrencies'],
-                'default_cryptocurrency' => $_POST['default_cryptocurrency'],
-                'payment_blocks_fee' => $_POST['payment_blocks_fee'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('plisio_whitelabel', $value);
-        }
-    }
-
-    public function revolut() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['mode'] = in_array($_POST['mode'], ['live', 'sandbox']) ? input_clean($_POST['mode']) : 'live';
-
-            /* Generate webhook id */
-            if(empty($_POST['webhook_id']) && !empty($_POST['secret_key'])) {
-                try {
-                    $response = \Unirest\Request::post(
-                        ($_POST['mode'] == 'live' ? Revolut::$live_api_url : Revolut::$sandbox_api_url) . 'api/1.0/webhooks',
-                        [
-                            'Authorization' => 'Bearer ' . $_POST['secret_key'],
-                            'Content-Type' => 'application/json',
-                            'Accept' => 'application/json',
-                            'Revolut-Api-Version' => '2024-09-01',
-                        ],
-                        \Unirest\Request\Body::json([
-                            'url' => SITE_URL . 'webhook-revolut',
-                            'events' => [
-                                'ORDER_COMPLETED'
-                            ]
-                        ])
-                    );
-                } catch (\Exception $exception) {
-                    Alerts::add_error($exception->getCode() . ':' . $exception->getMessage());
-                }
-
-                if($response->code == 200) {
-                    $_POST['webhook_id'] = $response->body->id;
-                } else {
-                    Alerts::add_error($response->code . ':' . $response->raw_body);
-                }
-            }
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'secret_key' => $_POST['secret_key'],
-                'webhook_id' => $_POST['webhook_id'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('revolut', $value);
-        }
-    }
-
     public function paypal() {
         $this->process();
 
@@ -528,29 +387,6 @@ class AdminSettings extends Controller {
             ]);
 
             $this->update_settings('paypal', $value);
-        }
-    }
-
-    public function stripe() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['automatic_tax_is_enabled'] = (int) isset($_POST['automatic_tax_is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'automatic_tax_is_enabled' => $_POST['automatic_tax_is_enabled'],
-                'publishable_key' => $_POST['publishable_key'],
-                'secret_key' => $_POST['secret_key'],
-                'webhook_secret' => $_POST['webhook_secret'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('stripe', $value);
         }
     }
 
@@ -575,195 +411,6 @@ class AdminSettings extends Controller {
         }
     }
 
-    public function payu() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['mode'] = in_array($_POST['mode'], ['secure', 'sandbox']) ? input_clean($_POST['mode']) : 'secure';
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'merchant_pos_id' => $_POST['merchant_pos_id'],
-                'signature_key' => $_POST['signature_key'],
-                'oauth_client_id' => $_POST['oauth_client_id'],
-                'oauth_client_secret' => $_POST['oauth_client_secret'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('payu', $value);
-        }
-    }
-
-    public function iyzico() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['mode'] = in_array($_POST['mode'], ['live', 'sandbox']) ? input_clean($_POST['mode']) : 'live';
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'api_key' => $_POST['api_key'],
-                'secret_key' => $_POST['secret_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('iyzico', $value);
-        }
-    }
-
-    public function paystack() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'public_key' => $_POST['public_key'],
-                'secret_key' => $_POST['secret_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('paystack', $value);
-        }
-    }
-
-    public function razorpay() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'key_id' => $_POST['key_id'],
-                'key_secret' => $_POST['key_secret'],
-                'webhook_secret' => $_POST['webhook_secret'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('razorpay', $value);
-        }
-    }
-
-    public function mollie() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'api_key' => $_POST['api_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('mollie', $value);
-        }
-    }
-
-    public function yookassa() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'shop_id' => $_POST['shop_id'],
-                'secret_key' => $_POST['secret_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('yookassa', $value);
-        }
-    }
-
-    public function crypto_com() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'publishable_key' => $_POST['publishable_key'],
-                'secret_key' => $_POST['secret_key'],
-                'webhook_secret' => $_POST['webhook_secret'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('crypto_com', $value);
-        }
-    }
-
-    public function paddle() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['mode'] = in_array($_POST['mode'], ['live', 'sandbox']) ? input_clean($_POST['mode']) : 'live';
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'mode' => $_POST['mode'],
-                'vendor_id' => $_POST['vendor_id'],
-                'api_key' => $_POST['api_key'],
-                'public_key' => $_POST['public_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('paddle', $value);
-        }
-    }
-
-    public function mercadopago() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'access_token' => $_POST['access_token'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('mercadopago', $value);
-        }
-    }
-
     public function midtrans() {
         $this->process();
 
@@ -784,7 +431,7 @@ class AdminSettings extends Controller {
         }
     }
 
-    public function flutterwave() {
+    public function tripay() {
         $this->process();
 
         if(!empty($_POST)) {
@@ -792,64 +439,18 @@ class AdminSettings extends Controller {
 
             /* :) */
             $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
+            $_POST['mode'] = in_array($_POST['mode'], ['production', 'sandbox']) ? input_clean($_POST['mode']) : 'production';
 
             $value = json_encode([
                 'is_enabled' => $_POST['is_enabled'],
-                'secret_key' => $_POST['secret_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('flutterwave', $value);
-        }
-    }
-
-    public function lemonsqueezy() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
+                'mode' => $_POST['mode'],
                 'api_key' => $_POST['api_key'],
-                'signing_secret' => $_POST['signing_secret'],
-                'store_id' => $_POST['store_id'],
-                'one_time_monthly_variant_id' => $_POST['one_time_monthly_variant_id'],
-                'one_time_quarterly_variant_id' => $_POST['one_time_quarterly_variant_id'],
-                'one_time_biannual_variant_id' => $_POST['one_time_biannual_variant_id'],
-                'one_time_annual_variant_id' => $_POST['one_time_annual_variant_id'],
-                'one_time_lifetime_variant_id' => $_POST['one_time_lifetime_variant_id'],
-                'recurring_monthly_variant_id' => $_POST['recurring_monthly_variant_id'],
-                'recurring_annual_variant_id' => $_POST['recurring_annual_variant_id'],
+                'private_key' => $_POST['private_key'],
+                'merchant_code' => $_POST['merchant_code'],
                 'currencies' => $_POST['currencies'] ?? [],
             ]);
 
-            $this->update_settings('lemonsqueezy', $value);
-        }
-    }
-
-    public function myfatoorah() {
-        $this->process();
-
-        if(!empty($_POST)) {
-            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
-
-            /* :) */
-            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
-            $_POST['api_endpoint'] = in_array($_POST['api_endpoint'], ['api.myfatoorah.com', 'api-sa.myfatoorah.com', 'api-qa.myfatoorah.com', 'api-eg.myfatoorah.com', 'apitest.myfatoorah.com',]) ? input_clean($_POST['api_endpoint']) : 'api.myfatoorah.com';
-
-            $value = json_encode([
-                'is_enabled' => $_POST['is_enabled'],
-                'api_endpoint' => $_POST['api_endpoint'],
-                'api_key' => $_POST['api_key'],
-                'secret_key' => $_POST['secret_key'],
-                'currencies' => $_POST['currencies'] ?? [],
-            ]);
-
-            $this->update_settings('myfatoorah', $value);
+            $this->update_settings('tripay', $value);
         }
     }
 

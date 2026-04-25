@@ -91,7 +91,20 @@ class Settings extends Model {
             $data->links->openai_api_url = 'https://api.openai.com/';
         }
 
+        /* Fallback for Tripay if not yet set in DB */
+        if(!isset($data->tripay)) {
+            $data->tripay = (object) [
+                'is_enabled' => 0,
+                'mode' => 'production',
+                'api_key' => '',
+                'private_key' => '',
+                'merchant_code' => '',
+                'currencies' => [],
+            ];
+        }
+
         return $data;
+
     }
 
 }

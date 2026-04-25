@@ -936,48 +936,14 @@ return [
     'admin_settings.payment.plan_features_help' => 'Show or hide specific plan features anywhere they appear. This only changes visibility, not functionality.',
     'admin_settings.payment.plan_feature_in_front' => 'Display in front',
 
-    'admin_settings.paddle_billing.tab' => 'Paddle Billing',
-    'admin_settings.paddle_billing.is_enabled' => 'Enable Paddle Billing payments',
-    'admin_settings.paddle_billing.api_key' => 'API key',
-    'admin_settings.paddle_billing.secret_key' => 'Secret key',
-    'admin_settings.paddle_billing.client_side_token' => 'Client side token',
 
-    'admin_settings.klarna.tab' => 'Klarna',
-    'admin_settings.klarna.is_enabled' => 'Enable Klarna payments',
-    'admin_settings.klarna.username' => 'Username',
-    'admin_settings.klarna.password' => 'Password',
-
-    'admin_settings.plisio.tab' => 'Plisio',
-    'admin_settings.plisio.is_enabled' => 'Enable Plisio payments',
-    'admin_settings.plisio.secret_key' => 'Secret key',
-    'admin_settings.plisio.accepted_cryptocurrencies' => 'Accepted cryptocurrencies',
-    'admin_settings.plisio.default_cryptocurrency' => 'Default cryptocurrency',
-
-
-    'admin_settings.plisio_whitelabel.tab' => 'Plisio whitelabel',
-    'admin_settings.plisio_whitelabel.is_enabled' => 'Enable Plisio whitelabel payments',
-    'admin_settings.plisio_whitelabel.payment_blocks_fee' => 'Payment blocks fee',
-
-
-    'admin_settings.revolut.tab' => 'Revolut',
-    'admin_settings.revolut.is_enabled' => 'Enable Revolut payments',
-    'admin_settings.revolut.secret_key' => 'Secret key',
-    'admin_settings.revolut.webhook_id' => 'Webhook ID',
-    'admin_settings.revolut.webhook_id_help' => 'Once generated, do not modify the value, nor the mode - as they are directly associated with each other.',
-    'admin_settings.revolut.webhook_id_generate' => 'Generate',
 
     'admin_settings.paypal.tab' => 'Paypal',
     'admin_settings.paypal.is_enabled' => 'Enable Paypal payments',
     'admin_settings.paypal.client_id' => 'Client Id',
     'admin_settings.paypal.secret' => 'Secret',
 
-    'admin_settings.stripe.tab' => 'Stripe',
-    'admin_settings.stripe.is_enabled' => 'Enable Stripe payments',
-    'admin_settings.stripe.publishable_key' => 'Publishable Key',
-    'admin_settings.stripe.secret_key' => 'Secret Key',
-    'admin_settings.stripe.webhook_secret' => 'Webhook Secret',
-    'admin_settings.stripe.automatic_tax_is_enabled' => 'Enable automatic stripe tax',
-    'admin_settings.stripe.automatic_tax_is_enabled_help' => 'If enabled, Stripe will automatically calculate your taxes as per their <a href="https://docs.stripe.com/tax/checkout">Automatic Tax feature</a>.',
+
 
     'admin_settings.offline_payment.tab' => 'Offline payment',
     'admin_settings.offline_payment.is_enabled' => 'Enable offline payments',
@@ -985,83 +951,17 @@ return [
     'admin_settings.offline_payment.instructions_help' => 'Payment instructions for the user to see, before submitting the payment.',
     'admin_settings.offline_payment.proof_size_limit' => 'Uploaded proof size limit',
 
-    'admin_settings.payu.tab' => 'PayU',
-    'admin_settings.payu.is_enabled' => 'Enable PayU payments',
-    'admin_settings.payu.merchant_pos_id' => 'Merchant POS Id',
-    'admin_settings.payu.signature_key' => 'Signature Key',
-    'admin_settings.payu.oauth_client_id' => 'Oauth Client Id',
-    'admin_settings.payu.oauth_client_secret' => 'Oauth Client Secret',
 
-    'admin_settings.iyzico.tab' => 'Iyzico',
-    'admin_settings.iyzico.is_enabled' => 'Enable Iyzico payments',
-    'admin_settings.iyzico.api_key' => 'API Key',
-    'admin_settings.iyzico.secret_key' => 'Secret Key',
-
-    'admin_settings.paystack.tab' => 'Paystack',
-    'admin_settings.paystack.is_enabled' => 'Enable Paystack payments',
-    'admin_settings.paystack.public_key' => 'Public Key',
-    'admin_settings.paystack.secret_key' => 'Secret Key',
-
-    'admin_settings.razorpay.tab' => 'Razorpay',
-    'admin_settings.razorpay.is_enabled' => 'Enable Razorpay payments',
-    'admin_settings.razorpay.key_id' => 'Key Id',
-    'admin_settings.razorpay.key_secret' => 'Key Secret',
-    'admin_settings.razorpay.webhook_secret' => 'Webhook Secret',
-
-    'admin_settings.mollie.tab' => 'Mollie',
-    'admin_settings.mollie.is_enabled' => 'Enable Mollie payments',
-    'admin_settings.mollie.api_key' => 'API Key',
-
-    'admin_settings.yookassa.tab' => 'Yookassa',
-    'admin_settings.yookassa.is_enabled' => 'Enable Yookassa payments',
-    'admin_settings.yookassa.shop_id' => 'Shop ID',
-    'admin_settings.yookassa.secret_key' => 'Secret Key',
-
-    'admin_settings.crypto_com.tab' => 'Crypto.com',
-    'admin_settings.crypto_com.is_enabled' => 'Enable Crypto.com payments',
-    'admin_settings.crypto_com.publishable_key' => 'Publishable Key',
-    'admin_settings.crypto_com.secret_key' => 'Secret Key',
-    'admin_settings.crypto_com.webhook_secret' => 'Webhook Secret',
-
-    'admin_settings.paddle.tab' => 'Paddle Classic',
-    'admin_settings.paddle.is_enabled' => 'Enable Paddle Classic payments',
-    'admin_settings.paddle.vendor_id' => 'Vendor ID',
-    'admin_settings.paddle.api_key' => 'API Key',
-    'admin_settings.paddle.public_key' => 'Public Key',
-
-    'admin_settings.mercadopago.tab' => 'MercadoPago',
-    'admin_settings.mercadopago.is_enabled' => 'Enable MercadoPago payments',
-    'admin_settings.mercadopago.access_token' => 'Access Token',
+    'admin_settings.tripay.tab' => 'Tripay',
+    'admin_settings.tripay.is_enabled' => 'Aktifkan pembayaran Tripay',
+    'admin_settings.tripay.merchant_code' => 'Merchant Code',
+    'admin_settings.tripay.api_key' => 'API Key',
+    'admin_settings.tripay.private_key' => 'Private Key',
 
     'admin_settings.midtrans.tab' => 'Midtrans',
     'admin_settings.midtrans.is_enabled' => 'Enable Midtrans payments',
     'admin_settings.midtrans.server_key' => 'Server Key',
 
-    'admin_settings.flutterwave.tab' => 'Flutterwave',
-    'admin_settings.flutterwave.is_enabled' => 'Enable Flutterwave payments',
-    'admin_settings.flutterwave.secret_key' => 'Secret Key',
-
-    'admin_settings.lemonsqueezy.tab' => 'Lemonsqueezy',
-    'admin_settings.lemonsqueezy.is_enabled' => 'Enable Lemonsqueezy payments',
-    'admin_settings.lemonsqueezy.api_key' => 'Api key',
-    'admin_settings.lemonsqueezy.signing_secret' => 'Secret signing',
-    'admin_settings.lemonsqueezy.store_id' => 'Store ID',
-    'admin_settings.lemonsqueezy.one_time_monthly_variant_id' => 'One time payment - monthly - variant id',
-    'admin_settings.lemonsqueezy.one_time_quarterly_variant_id' => 'One time payment - quarterly - variant id',
-    'admin_settings.lemonsqueezy.one_time_biannual_variant_id' => 'One time payment - biannual - variant id',
-    'admin_settings.lemonsqueezy.one_time_annual_variant_id' => 'One time payment - annual - variant id',
-    'admin_settings.lemonsqueezy.one_time_lifetime_variant_id' => 'One time payment - lifetime - variant id',
-    'admin_settings.lemonsqueezy.recurring_monthly_variant_id' => 'Recurring payment - monthly - variant id',
-    'admin_settings.lemonsqueezy.recurring_quarterly_variant_id' => 'Recurring payment - quarterly - variant id',
-    'admin_settings.lemonsqueezy.recurring_biannual_variant_id' => 'Recurring payment - biannual - variant id',
-    'admin_settings.lemonsqueezy.recurring_annual_variant_id' => 'Recurring payment - annual - variant id',
-
-    'admin_settings.myfatoorah.tab' => 'Myfatoorah',
-    'admin_settings.myfatoorah.is_enabled' => 'Enable Myfatoorah payments',
-    'admin_settings.myfatoorah.api_key' => 'API key',
-    'admin_settings.myfatoorah.secret_key' => 'Secret key',
-    'admin_settings.myfatoorah.api_endpoint' => 'API endpoint',
-    'admin_settings.myfatoorah.api_endpoint_help' => 'Choose the endpoint based on the account region.',
 
     'admin_settings.affiliate.tab' => 'Affiliate',
     'admin_settings.affiliate.is_enabled' => 'Enable the affiliate system',
