@@ -1,0 +1,56 @@
+[21-Apr-2026 14:57:25 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 14:57:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 14:57:28 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 14:57:29 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 14:57:37 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 14:58:18 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 15:06:41 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40
+[21-Apr-2026 15:07:34 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in /home/linkkit/public_html/app/controllers/AccountPayments.php:40
+Stack trace:
+#0 [internal function]: Altum\Controllers\AccountPayments->index()
+#1 /home/linkkit/public_html/app/core/App.php(331): call_user_func_array()
+#2 /home/linkkit/public_html/index.php(22): Altum\App->__construct()
+#3 {main}
+  thrown in /home/linkkit/public_html/app/controllers/AccountPayments.php on line 40

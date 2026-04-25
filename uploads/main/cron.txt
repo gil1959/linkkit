@@ -1,0 +1,4 @@
+wget --quiet -O /dev/null http://app/cron?key=34ea452b62716d1a770c23337d777de1
+wget --quiet -O /dev/null http://app/cron/email_reports?key=34ea452b62716d1a770c23337d777de1
+wget --quiet -O /dev/null http://app/cron/broadcasts?key=34ea452b62716d1a770c23337d777de1
+wget --quiet -O /dev/null http://app/cron/push_notifications?key=34ea452b62716d1a770c23337d777de1
