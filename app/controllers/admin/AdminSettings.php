@@ -56,7 +56,10 @@ class AdminSettings extends Controller {
         if(!Alerts::has_field_errors() && !Alerts::has_errors()) {
 
             /* Upsert: insert if not exists, update if exists */
-            database()->query("INSERT INTO `settings` (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)", [$key, $value]);
+            $stmt = database()->prepare("INSERT INTO `settings` (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)");
+            $stmt->bind_param('ss', $key, $value);
+            $stmt->execute();
+            $stmt->close();
 
             $this->after_update_settings($key);
         }

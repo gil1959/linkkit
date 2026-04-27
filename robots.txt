@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://linkkit.id/sitemap
+Sitemap: http://127.0.0.1:8000/sitemap

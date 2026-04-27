@@ -290,8 +290,8 @@ class App {
         Meta::initialize();
 
         /* Set a CSRF Token */
-//        \Altum\Csrf::set('token');
-//        \Altum\Csrf::set('global_token');
+        \Altum\Csrf::set('token');
+        \Altum\Csrf::set('global_token');
 
         /* If the language code is the default one, redirect to index */
         if(\Altum\Router::$language_code == Language::$default_code) {

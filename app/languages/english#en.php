@@ -729,6 +729,7 @@ return [
     'pay.custom_plan.paddle_billing' => 'Paddle',
     'pay.custom_plan.mercadopago' => 'MercadoPago',
     'pay.custom_plan.midtrans' => 'Midtrans',
+    'pay.custom_plan.tripay' => 'Tripay',
     'pay.custom_plan.flutterwave' => 'Flutterwave',
     'pay.custom_plan.lemonsqueezy' => 'Lemonsqueezy',
     'pay.custom_plan.myfatoorah' => 'Myfatoorah',

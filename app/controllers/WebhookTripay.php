@@ -2,6 +2,7 @@
 /*
  * Tripay Webhook Controller
  * Handles payment callback from Tripay
+ * Docs: https://tripay.co.id/developer#callback
  */
 
 namespace Altum\Controllers;
@@ -16,10 +17,6 @@ class WebhookTripay extends Controller {
 
         /* No cache on webhook endpoint */
         header('Cache-Control: no-store');
-
-        if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-            throw_404();
-        }
 
         if(strtoupper($_SERVER['REQUEST_METHOD']) !== 'POST') {
             throw_404();
@@ -40,46 +37,59 @@ class WebhookTripay extends Controller {
         $expected_signature = hash_hmac('sha256', $payload, $private_key);
 
         if(!hash_equals($expected_signature, $received_signature)) {
+            http_response_code(400);
             die('INVALID_SIGNATURE');
         }
 
         $data = json_decode($payload, true);
 
         if(!$data) {
-            die('0');
+            http_response_code(400);
+            die('INVALID_PAYLOAD');
         }
 
         /* Only process PAID status */
         if(!isset($data['status']) || $data['status'] !== 'PAID') {
-            die('1');
+            http_response_code(200);
+            die('IGNORED');
         }
 
-        /* Extract merchant_ref which contains our order metadata */
-        /* Format: userId-planId-frequency-baseAmount-code-discountAmount-taxesIds */
-        $merchant_ref = $data['merchant_ref'] ?? '';
-        $metadata_parts = explode('-', $merchant_ref, 7);
+        /*
+         * Extract metadata from 'note' field.
+         * Format: userId&planId&frequency&baseAmount&code&discountAmount&taxesIds
+         * This is set in Pay::tripay() as $tripay_custom_id
+         */
+        $note = $data['note'] ?? '';
+        $metadata_parts = explode('&', $note, 7);
 
-        if(count($metadata_parts) < 6) {
-            die('2');
+        if(count($metadata_parts) < 3) {
+            http_response_code(400);
+            die('INVALID_METADATA');
         }
 
-        $user_id           = (int) $metadata_parts[0];
-        $plan_id           = (int) $metadata_parts[1];
-        $payment_frequency = $metadata_parts[2];
-        $base_amount       = $metadata_parts[3];
-        $code              = $metadata_parts[4] ?? null;
-        $discount_amount   = $metadata_parts[5] ?? 0;
-        $taxes_ids         = $metadata_parts[6] ?? null;
+        $user_id           = (int)   $metadata_parts[0];
+        $plan_id           = (int)   $metadata_parts[1];
+        $payment_frequency = trim($metadata_parts[2]);
+        $base_amount       = isset($metadata_parts[3]) ? (float) $metadata_parts[3] : 0;
+        $code              = isset($metadata_parts[4]) ? trim($metadata_parts[4]) : null;
+        $discount_amount   = isset($metadata_parts[5]) ? (float) $metadata_parts[5] : 0;
+        $taxes_ids         = isset($metadata_parts[6]) ? trim($metadata_parts[6]) : null;
 
         /* Payment data */
         $external_payment_id      = $data['reference'] ?? '';
-        $payment_total            = $data['total_amount'] ?? 0;
+        $payment_total            = (float) ($data['total_amount'] ?? 0);
         $payment_currency         = 'IDR'; /* Tripay always uses IDR */
         $payment_type             = 'one_time';
         $payment_subscription_id  = null;
         $payer_email              = $data['customer_email'] ?? '';
         $payer_name               = $data['customer_name'] ?? '';
 
+        if(empty($external_payment_id) || $user_id <= 0 || $plan_id <= 0) {
+            http_response_code(400);
+            die('INVALID_DATA');
+        }
+
+        /* Process the payment — this updates user plan automatically */
         (new Payments())->webhook_process_payment(
             'tripay',
             $external_payment_id,
@@ -98,8 +108,8 @@ class WebhookTripay extends Controller {
             $payer_name
         );
 
+        http_response_code(200);
         echo 'successful';
-
     }
 
 }

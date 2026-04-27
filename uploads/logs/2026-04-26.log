@@ -1,0 +1,359 @@
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:37:02 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 09:47:19 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(453): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->tripay()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 09:47:43 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(410): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->offline_payment()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 09:49:08 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(974): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->theme()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 09:55:08 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(453): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->tripay()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 09:55:30 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(410): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->offline_payment()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 09:57:37 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(207): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->main()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 10:02:56 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(453): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->tripay()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 10:24:49 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(453): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->tripay()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 10:25:42 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(410): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->offline_payment()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 10:27:06 UTC] PHP Fatal error:  Uncaught TypeError: mysqli::query(): Argument #2 ($result_mode) must be of type int, array given in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php:59
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(59): mysqli->query()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php(410): Altum\Controllers\AdminSettings->update_settings()
+#2 [internal function]: Altum\Controllers\AdminSettings->offline_payment()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\admin\AdminSettings.php on line 59
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:31:59 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:08 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:14 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:20 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:32:53 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php:143
+Stack trace:
+#0 [internal function]: Altum\Controllers\Pay->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php on line 143
+[26-Apr-2026 10:38:01 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:38:01 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:38:01 UTC] PHP Warning:  Undefined property: stdClass::$domains in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:38:01 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:39:40 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:40:22 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:41:20 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Altum\Controllers\Pay::tripay() in D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php:324
+Stack trace:
+#0 [internal function]: Altum\Controllers\Pay->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php on line 324
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:41:33 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:41:47 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:41:47 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:41:47 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:48 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:48 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:41:48 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:41:48 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:49:26 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:49:26 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:49:26 UTC] PHP Warning:  Undefined property: stdClass::$domains in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:49:26 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:03 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:50:45 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:51:13 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\helpers\payment-gateways\Tripay.php on line 9
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:51:50 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:52:15 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\helpers\payment-gateways\Tripay.php on line 9
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:52:20 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:52:46 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:54:20 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:54:20 UTC] PHP Warning:  Undefined property: stdClass::$ai_static_prompts_characters_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\create_link_modals.php on line 390
+[26-Apr-2026 10:54:20 UTC] PHP Warning:  Undefined property: stdClass::$domains in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:54:20 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\Kerjoan\Coding\linkkit\themes\altum\views\links\links_content.php on line 236
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:54:34 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:55:01 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:55:34 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:55:50 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 441
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 10:56:56 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1314
+[26-Apr-2026 11:13:03 UTC] PHP Fatal error:  Uncaught Exception: Table 'linkkit_biolinkpr0.payments' doesn't exist query: INSERT  INTO payments (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `code`, `discount_amount`, `base_amount`, `email`, `payment_id`, `name`, `plan`, `billing`, `business`, `taxes_ids`, `total_amount`, `currency`, `payment_proof`, `status`, `datetime`)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) in D:\Kerjoan\Coding\linkkit\app\helpers\MysqliDb.php:2088
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\helpers\MysqliDb.php(1676): Altum\Helpers\MysqliDb->_prepareQuery()
+#1 D:\Kerjoan\Coding\linkkit\app\helpers\MysqliDb.php(1606): Altum\Helpers\MysqliDb->_buildQuery()
+#2 D:\Kerjoan\Coding\linkkit\app\helpers\MysqliDb.php(870): Altum\Helpers\MysqliDb->_buildInsert()
+#3 D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php(910): Altum\Helpers\MysqliDb->insert()
+#4 D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php(325): Altum\Controllers\Pay->offline_payment()
+#5 [internal function]: Altum\Controllers\Pay->index()
+#6 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#7 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#8 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#9 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\helpers\MysqliDb.php on line 2088
+[26-Apr-2026 11:59:56 UTC] PHP Fatal error:  Uncaught Error: Cannot use object of type stdClass as array in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php:411
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php(352): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Pay->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 411
+[26-Apr-2026 12:01:14 UTC] PHP Fatal error:  Uncaught Error: Cannot use object of type stdClass as array in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php:411
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Pay.php(352): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Pay->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 411
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:05:09 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:06:37 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 478
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Undefined property: stdClass::$plisio_whitelabel in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:07:30 UTC] PHP Warning:  Attempt to read property "is_enabled" on null in D:\Kerjoan\Coding\linkkit\themes\altum\views\pay\index.php on line 1352
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$links_bulk_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 66
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$links_bulk_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 67
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$links_bulk_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 68
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$links_bulk_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 68
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$x_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$google_chat_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$internal_notification_is_enabled in D:\Kerjoan\Coding\linkkit\app\includes\notification_handlers.php on line 22
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_email_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_email_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_email_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_webhook_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_webhook_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_webhook_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_slack_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_slack_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_slack_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_discord_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_discord_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_discord_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_telegram_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_telegram_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_telegram_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_microsoft_teams_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 199
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_microsoft_teams_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 12:09:32 UTC] PHP Warning:  Undefined property: stdClass::$notification_handlers_microsoft_teams_limit in D:\Kerjoan\Coding\linkkit\themes\altum\views\partials\plan_features.php on line 200
+[26-Apr-2026 16:01:11 UTC] PHP Fatal error:  Uncaught TypeError: MaxMind\Db\Reader::get(): Argument #1 ($ipAddress) must be of type string, null given, called in D:\Kerjoan\Coding\linkkit\app\core\App.php on line 130 and defined in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php:129
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\App.php(130): MaxMind\Db\Reader->get()
+#1 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#2 D:\Kerjoan\Coding\linkkit\test_tripay.php(2): require('...')
+#3 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php on line 129
+[26-Apr-2026 16:25:21 UTC] PHP Fatal error:  Uncaught TypeError: MaxMind\Db\Reader::get(): Argument #1 ($ipAddress) must be of type string, null given, called in D:\Kerjoan\Coding\linkkit\app\core\App.php on line 130 and defined in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php:129
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\App.php(130): MaxMind\Db\Reader->get()
+#1 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#2 D:\Kerjoan\Coding\linkkit\test_tripay.php(2): require('...')
+#3 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php on line 129
+[26-Apr-2026 16:25:44 UTC] PHP Fatal error:  Uncaught TypeError: MaxMind\Db\Reader::get(): Argument #1 ($ipAddress) must be of type string, null given, called in D:\Kerjoan\Coding\linkkit\app\core\App.php on line 130 and defined in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php:129
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\App.php(130): MaxMind\Db\Reader->get()
+#1 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#2 Command line code(1): require('...')
+#3 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\vendor\maxmind-db\reader\src\MaxMind\Db\Reader.php on line 129

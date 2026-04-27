@@ -22,6 +22,7 @@ use Altum\PaymentGateways\Lemonsqueezy;
 use Altum\PaymentGateways\Paystack;
 use Altum\PaymentGateways\Plisio;
 use Altum\PaymentGateways\Revolut;
+use Altum\PaymentGateways\Tripay;
 use Altum\Response;
 use Altum\Title;
 
@@ -192,6 +193,12 @@ class Pay extends Controller {
                 $_POST['payment_processor'] = query_clean($_POST['payment_processor']);
                 $_POST['payment_type'] = query_clean($_POST['payment_type']);
 
+                /* Intercept Tripay sub-channels from payment_processor */
+                if(strpos($_POST['payment_processor'], 'tripay_') === 0) {
+                    $_POST['tripay_channel'] = substr($_POST['payment_processor'], 7);
+                    $_POST['payment_processor'] = 'tripay';
+                }
+
                 /* Make sure the chosen option comply */
                 if(!in_array($_POST['payment_frequency'], ['monthly', 'quarterly', 'biannual', 'annual', 'lifetime'])) {
                     redirect('pay/' . $this->plan_id . '?' . (isset($_GET['trial_skip']) ? '&trial_skip=true' : null) . (isset($_GET['code']) ? '&code=' . $_GET['code'] : null));
@@ -340,6 +347,7 @@ class Pay extends Controller {
             'plan_taxes'        => $this->plan_taxes,
             'payment_processors'=> $payment_processors,
             'payment_extra_data'=> $this->payment_extra_data,
+            'tripay_channels'   => settings()->tripay->is_enabled ? Tripay::get_channels() : [],
             'total_users'       => \Altum\Cache::cache_function_result('total_users', [], function() {
                 return db()->getValue('users', 'count(*)');
             })
@@ -899,7 +907,7 @@ class Pay extends Controller {
         );
 
         /* If there are field errors, redirect back */
-        if(Alerts::has_field_errors() && !Alerts::has_errors()) {
+        if(Alerts::has_field_errors() || Alerts::has_errors()) {
             redirect('pay/' . $this->plan_id . '?' . $trial_skip_parameter . $discount_code_parameter);
         }
 
@@ -967,8 +975,9 @@ class Pay extends Controller {
             );
         }
 
-        /* Redirect to the thank you page after offline payment submission */
-        redirect('pay/' . $this->plan_id . $this->return_url_parameters('success', $base_amount, $formatted_price, $code, $discount_amount));
+        /* Tampilkan notifikasi dan alihkan langsung ke halaman riwayat pembayaran */
+        Alerts::add_success(l('pay.success_message'));
+        redirect('account-payments');
     }
 
     private function payu() {
@@ -1957,6 +1966,123 @@ class Pay extends Controller {
 
                 /* Redirect to Midtrans payment URL */
                 header('Location: ' . $midtrans_response->body->payment_url); die();
+
+        }
+    }
+
+    private function tripay() {
+
+        /* Get price details */
+        extract($this->get_price_details());
+
+        /* Apply taxes to base price */
+        $price_with_taxes = $this->calculate_price_with_taxes($price);
+
+        /* Tripay only supports IDR integer amounts */
+        $formatted_price = (int) round($price_with_taxes);
+
+        /* Prepare redirect query parameters */
+        $trial_skip_parameter = isset($_GET['trial_skip']) ? '&trial_skip=true' : '';
+        $discount_code_parameter = isset($_GET['code']) ? '&code=' . $_GET['code'] : '';
+
+        switch ($_POST['payment_type']) {
+
+            case 'one_time':
+
+                /* Validate selected payment channel */
+                $tripay_channels = Tripay::get_channels();
+                $valid_channel_codes = array_column($tripay_channels, 'code');
+
+                $tripay_channel = isset($_POST['tripay_channel']) ? trim($_POST['tripay_channel']) : '';
+
+                if (empty($tripay_channel) || !in_array($tripay_channel, $valid_channel_codes)) {
+                    /* Fallback to first available channel */
+                    if (!empty($valid_channel_codes)) {
+                        $tripay_channel = $valid_channel_codes[0];
+                    } else {
+                        Alerts::add_error(l('pay.error_message.failed_payment'));
+                        redirect('pay/' . $this->plan_id . (($trial_skip_parameter || $discount_code_parameter) ? '?' . ltrim($trial_skip_parameter . $discount_code_parameter, '&') : ''));
+                    }
+                }
+
+                /* Generate unique merchant ref (max 25 chars) */
+                $merchant_ref = 'INV-' . strtoupper(substr(md5($this->user->user_id . $this->plan_id . time()), 0, 20));
+
+                /* Custom note to track payment details */
+                $tripay_custom_id = $this->user->user_id . '&' . $this->plan_id . '&' . $_POST['payment_frequency'] . '&' . $base_amount . '&' . $code . '&' . $discount_amount . '&' . json_encode($this->applied_taxes_ids);
+
+                /* Return URL after payment */
+                $return_url = SITE_URL . 'pay-thank-you';
+
+                /* Check if this is an open payment channel (QRIS, OVO, Dana, ShopeePay etc) */
+                if (Tripay::is_open_payment_channel($tripay_channel)) {
+
+                    /* Open Payment — different signature formula and endpoint, no 'amount' field */
+                    $open_signature = Tripay::generate_open_signature($tripay_channel, $merchant_ref);
+
+                    $payload = [
+                        'method'        => $tripay_channel,
+                        'merchant_ref'  => $merchant_ref,
+                        'customer_name' => $this->user->name,
+                        'signature'     => $open_signature,
+                    ];
+
+                    $tripay_response = Tripay::create_open_payment($payload);
+
+                    if (!$tripay_response || !$tripay_response->success) {
+                        $error_message = (DEBUG || \Altum\Authentication::is_admin())
+                            ? ($tripay_response->message ?? 'Tripay Open Payment API error')
+                            : l('pay.error_message.failed_payment');
+                        Alerts::add_error($error_message);
+                        redirect('pay/' . $this->plan_id . (($trial_skip_parameter || $discount_code_parameter) ? '?' . ltrim($trial_skip_parameter . $discount_code_parameter, '&') : ''));
+                    }
+
+                    /* Open payment returns a uuid and a qr_url / checkout_url */
+                    $open_uuid = $tripay_response->data->uuid ?? null;
+                    $checkout_url = 'https://tripay.co.id/open-payment/' . $tripay_channel . '/' . $open_uuid;
+
+                    header('Location: ' . $checkout_url);
+                    die();
+
+                } else {
+
+                    /* Closed Payment (VA, Indomaret, Alfamart etc) — standard endpoint */
+                    $signature = Tripay::generate_signature($merchant_ref, $formatted_price);
+
+                    $payload = [
+                        'method'         => $tripay_channel,
+                        'merchant_ref'   => $merchant_ref,
+                        'amount'         => $formatted_price,
+                        'customer_name'  => $this->user->name,
+                        'customer_email' => $this->user->email,
+                        'customer_phone' => '08123456789',
+                        'order_items'    => [[
+                            'sku'         => 'PLAN-' . $this->plan_id,
+                            'name'        => settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency']),
+                            'price'       => $formatted_price,
+                            'quantity'    => 1,
+                        ]],
+                        'return_url'   => $return_url,
+                        'expired_time' => time() + (24 * 60 * 60),
+                        'signature'    => $signature,
+                        'note'         => substr($tripay_custom_id, 0, 255),
+                    ];
+
+                    $tripay_response = Tripay::create_transaction($payload);
+
+                    if (!$tripay_response || !$tripay_response->success) {
+                        $error_message = (DEBUG || \Altum\Authentication::is_admin())
+                            ? ($tripay_response->message ?? 'Tripay API error')
+                            : l('pay.error_message.failed_payment');
+                        Alerts::add_error($error_message);
+                        redirect('pay/' . $this->plan_id . (($trial_skip_parameter || $discount_code_parameter) ? '?' . ltrim($trial_skip_parameter . $discount_code_parameter, '&') : ''));
+                    }
+
+                    /* Redirect to Tripay payment checkout page */
+                    header('Location: ' . $tripay_response->data->checkout_url);
+                    die();
+
+                }
 
         }
     }

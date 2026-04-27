@@ -144,7 +144,6 @@
                 </a>
             </li>
 
-            <?php if(in_array(settings()->license->type, ['SPECIAL','Extended License', 'extended'])): ?>
                 <div class="divider-wrapper">
                     <div class="divider"></div>
                 </div>
@@ -174,7 +173,6 @@
                         </a>
                     </li>
                 <?php endif ?>
-            <?php endif ?>
 
             <div class="divider-wrapper">
                 <div class="divider"></div>

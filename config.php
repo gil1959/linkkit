@@ -5,7 +5,7 @@ define('DATABASE_SERVER',   'localhost');
 define('DATABASE_USERNAME', 'root');
 define('DATABASE_PASSWORD', '');
 define('DATABASE_NAME',     'linkkit_BiolinkPr0');
-define('SITE_URL',          'http://localhost:8080/');
+define('SITE_URL',          'http://127.0.0.1:8000/');
 
 /* Cache driver */
 define('CACHE_DRIVER', 'files'); // Available values: files, redis, apcu

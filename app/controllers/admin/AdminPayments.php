@@ -26,9 +26,7 @@ class AdminPayments extends Controller {
 
     public function index() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-            redirect('admin');
-        }
+
 
         $payment_processors = require APP_PATH . 'includes/payment_processors.php';
 
@@ -90,9 +88,7 @@ class AdminPayments extends Controller {
 
     public function delete() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-            redirect('admin');
-        }
+
 
         $payment_id = isset($this->params[0]) ? (int) $this->params[0] : null;
 
@@ -123,9 +119,7 @@ class AdminPayments extends Controller {
 
     public function approve() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-            redirect('admin');
-        }
+
 
         $payment_id = (isset($this->params[0])) ? (int) $this->params[0] : null;
 
@@ -266,9 +260,7 @@ class AdminPayments extends Controller {
 
 	public function cancel() {
 
-		if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-			redirect('admin');
-		}
+
 
 		$payment_id = (isset($this->params[0])) ? (int) $this->params[0] : null;
 
@@ -320,9 +312,7 @@ class AdminPayments extends Controller {
 
     public function refund() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended'])) {
-            redirect('admin');
-        }
+
 
         if (empty($_POST)) {
             throw_404();

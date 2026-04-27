@@ -375,21 +375,43 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                             <div class="row d-flex align-items-stretch mx-n2">
                                 <?php foreach($data->payment_processors as $key => $value): ?>
                                     <?php if(settings()->{$key}->is_enabled && in_array(currency(), settings()->{$key}->currencies ?? [])): ?>
-                                        <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">
-                                            <input type="radio" name="payment_processor" value="<?= $key ?>" class="custom-control-input" required="required" <?= $key == settings()->payment->currencies->{currency()}->default_payment_processor ? 'checked="checked"' : null ?>>
-
-                                            <div class="card">
-                                                <div class="card-body d-flex <?= $enabled_payment_processors <= 4 ? null : 'flex-column justify-content-between' ?> align-items-center">
-                                                    <div class="<?= $enabled_payment_processors <= 4 ? 'mr-3' : 'mb-3' ?>">
-                                                        <span class="custom-radio-box-main-icon">
-                                                            <i class="<?= $value['icon'] ?> fa-fw" style="--brand-color: <?= $value['color'] ?>;--brand-color-dark: <?= $value['dark_color'] ?>; color: var(--brand-color)" data-custom-colors></i>
-                                                        </span>
+                                        <?php if($key === 'tripay' && !empty($data->tripay_channels)): ?>
+                                            <?php foreach($data->tripay_channels as $channel): ?>
+                                                <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">
+                                                    <input type="radio" name="payment_processor" value="tripay_<?= $channel->code ?>" class="custom-control-input" required="required">
+                                                    <div class="card">
+                                                        <div class="card-body d-flex <?= $enabled_payment_processors <= 4 ? null : 'flex-column justify-content-between' ?> align-items-center">
+                                                            <div class="<?= $enabled_payment_processors <= 4 ? 'mr-3' : 'mb-3' ?>">
+                                                                <span class="custom-radio-box-main-icon">
+                                                                    <?php if (!empty($channel->icon_url)): ?>
+                                                                        <img src="<?= $channel->icon_url ?>" alt="<?= $channel->name ?>" style="max-height:36px; max-width:80px; object-fit:contain;" />
+                                                                    <?php else: ?>
+                                                                        <i class="fas fa-money-bill-wave fa-fw" style="--brand-color: #e74c3c;--brand-color-dark: #ff8a7a; color: var(--brand-color)" data-custom-colors></i>
+                                                                    <?php endif ?>
+                                                                </span>
+                                                            </div>
+                                                            <div class="card-title mb-0"><?= $channel->name ?></div>
+                                                        </div>
                                                     </div>
+                                                </label>
+                                            <?php endforeach ?>
+                                        <?php else: ?>
+                                            <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">
+                                                <input type="radio" name="payment_processor" value="<?= $key ?>" class="custom-control-input" required="required" <?= $key == settings()->payment->currencies->{currency()}->default_payment_processor ? 'checked="checked"' : null ?>>
 
-                                                    <div class="card-title mb-0"><?= l('pay.custom_plan.' . $key) ?></div>
+                                                <div class="card">
+                                                    <div class="card-body d-flex <?= $enabled_payment_processors <= 4 ? null : 'flex-column justify-content-between' ?> align-items-center">
+                                                        <div class="<?= $enabled_payment_processors <= 4 ? 'mr-3' : 'mb-3' ?>">
+                                                            <span class="custom-radio-box-main-icon">
+                                                                <i class="<?= $value['icon'] ?> fa-fw" style="--brand-color: <?= $value['color'] ?>;--brand-color-dark: <?= $value['dark_color'] ?>; color: var(--brand-color)" data-custom-colors></i>
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="card-title mb-0"><?= l('pay.custom_plan.' . $key) ?></div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </label>
+                                            </label>
+                                        <?php endif ?>
                                     <?php endif ?>
                                 <?php endforeach ?>
                             </div>
@@ -407,6 +429,8 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                                 <small class="form-text text-muted"><?= sprintf(l('global.accessibility.whitelisted_file_extensions'), \Altum\Uploads::get_whitelisted_file_extensions_accept('offline_payment_proofs'))  . ' ' . sprintf(l('global.accessibility.file_size_limit'), settings()->offline_payment->proof_size_limit) ?></small>
                             </div>
                         </div>
+
+
 
                         <?php if(settings()->plisio->is_enabled): ?>
                             <?php $cryptocurrencies = require APP_PATH . 'includes/plisio_cryptocurrencies.php' ?>
@@ -1052,11 +1076,28 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
             return;
         }
 
-        document.querySelectorAll(`[data-summary-payment-processor]:not([data-summary-payment-processor="${payment_processor}"])`).forEach(element => {
+        let payment_processor_check = payment_processor;
+        if(payment_processor && payment_processor.startsWith('tripay_')) {
+            payment_processor_check = 'tripay';
+        }
+
+        document.querySelectorAll(`[data-summary-payment-processor]:not([data-summary-payment-processor="${payment_processor_check}"])`).forEach(element => {
             element.classList.add('d-none');
         });
 
-        document.querySelector(`[data-summary-payment-processor="${payment_processor}"]`).classList.remove('d-none');
+        let summary_element = document.querySelector(`[data-summary-payment-processor="${payment_processor_check}"]`);
+        if(summary_element) {
+            summary_element.classList.remove('d-none');
+            
+            /* Update the text for Tripay channels */
+            if(payment_processor.startsWith('tripay_')) {
+                let selected_radio = document.querySelector(`[name="payment_processor"][value="${payment_processor}"]`);
+                if(selected_radio) {
+                    let channel_name = selected_radio.closest('label').querySelector('.card-title').innerText;
+                    summary_element.innerText = channel_name;
+                }
+            }
+        }
 
         <?php
         $one_time_payment_processors = array_keys(array_filter($data->payment_processors, function ($item) {
@@ -1064,7 +1105,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
         }));
         ?>
         let one_time_payment_processors = <?= json_encode($one_time_payment_processors) ?>;
-        if(one_time_payment_processors.includes(payment_processor)) {
+        if(one_time_payment_processors.includes(payment_processor_check)) {
             $('#recurring_type_label').hide();
             $('#one_time_type_label').show();
         }
