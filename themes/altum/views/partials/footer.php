@@ -192,4 +192,12 @@
     <?php endif ?>
 </div>
 
-<div class="text-center text-muted font-size-xs mt-4"><?= sprintf(l('global.footer.copyright'), date('Y'), settings()->main->title) ?></div>
+<div class="row">
+    <div class="col-12 text-center mt-4">
+        <a href="<?= url('page/terms-and-conditions') ?>" class="text-muted font-size-sm mx-2">Terms and Conditions</a>
+        <span class="text-muted">&bull;</span>
+        <a href="<?= url('page/privacy-policy') ?>" class="text-muted font-size-sm mx-2">Privacy Policy</a>
+    </div>
+</div>
+
+<div class="text-center text-muted font-size-xs mt-3"><?= sprintf(l('global.footer.copyright'), date('Y'), settings()->main->title) ?></div>

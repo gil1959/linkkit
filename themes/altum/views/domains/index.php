@@ -210,10 +210,10 @@
                             </td>
 
                             <td class="text-nowrap">
-                                <?php if($row->is_enabled): ?>
+                                <?php if($row->is_enabled && (isset($row->is_cpanel_synced) ? $row->is_cpanel_synced : 1)): ?>
                                     <span class="badge badge-success"><i class="fas fa-fw fa-sm fa-check mr-1"></i> <?= l('domains.table.is_enabled_active') ?></span>
                                 <?php else: ?>
-                                    <span class="badge badge-warning"><i class="fas fa-fw fa-sm fa-eye-slash mr-1"></i> <?= l('domains.table.is_enabled_pending') ?></span>
+                                    <span class="badge badge-warning"><i class="fas fa-fw fa-sm fa-sync fa-spin mr-1"></i> <?= l('domains.table.is_enabled_pending') ?></span>
                                 <?php endif ?>
                             </td>
 
