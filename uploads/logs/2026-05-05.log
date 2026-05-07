@@ -1,0 +1,24 @@
+[05-May-2026 11:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php:20
+Stack trace:
+#0 [internal function]: Altum\Controllers\Shop->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php on line 20
+[05-May-2026 11:45:32 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Controllers\Alerts" not found in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php:37
+Stack trace:
+#0 [internal function]: Altum\Controllers\Shop->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php on line 37
+[05-May-2026 11:45:43 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Controllers\Alerts" not found in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php:37
+Stack trace:
+#0 [internal function]: Altum\Controllers\Shop->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\Shop.php on line 37

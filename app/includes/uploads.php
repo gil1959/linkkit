@@ -199,4 +199,18 @@ return [
         'whitelisted_file_extensions' => ['jpg', 'jpeg', 'png', 'webp', 'avif', 'pdf'],
         'path' => 'payment_processors_offline_payment_proofs/',
     ],
+
+    /* Shop */
+    'shop_items' => [
+        'whitelisted_file_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        'path' => 'shop_items/',
+    ],
+    'shop_covers' => [
+        'whitelisted_file_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        'path' => 'shop_covers/',
+    ],
+    'shop_logos' => [
+        'whitelisted_file_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+        'path' => 'shop_logos/',
+    ],
 ];

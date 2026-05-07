@@ -174,6 +174,12 @@
                     </li>
                 <?php endif ?>
 
+                <li class="<?= \Altum\Router::$controller == 'AdminShopWithdrawals' ? 'active' : null ?>">
+                    <a class="nav-link text-truncate" href="<?= url('admin/shop-withdrawals') ?>">
+                        <i class="fas fa-fw fa-sm fa-money-bill-wave mr-2"></i> Shop Withdrawals
+                    </a>
+                </li>
+
             <div class="divider-wrapper">
                 <div class="divider"></div>
             </div>

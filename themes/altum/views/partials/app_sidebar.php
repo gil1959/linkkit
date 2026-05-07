@@ -43,6 +43,10 @@
                     <?php endif ?>
                 </li>
 
+                <li class="<?= \Altum\Router::$controller == 'Shop' ? 'active' : null ?>">
+                    <a href="<?= url('shop') ?>"><i class="fas fa-fw fa-sm fa-shopping-cart mr-2"></i> <?= l('shop.menu') ?? 'Shop' ?></a>
+                </li>
+
                 <?php if(settings()->links->biolinks_is_enabled): ?>
                     <li class="<?= (\Altum\Router::$controller == 'Links' && ($_GET['type'] ?? null) == 'biolink') || (\Altum\Router::$controller == 'Link' && $this->link->type == 'biolink') ? 'active' : null ?>">
                         <a href="<?= url('links?type=biolink') ?>"><i class="fas fa-fw fa-sm fa-hashtag mr-2"></i> <?= l('links.menu.biolink') ?></a>

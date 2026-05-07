@@ -1,0 +1,376 @@
+<?php defined('ALTUMCODE') || die() ?>
+<?php \Altum\Title::set('Checkout — ' . htmlspecialchars($data->shop->name)) ?>
+
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;min-height:100vh}
+
+/* ── mini topbar ── */
+.co-topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.co-shop-logo{width:30px;height:30px;border-radius:8px;object-fit:cover}
+.co-shop-logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#818cf8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem}
+.co-shop-name{font-weight:700;font-size:.95rem;color:#1e293b}
+.co-back{display:inline-flex;align-items:center;gap:6px;color:#6b7280;text-decoration:none;font-size:.82rem;margin-left:auto;transition:.2s;padding:6px 10px;border-radius:8px}
+.co-back:hover{background:#f3f4f6;color:#4f46e5}
+.co-secure-badge{display:flex;align-items:center;gap:5px;font-size:.75rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:4px 10px;margin-left:8px}
+
+/* ── layout ── */
+.co-page{max-width:960px;margin:32px auto;padding:0 20px 60px;display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+@media(max-width:680px){.co-page{grid-template-columns:1fr;margin:16px auto}}
+
+/* ── cards ── */
+.co-card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden}
+.co-card-head{padding:18px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px}
+.co-step-num{width:26px;height:26px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.co-card-title{font-size:.95rem;font-weight:700;margin:0}
+.co-card-body{padding:22px}
+
+/* ── form ── */
+.form-group{margin-bottom:18px}
+.form-group:last-of-type{margin-bottom:0}
+.form-label{display:flex;align-items:center;gap:4px;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:7px}
+.form-label .req{color:#ef4444}
+.form-control{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:.88rem;color:#1e293b;outline:none;transition:.2s;background:#fafafa;font-family:inherit}
+.form-control:focus{border-color:#6366f1;background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-hint{font-size:.73rem;color:#94a3b8;margin-top:5px}
+
+/* ── payment methods ── */
+.pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.pm-card{border:2px solid #e2e8f0;border-radius:12px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.2s;position:relative;background:#fff;user-select:none}
+.pm-card:hover{border-color:#a5b4fc;background:#f8f7ff}
+.pm-card.selected{border-color:#4f46e5;background:#eef2ff}
+.pm-card.selected::after{content:'✓';position:absolute;top:6px;right:8px;font-size:.65rem;font-weight:700;color:#4f46e5}
+.pm-icon{width:44px;height:44px;object-fit:contain;border-radius:8px}
+.pm-icon-ph{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#4f46e5;text-align:center;line-height:1.2;padding:2px}
+.pm-name{font-size:.72rem;font-weight:600;color:#374151;text-align:center;line-height:1.3}
+.pm-fee{font-size:.65rem;color:#94a3b8;text-align:center}
+.pm-group-title{font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+.pm-group-title:first-child{margin-top:0}
+input[type=radio].pm-radio{display:none}
+
+/* ── submit ── */
+.btn-pay{width:100%;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em}
+.btn-pay:hover{background:linear-gradient(135deg,#3730a3,#4f46e5);transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,.3)}
+.btn-pay:active{transform:none}
+
+/* ── order summary ── */
+.co-summary{position:sticky;top:74px}
+.order-product{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.order-img{width:60px;height:60px;border-radius:10px;object-fit:cover;background:#f1f5f9;flex-shrink:0}
+.order-img-icon{width:60px;height:60px;border-radius:10px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#7c3aed;flex-shrink:0}
+.order-name{font-weight:700;font-size:.9rem;color:#1e293b;margin-bottom:2px}
+.order-type{font-size:.73rem;color:#7c3aed;background:#ede9fe;padding:2px 8px;border-radius:10px;display:inline-block}
+.co-divider{height:1px;background:#f1f5f9;margin:14px 0}
+.co-row{display:flex;justify-content:space-between;font-size:.83rem;color:#64748b;margin-bottom:10px}
+.co-row:last-of-type{margin-bottom:0}
+.co-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;padding-top:14px;border-top:2px solid #f1f5f9;margin-top:4px}
+.co-total-label{color:#1e293b}
+.co-total-val{color:#4f46e5}
+
+/* ── selected method preview ── */
+.selected-method{background:#f8f7ff;border:1.5px solid #a5b4fc;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:14px;display:none}
+.selected-method.show{display:flex}
+.selected-method-name{font-size:.83rem;font-weight:600;color:#4f46e5}
+
+/* ── test mode banner ── */
+.test-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:.78rem;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:20px}
+/* ── offline instructions ── */
+.offline-panel{background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:16px 18px;margin-top:16px;display:none}
+.offline-panel.show{display:block}
+.offline-panel-title{font-size:.78rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.offline-instructions{font-size:.85rem;color:#78350f;white-space:pre-wrap;line-height:1.7;font-family:monospace}
+</style>
+
+<!-- TOPBAR -->
+<nav class="co-topbar">
+    <?php if($data->shop->logo_image): ?>
+        <img src="<?= \Altum\Uploads::get_full_url('shop_logos') . $data->shop->logo_image ?>" class="co-shop-logo" alt="">
+    <?php else: ?>
+        <div class="co-shop-logo-icon"><i class="fas fa-shopping-bag"></i></div>
+    <?php endif ?>
+    <span class="co-shop-name"><?= htmlspecialchars($data->shop->name) ?></span>
+    <div class="co-secure-badge"><i class="fas fa-lock"></i> Pembayaran Aman</div>
+    <a href="<?= SITE_URL . 'store/' . htmlspecialchars($data->shop->url) ?>" class="co-back">
+        <i class="fas fa-arrow-left fa-sm"></i> Kembali ke Toko
+    </a>
+</nav>
+
+<div class="co-page">
+    <!-- LEFT: FORM -->
+    <div>
+        <?= \Altum\Alerts::output_alerts() ?>
+
+        <?php if($data->is_demo): ?>
+        <div class="test-banner">
+            <i class="fas fa-flask"></i>
+            <span><strong>Mode Demo</strong> — Tidak ada gateway aktif. Pembayaran akan disimulasikan. Aktifkan Tripay / Midtrans di panel admin untuk transaksi nyata.</span>
+        </div>
+        <?php endif ?>
+
+        <form action="" method="post" id="checkoutForm">
+            <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
+            <input type="hidden" name="payment_method" id="selectedMethod" value="QRIS">
+
+            <!-- STEP 1: Buyer Info -->
+            <div class="co-card" style="margin-bottom:20px">
+                <div class="co-card-head">
+                    <div class="co-step-num">1</div>
+                    <h2 class="co-card-title">Informasi Pembeli</h2>
+                </div>
+                <div class="co-card-body">
+                    <div class="form-group">
+                        <label class="form-label">Alamat Email <span class="req">*</span></label>
+                        <input type="email" name="email" class="form-control" required placeholder="email@kamu.com">
+                        <div class="form-hint"><i class="fas fa-info-circle fa-xs"></i> Produk digital akan dikirim ke email ini.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+                        <input type="text" name="full_name" class="form-control" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">No. WhatsApp</label>
+                        <input type="text" name="phone" class="form-control" placeholder="08xxxxxxxxxx">
+                        <div class="form-hint">Opsional — untuk notifikasi pesanan.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Payment Method -->
+            <div class="co-card">
+                <div class="co-card-head">
+                    <div class="co-step-num">2</div>
+                    <h2 class="co-card-title">Pilih Metode Pembayaran</h2>
+                </div>
+                <div class="co-card-body">
+                    <?php
+                    /* group channels by group */
+                    $groups = [];
+                    foreach($data->payment_channels as $ch) {
+                        $g = $ch->group ?? 'Lainnya';
+                        $groups[$g][] = $ch;
+                    }
+                    $first = true;
+                    foreach($groups as $gname => $channels):
+                    ?>
+                    <div class="pm-group-title"><?= htmlspecialchars($gname) ?></div>
+                    <div class="pm-grid">
+                        <?php foreach($channels as $ch): ?>
+                        <label class="pm-card <?= $first ? 'selected' : '' ?>" for="pm_<?= $ch->code ?>">
+                            <input type="radio" class="pm-radio" name="_pm" id="pm_<?= $ch->code ?>"
+                                   value="<?= $ch->code ?>" <?= $first ? 'checked' : '' ?>
+                                   onchange="selectMethod('<?= $ch->code ?>', '<?= addslashes($ch->name) ?>', this.closest('.pm-card').querySelector('.pm-logo-wrap'))"
+                            >
+                            <div class="pm-logo-wrap">
+                                <?php if(!empty($ch->icon_url)): ?>
+                                    <img
+                                        src="<?= htmlspecialchars($ch->icon_url) ?>"
+                                        class="pm-icon"
+                                        alt="<?= htmlspecialchars($ch->name) ?>"
+                                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                                    >
+                                    <div class="pm-icon-ph" style="display:none"><?= mb_substr($ch->name,0,3) ?></div>
+                                <?php else: ?>
+                                    <div class="pm-icon-ph"><?= mb_substr($ch->name,0,3) ?></div>
+                                <?php endif ?>
+                            </div>
+                            <div class="pm-name"><?= htmlspecialchars($ch->name) ?></div>
+                            <?php
+                            $flat = $ch->total_fee->flat ?? 0;
+                            $pct  = $ch->total_fee->percent ?? 0;
+                            if($flat > 0)      $fee_label = 'Biaya Rp ' . number_format($flat,0,',','.');
+                            elseif($pct > 0)   $fee_label = 'Biaya ' . $pct . '%';
+                            else               $fee_label = 'Tanpa biaya';
+                            ?>
+                            <div class="pm-fee"><?= $fee_label ?></div>
+                        </label>
+                        <?php $first = false; endforeach ?>
+                    </div>
+                    <?php endforeach ?>
+
+
+                    <?php if(!empty($data->offline_instructions)): ?>
+                    <div class="offline-panel" id="offlinePanel">
+                        <div class="offline-panel-title"><i class="fas fa-university fa-sm"></i> Instruksi Transfer Bank</div>
+                        <div class="offline-instructions"><?= nl2br(htmlspecialchars($data->offline_instructions)) ?></div>
+                        <p style="font-size:.75rem;color:#92400e;margin:10px 0 0"><i class="fas fa-info-circle fa-xs"></i> Transfer sejumlah total di bawah, lalu upload bukti di halaman konfirmasi.</p>
+                    </div>
+                    <?php endif ?>
+
+                    <button type="submit" class="btn-pay" id="btnPay">
+                        <i class="fas fa-lock"></i>
+                        <span id="btnPayText">Bayar Sekarang</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="co-summary">
+        <div class="co-card">
+            <div class="co-card-head">
+                <div class="co-step-num" style="background:#0ea5e9">📋</div>
+                <h2 class="co-card-title">Ringkasan Pesanan</h2>
+            </div>
+            <div class="co-card-body">
+                <div class="order-product">
+                    <?php if($data->item->image): ?>
+                        <img src="<?= \Altum\Uploads::get_full_url('shop_items') . $data->item->image ?>" class="order-img" alt="">
+                    <?php else: ?>
+                        <div class="order-img-icon"><i class="fas fa-box"></i></div>
+                    <?php endif ?>
+                    <div>
+                        <div class="order-name"><?= htmlspecialchars($data->item->name) ?></div>
+                        <span class="order-type"><?= ucwords(str_replace('_',' ', $data->item->type)) ?></span>
+                    </div>
+                </div>
+
+                <div class="co-divider"></div>
+
+                <div class="co-row">
+                    <span>Harga produk</span>
+                    <span>Rp <?= number_format($data->item->price,0,',','.') ?></span>
+                </div>
+                <div class="co-row">
+                    <span>Kuantitas</span>
+                    <span>1</span>
+                </div>
+                <div class="co-row">
+                    <span>Biaya platform</span>
+                    <span style="color:#16a34a;font-weight:600">Gratis</span>
+                </div>
+
+                <!-- Voucher code input -->
+                <div style="margin:14px 0">
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="voucherInput" placeholder="Kode voucher" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:.83rem;outline:none;transition:.2s;font-family:inherit;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+                        <button type="button" onclick="applyVoucher()" style="background:#4f46e5;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">Pakai</button>
+                    </div>
+                    <div id="voucherMsg" style="font-size:.75rem;margin-top:5px"></div>
+                    <input type="hidden" name="voucher_code" id="voucherCodeHidden">
+                </div>
+
+                <div id="discountRow" class="co-row" style="display:none;color:#16a34a">
+                    <span>Diskon Voucher</span>
+                    <span id="discountVal">-Rp 0</span>
+                </div>
+
+                <!-- selected method preview -->
+                <div class="selected-method show" id="methodPreview">
+
+                    <div class="preview-logo-wrap" id="previewLogoWrap"
+                         style="width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#f1f5f9;display:flex;align-items:center;justify-content:center">
+                        <img id="previewLogoImg" src="" alt="" style="width:100%;height:100%;object-fit:contain"
+                             onerror="this.style.display='none';document.getElementById('previewLogoText').style.display='block'">
+                        <span id="previewLogoText" style="display:none;font-size:.7rem;font-weight:700;color:#4f46e5;text-align:center;padding:2px"></span>
+                    </div>
+                    <div>
+                        <div style="font-size:.72rem;color:#94a3b8">Metode Bayar</div>
+                        <div class="selected-method-name" id="methodName"></div>
+                    </div>
+                </div>
+
+                <div class="co-total-row">
+                    <span class="co-total-label">Total Bayar</span>
+                    <span class="co-total-val">Rp <?= number_format($data->item->price,0,',','.') ?></span>
+                </div>
+
+                <p style="text-align:center;font-size:.72rem;color:#94a3b8;margin:14px 0 0">
+                    <i class="fas fa-shield-alt fa-sm" style="color:#16a34a"></i>
+                    Transaksi aman &amp; terenkripsi SSL
+                </p>
+            </div>
+        </div>
+
+        <!-- shop info -->
+        <div style="margin-top:14px;text-align:center;font-size:.75rem;color:#94a3b8">
+            Toko ini menggunakan <strong style="color:#6366f1"><?= htmlspecialchars(settings()->main->title) ?></strong><br>
+            sebagai platform jual-beli digital
+        </div>
+    </div>
+</div>
+
+<script>
+/* Build channel data map: code -> {name, iconUrl} */
+var CHANNEL_MAP = <?= json_encode(array_reduce($data->payment_channels, function($carry, $ch) {
+    $carry[$ch->code] = [
+        'name'    => $ch->name,
+        'iconUrl' => $ch->icon_url ?? '',
+    ];
+    return $carry;
+}, [])) ?>;
+
+function selectMethod(code, name, logoWrapEl) {
+    /* update hidden input */
+    document.getElementById('selectedMethod').value = code;
+    /* update card selection */
+    document.querySelectorAll('.pm-card').forEach(function(c){ c.classList.remove('selected'); });
+    var radio = document.getElementById('pm_' + code);
+    if(radio) radio.closest('.pm-card').classList.add('selected');
+    /* update preview */
+    var info = CHANNEL_MAP[code] || {name: name, iconUrl: ''};
+    document.getElementById('methodName').textContent = info.name;
+    var img = document.getElementById('previewLogoImg');
+    var txt = document.getElementById('previewLogoText');
+    if(info.iconUrl) {
+        img.src = info.iconUrl;
+        img.style.display = '';
+        txt.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        txt.textContent = name.substring(0, 3).toUpperCase();
+        txt.style.display = 'block';
+    }
+    /* toggle offline panel */
+    var panel = document.getElementById('offlinePanel');
+    var btnText = document.getElementById('btnPayText');
+    if(code === 'OFFLINE') {
+        if(panel) panel.classList.add('show');
+        if(btnText) btnText.textContent = 'Buat Pesanan & Lihat Instruksi';
+    } else {
+        if(panel) panel.classList.remove('show');
+        if(btnText) btnText.textContent = 'Bayar Sekarang';
+    }
+}
+
+/* init with first channel */
+var firstRadio = document.querySelector('.pm-radio');
+if(firstRadio) {
+    firstRadio.checked = true;
+    selectMethod(firstRadio.value, firstRadio.closest('.pm-card').querySelector('.pm-name').textContent);
+}
+
+var BASE_PRICE = <?= (float)$data->item->price ?>;
+
+function applyVoucher() {
+    var code = document.getElementById('voucherInput').value.trim();
+    var msg  = document.getElementById('voucherMsg');
+    if(!code) { msg.innerHTML = '<span style="color:#ef4444">Masukkan kode voucher</span>'; return; }
+    msg.innerHTML = '<span style="color:#94a3b8">Memvalidasi...</span>';
+
+    var params = new URLSearchParams({
+        shop_id: <?= $data->shop->id ?>,
+        item_id: <?= $data->item->id ?>,
+        code: code,
+        price: BASE_PRICE
+    });
+
+    fetch('<?= url('shop-voucher-validate') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params})
+    .then(r=>r.json()).then(function(res){
+        if(res.success) {
+            msg.innerHTML = '<span style="color:#16a34a">✓ ' + res.message + '</span>';
+            document.getElementById('voucherCodeHidden').value = code;
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('discountVal').textContent = '-Rp ' + res.discount_amount.toLocaleString('id-ID');
+            document.querySelector('.co-total-val').textContent = 'Rp ' + res.final_price.toLocaleString('id-ID');
+            document.getElementById('voucherInput').style.borderColor = '#16a34a';
+        } else {
+            msg.innerHTML = '<span style="color:#ef4444">✗ ' + res.message + '</span>';
+            document.getElementById('voucherCodeHidden').value = '';
+            document.getElementById('discountRow').style.display = 'none';
+            document.querySelector('.co-total-val').textContent = 'Rp ' + BASE_PRICE.toLocaleString('id-ID');
+            document.getElementById('voucherInput').style.borderColor = '#ef4444';
+        }
+    }).catch(function(){ msg.innerHTML = '<span style="color:#ef4444">Gagal validasi</span>'; });
+}
+</script>

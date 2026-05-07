@@ -1,0 +1,98 @@
+[06-May-2026 16:07:54 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function Altum\Uploads::process_upload(), 4 passed in D:\Kerjoan\Coding\linkkit\app\controllers\ShopItemCreate.php on line 57 and at least 5 expected in D:\Kerjoan\Coding\linkkit\app\core\Uploads.php:146
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopItemCreate.php(57): Altum\Uploads::process_upload()
+#1 [internal function]: Altum\Controllers\ShopItemCreate->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\core\Uploads.php on line 146
+[06-May-2026 16:27:00 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Controllers\AdminShopWithdrawals" not found in D:\Kerjoan\Coding\linkkit\app\core\Router.php:1939
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\App.php(53): Altum\Router::get_controller()
+#1 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#2 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#3 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 1939
+[06-May-2026 16:27:34 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:27:34 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:33:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:33:32 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:34:00 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:35:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 16:35:35 UTC] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on false in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php:387
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\core\View.php(44): require()
+#1 D:\Kerjoan\Coding\linkkit\app\controllers\Store.php(57): Altum\View->run()
+#2 [internal function]: Altum\Controllers\Store->index()
+#3 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#4 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#5 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#6 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\themes\altum\views\store\index.php on line 387
+[06-May-2026 18:04:44 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:45 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:46 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:46 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:46 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:47 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:48 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:48 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:50 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:54 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:04:54 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17
+[06-May-2026 18:05:19 UTC] PHP Fatal error:  Namespace declaration statement has to be the very first statement or after any declare call in the script in D:\Kerjoan\Coding\linkkit\app\core\Router.php on line 17

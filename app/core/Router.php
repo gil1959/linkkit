@@ -5,13 +5,13 @@
  * This software is licensed exclusively by AltumCode and is sold only via https://altumcode.com/.
  * Unauthorized distribution, modification, or use of this software without a valid license is not permitted and may be subject to applicable legal actions.
  *
- * 🌍 View all other existing AltumCode projects via https://altumcode.com/
- * 📧 Get in touch for support or general queries via https://altumcode.com/contact
- * 📤 Download the latest version via https://altumcode.com/downloads
+ * ðŸŒ View all other existing AltumCode projects via https://altumcode.com/
+ * ðŸ“§ Get in touch for support or general queries via https://altumcode.com/contact
+ * ðŸ“¤ Download the latest version via https://altumcode.com/downloads
  *
- * 🐦 X/Twitter: https://x.com/AltumCode
- * 📘 Facebook: https://facebook.com/altumcode
- * 📸 Instagram: https://instagram.com/altumcode
+ * ðŸ¦ X/Twitter: https://x.com/AltumCode
+ * ðŸ“˜ Facebook: https://facebook.com/altumcode
+ * ðŸ“¸ Instagram: https://instagram.com/altumcode
  */
 
 namespace Altum;
@@ -95,6 +95,109 @@ class Router {
                 'settings' => [
                     'wrapper' => 'app_wrapper',
                     'ads' => true,
+                ]
+            ],
+
+            'shop' => [
+                'controller' => 'Shop',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'ads' => true,
+                ]
+            ],
+
+            'shop-item-create' => [
+                'controller' => 'ShopItemCreate',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'ads' => true,
+                ]
+            ],
+
+            'shop-withdraw' => [
+                'controller' => 'ShopWithdraw',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'ads' => true,
+                ]
+            ],
+
+            'shop-ajax' => [
+                'controller' => 'ShopAjax',
+                'settings' => [
+                    'has_view' => false,
+                    'no_browser_language_detection' => true,
+                ]
+            ],
+
+            'store-review-create' => [
+                'controller' => 'StoreReviewCreate',
+                'settings' => [
+                    'no_authentication_check' => true,
+                    'has_view' => false,
+                    'no_browser_language_detection' => true,
+                    'allow_sessions' => false,
+                ]
+            ],
+
+            'shop-voucher-validate' => [
+                'controller' => 'ShopVoucherValidate',
+                'settings' => [
+                    'no_authentication_check' => true,
+                    'has_view' => false,
+                    'no_browser_language_detection' => true,
+                    'allow_sessions' => false,
+                ]
+            ],
+
+            'shop-settings-update' => [
+                'controller' => 'ShopSettingsUpdate',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'has_view' => false,
+                ]
+            ],
+
+            'shop-item-update' => [
+                'controller' => 'ShopItemUpdate',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                ]
+            ],
+
+            'store' => [
+                'controller' => 'Store',
+                'settings' => [
+                    'wrapper' => 'store_wrapper',
+                    'no_authentication_check' => true,
+                    'has_view' => true,
+                ]
+            ],
+
+            'store-checkout' => [
+                'controller' => 'StoreCheckout',
+                'settings' => [
+                    'wrapper' => 'store_wrapper',
+                    'no_authentication_check' => true,
+                    'has_view' => true,
+                ]
+            ],
+            'store-checkout-success' => [
+                'controller' => 'StoreCheckoutSuccess',
+                'settings' => [
+                    'wrapper' => 'store_wrapper',
+                    'no_authentication_check' => true,
+                    'has_view' => true,
+                ]
+            ],
+
+            'webhook-tripay-shop' => [
+                'controller' => 'WebhookTripayShop',
+                'settings' => [
+                    'no_authentication_check' => true,
+                    'has_view' => false,
+                    'no_browser_language_detection' => true,
+					'allow_sessions' => false,
                 ]
             ],
 
@@ -1532,6 +1635,10 @@ class Router {
             'image-optimizer' => [
                 'controller' => 'AdminImageOptimizer',
             ],
+
+            'shop-withdrawals' => [
+                'controller' => 'AdminShopWithdrawals',
+            ],
         ],
 
         'admin-api' => [
@@ -1907,3 +2014,4 @@ class Router {
     }
 
 }
+
