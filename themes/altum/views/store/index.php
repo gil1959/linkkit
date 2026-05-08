@@ -70,6 +70,21 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .s-modal-price{font-size:1.4rem;font-weight:800;color:#4f46e5;margin-bottom:8px}
 .s-modal-stock{font-size:.8rem;color:#6b7280;margin-bottom:12px}
 .s-modal-desc{font-size:.88rem;color:#374151;line-height:1.6;margin-bottom:20px}
+/* Rich text content styles for product description */
+.s-modal-desc p{margin:0 0 .6em}
+.s-modal-desc p:last-child{margin-bottom:0}
+.s-modal-desc h1,.s-modal-desc h2,.s-modal-desc h3{font-weight:700;margin:.8em 0 .4em;line-height:1.3}
+.s-modal-desc h1{font-size:1.15rem}.s-modal-desc h2{font-size:1.05rem}.s-modal-desc h3{font-size:.95rem}
+.s-modal-desc strong{font-weight:700}.s-modal-desc em{font-style:italic}
+.s-modal-desc u{text-decoration:underline}.s-modal-desc s{text-decoration:line-through}
+.s-modal-desc ul,.s-modal-desc ol{padding-left:1.4em;margin:.4em 0}
+.s-modal-desc ul{list-style:disc}.s-modal-desc ol{list-style:decimal}
+.s-modal-desc li{margin-bottom:.2em}
+.s-modal-desc blockquote{border-left:3px solid #c7d2fe;padding:.4em .8em;margin:.6em 0;color:#6b7280;font-style:italic}
+.s-modal-desc a{color:#4f46e5;text-decoration:underline;word-break:break-word}
+.s-modal-desc .ql-align-center{text-align:center}
+.s-modal-desc .ql-align-right{text-align:right}
+.s-modal-desc .ql-align-justify{text-align:justify}
 .s-modal-actions{display:flex;gap:10px}
 .btn-add-cart{flex:1;background:#eef2ff;color:#4f46e5;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s}
 .btn-add-cart:hover{background:#dde4ff}
@@ -313,7 +328,7 @@ function openDetail(id){
         '<p class="s-modal-name">'+escHtml(p.name)+'</p>'+
         '<p class="s-modal-price">'+fmtRp(p.price)+'</p>'+
         '<p class="s-modal-stock">'+escHtml(stockHtml)+'</p>'+
-        (p.description ? '<p class="s-modal-desc">'+escHtml(p.description)+'</p>' : '')+
+        (p.description ? '<div class="s-modal-desc">'+p.description+'</div>' : '')+
         '<div class="s-modal-actions">'+
             '<button class="btn-add-cart" id="btnAddCart_'+id+'"><i class="fas fa-cart-plus" style="margin-right:4px"></i>Tambah ke Keranjang</button>'+
             '<button class="btn-buy-now" id="btnBuyNow_'+id+'"><i class="fas fa-bolt" style="margin-right:4px"></i>Beli Sekarang</button>'+

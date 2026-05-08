@@ -30,7 +30,11 @@ class ShopItemUpdate extends Controller {
             }
 
             $_POST['name']        = input_clean($_POST['name'] ?? '');
-            $_POST['description'] = input_clean($_POST['description'] ?? '');
+            // Allow safe HTML text tags from the rich text editor (no scripts/images)
+            $_POST['description'] = strip_tags(
+                $_POST['description'] ?? '',
+                '<p><br><strong><em><u><s><h1><h2><h3><ul><ol><li><blockquote><a><span>'
+            );
             $_POST['price']       = abs((float) ($_POST['price'] ?? 0));
             $_POST['type']        = in_array($_POST['type'] ?? '', ['download_link', 'webhook_event', 'random_code', 'manual'])
                                     ? $_POST['type'] : 'download_link';
