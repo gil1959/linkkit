@@ -1,6 +1,19 @@
 Options -Indexes
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
+# Disable ModSecurity for shop upload routes (fix 406 Not Acceptable on file uploads)
+<IfModule mod_security2.c>
+    <LocationMatch "^/(en/)?shop-settings-update">
+        SecRuleEngine Off
+    </LocationMatch>
+    <LocationMatch "^/(en/)?shop-item-update">
+        SecRuleEngine Off
+    </LocationMatch>
+    <LocationMatch "^/(en/)?shop-item-create">
+        SecRuleEngine Off
+    </LocationMatch>
+</IfModule>
+
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-d

@@ -19,9 +19,8 @@
                     </a>
                 </div>
 
-                <div class="ml-auto">
-                    <a href="#" class="btn btn-primary"><i class="fas fa-arrow-up fa-sm mr-1"></i> Upgrade</a>
-                </div>
+
+
             </div>
         </div>
 
@@ -241,7 +240,7 @@
                             <td style="max-width:200px"><?= nl2br(htmlspecialchars($review->review ?? '-')) ?></td>
                             <td><?= \Altum\Date::get($review->datetime, 1) ?></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-danger" onclick="shopAjax('review_delete',{id:<?= $review->id ?>},this)">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault();shopDeleteAjax('review_delete',{id:<?= $review->id ?>},this,'Ulasan berhasil dihapus!')">
                                     <i class="fas fa-trash fa-sm"></i>
                                 </button>
                             </td>
@@ -275,8 +274,8 @@
                             <td><span class="badge badge-primary"><?= $lst->item_count ?> item</span></td>
                             <td><?= htmlspecialchars($lst->description ?? '-') ?></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary mr-1" onclick="openListingEdit(<?= htmlspecialchars(json_encode($lst)) ?>)"><i class="fas fa-edit fa-sm"></i></button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="shopAjax('listing_delete',{id:<?= $lst->id ?>},this)"><i class="fas fa-trash fa-sm"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-primary mr-1" onclick="event.preventDefault();openListingEdit(<?= htmlspecialchars(json_encode($lst)) ?>)"><i class="fas fa-edit fa-sm"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault();shopDeleteAjax('listing_delete',{id:<?= $lst->id ?>},this,'Listing berhasil dihapus!')"><i class="fas fa-trash fa-sm"></i></button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -324,8 +323,8 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary mr-1" onclick="openVoucherEdit(<?= htmlspecialchars(json_encode($vc)) ?>)"><i class="fas fa-edit fa-sm"></i></button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="shopAjax('voucher_delete',{id:<?= $vc->id ?>},this)"><i class="fas fa-trash fa-sm"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-primary mr-1" onclick="event.preventDefault();openVoucherEdit(<?= htmlspecialchars(json_encode($vc)) ?>)"><i class="fas fa-edit fa-sm"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault();shopDeleteAjax('voucher_delete',{id:<?= $vc->id ?>},this,'Voucher berhasil dihapus!')"><i class="fas fa-trash fa-sm"></i></button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -488,42 +487,143 @@
         </div>
         <!-- WEBHOOK EVENTS TAB -->
         <div class="tab-pane fade" id="webhook_events" role="tabpanel">
-            <h2 class="h5 mb-3">Webhook Events</h2>
-            <div class="card mb-4">
-                <div class="card-body">
-                    <p class="mb-2"><i class="fas fa-info-circle text-primary mr-1"></i> <strong>Cara kerja Webhook:</strong> Buat item bertipe <code>webhook_event</code>, isi <em>Webhook URL</em> di form edit item. Setiap kali pembeli membeli item tersebut dan pembayaran berhasil, sistem akan <strong>otomatis POST</strong> payload JSON ke URL tersebut.</p>
-                    <p class="mb-0 small text-muted">Payload yang dikirim: <code>event, invoice, customer_name, customer_email, product_id, product_name, amount, datetime</code></p>
+
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#818cf8);display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0;">
+                    <i class="fas fa-plug text-white"></i>
+                </div>
+                <div>
+                    <h2 class="h5 mb-0 font-weight-bold">Webhook Events</h2>
+                    <small class="text-muted">Kirim data otomatis ke sistem lain setiap ada pembelian</small>
                 </div>
             </div>
+
+            <!-- What is webhook -->
+            <div class="card border-0 mb-3" style="background:linear-gradient(135deg,#eef2ff,#f0fdf4);border-radius:14px;">
+                <div class="card-body pb-3">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="fas fa-info-circle text-primary mr-2 mt-1" style="font-size:1rem;flex-shrink:0;"></i>
+                        <p class="mb-0 text-muted" style="font-size:.875rem;line-height:1.6;">
+                            Webhook memungkinkan toko kamu <strong>memberi tahu sistem lain</strong> — seperti bot WhatsApp, Google Sheets, Make, atau Zapier — secara otomatis setiap kali pembeli berhasil melakukan pembayaran.
+                        </p>
+                    </div>
+                    <div style="display:flex;border-radius:10px;border:1.5px solid #e0e7ff;overflow:hidden;">
+                        <div class="p-3 text-center" style="flex:1;border-right:1.5px solid #e0e7ff;background:#fff;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:.78rem;font-weight:700;">1</div>
+                            <div style="font-size:.78rem;font-weight:600;color:#1e293b;margin-bottom:4px;">Buat Produk</div>
+                            <div style="font-size:.72rem;color:#64748b;">Pilih tipe <strong>Webhook Event</strong></div>
+                        </div>
+                        <div class="p-3 text-center" style="flex:1;border-right:1.5px solid #e0e7ff;background:#fff;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:.78rem;font-weight:700;">2</div>
+                            <div style="font-size:.78rem;font-weight:600;color:#1e293b;margin-bottom:4px;">Isi Webhook URL</div>
+                            <div style="font-size:.72rem;color:#64748b;">Di form edit produk</div>
+                        </div>
+                        <div class="p-3 text-center" style="flex:1;background:#fff;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                <i class="fas fa-bolt" style="font-size:.75rem;"></i>
+                            </div>
+                            <div style="font-size:.78rem;font-weight:600;color:#1e293b;margin-bottom:4px;">Otomatis Kirim</div>
+                            <div style="font-size:.72rem;color:#64748b;">Setiap transaksi berhasil</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payload Fields -->
+            <div class="card border-0 mb-4" style="border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-code text-primary mr-2"></i>
+                        <strong style="font-size:.875rem;">Data JSON yang Dikirim</strong>
+                    </div>
+                    <div class="row">
+                        <?php
+                        $pf = [
+                            ['event',          'purchase_success',     'Jenis kejadian',    '#4f46e5'],
+                            ['invoice',        'INV-SHOP-ABC123',      'Nomor invoice',     '#0891b2'],
+                            ['customer_name',  'Budi Santoso',         'Nama pembeli',      '#7c3aed'],
+                            ['customer_email', 'budi@email.com',       'Email pembeli',     '#7c3aed'],
+                            ['product_id',     '5',                    'ID produk',         '#059669'],
+                            ['product_name',   'Akun Netflix 1 Bulan', 'Nama produk',       '#059669'],
+                            ['amount',         '50000',                'Total harga (Rp)',  '#d97706'],
+                            ['datetime',       '2026-05-07 17:00:00',  'Waktu transaksi',   '#64748b'],
+                        ];
+                        foreach($pf as $f):
+                        ?>
+                        <div class="col-12 col-md-6 mb-2">
+                            <div class="d-flex align-items-start p-2" style="border:1px solid #f1f5f9;border-radius:10px;background:#fafafa;">
+                                <div style="flex-shrink:0;margin-right:10px;margin-top:1px;">
+                                    <code style="background:<?= $f[3] ?>1a;color:<?= $f[3] ?>;padding:2px 7px;border-radius:6px;font-size:.72rem;white-space:nowrap;"><?= $f[0] ?></code>
+                                </div>
+                                <div style="min-width:0;">
+                                    <div style="font-size:.72rem;color:#64748b;margin-bottom:1px;"><?= $f[2] ?></div>
+                                    <code style="font-size:.7rem;color:#94a3b8;word-break:break-all;"><?= htmlspecialchars($f[1]) ?></code>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="mt-2 pt-2" style="border-top:1px solid #f1f5f9;">
+                        <small class="text-muted">
+                            <i class="fas fa-flask text-warning mr-1"></i>
+                            <strong>Test:</strong> Gunakan <a href="https://webhook.site" target="_blank" class="text-primary">webhook.site</a> untuk melihat payload secara real-time.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <strong style="font-size:.875rem;"><i class="fas fa-history text-muted mr-2"></i>Log Event</strong>
+                <span class="badge badge-secondary" style="font-size:.7rem;"><?= count($data->webhook_events) ?> event</span>
+            </div>
+
             <?php if(count($data->webhook_events) > 0): ?>
-            <div class="table-responsive table-custom-container">
-                <table class="table table-custom">
-                    <thead><tr><th>Tanggal</th><th>Produk</th><th>Webhook URL</th><th>Status</th><th>Payload</th></tr></thead>
-                    <tbody>
-                    <?php foreach($data->webhook_events as $wh): ?>
-                        <tr>
-                            <td style="white-space:nowrap"><?= \Altum\Date::get($wh->datetime,1) ?></td>
-                            <td><?= htmlspecialchars($wh->item_name ?? '-') ?></td>
-                            <td><small class="text-truncate d-inline-block" style="max-width:200px" title="<?= htmlspecialchars($wh->webhook_url) ?>"><?= htmlspecialchars($wh->webhook_url) ?></small></td>
-                            <td>
-                                <?php if($wh->status_code >= 200 && $wh->status_code < 300): ?>
-                                    <span class="badge badge-success"><?= $wh->status_code ?></span>
-                                <?php else: ?>
-                                    <span class="badge badge-danger"><?= $wh->status_code ?: 'Error' ?></span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <button class="btn btn-xs btn-outline-secondary" onclick="alert(JSON.stringify(JSON.parse('<?= addslashes(htmlspecialchars($wh->payload)) ?>'),null,2))"><i class="fas fa-code fa-sm"></i></button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <?php foreach($data->webhook_events as $wh): ?>
+                <?php $ok = $wh->status_code >= 200 && $wh->status_code < 300; ?>
+                <div class="card border-0" style="border-radius:12px;border-left:4px solid <?= $ok ? '#10b981' : '#ef4444' ?> !important;box-shadow:0 1px 5px rgba(0,0,0,.05);">
+                    <div class="card-body py-3 px-3">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:8px;">
+                            <div class="d-flex align-items-center" style="gap:10px;min-width:0;">
+                                <div style="width:30px;height:30px;border-radius:8px;background:<?= $ok ? '#d1fae5' : '#fee2e2' ?>;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-<?= $ok ? 'check' : 'times' ?>" style="color:<?= $ok ? '#059669' : '#dc2626' ?>;font-size:.75rem;"></i>
+                                </div>
+                                <div style="min-width:0;">
+                                    <div style="font-weight:600;font-size:.82rem;color:#1e293b;"><?= htmlspecialchars($wh->item_name ?? 'Produk tidak dikenal') ?></div>
+                                    <div style="font-size:.7rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;" title="<?= htmlspecialchars($wh->webhook_url) ?>">
+                                        <i class="fas fa-link fa-xs mr-1"></i><?= htmlspecialchars($wh->webhook_url) ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center" style="gap:6px;flex-shrink:0;">
+                                <span style="font-size:.7rem;color:#94a3b8;white-space:nowrap;"><i class="fas fa-clock fa-xs mr-1"></i><?= \Altum\Date::get($wh->datetime, 1) ?></span>
+                                <span class="badge badge-<?= $ok ? 'success' : 'danger' ?>"><?= $wh->status_code ?: 'Error' ?></span>
+                                <button class="btn btn-sm btn-light" style="padding:2px 8px;font-size:.7rem;border-radius:6px;"
+                                    onclick="var d=document.getElementById('whp_<?= $wh->id ?>');d.style.display=d.style.display==='none'?'block':'none'">
+                                    <i class="fas fa-code fa-xs mr-1"></i>Payload
+                                </button>
+                            </div>
+                        </div>
+                        <div id="whp_<?= $wh->id ?>" style="display:none;margin-top:10px;">
+                            <pre style="background:#1e293b;color:#a5b4fc;border-radius:8px;padding:12px;font-size:.73rem;margin:0;overflow-x:auto;max-height:180px;"><?= htmlspecialchars(json_encode(json_decode($wh->payload), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></pre>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
             </div>
             <?php else: ?>
-            <div class="card bg-light"><div class="card-body text-center text-muted"><i class="fas fa-plug fa-2x mb-2 d-block"></i>Belum ada webhook event dikirim</div></div>
+            <div class="card border-0 text-center" style="border-radius:14px;padding:40px 20px;background:#f8faff;">
+                <div style="width:54px;height:54px;border-radius:50%;background:#e0e7ff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                    <i class="fas fa-plug text-primary fa-lg"></i>
+                </div>
+                <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">Belum ada event terkirim</div>
+                <div style="font-size:.82rem;color:#94a3b8;">Buat produk bertipe Webhook Event untuk mulai menerima notifikasi otomatis.</div>
+            </div>
             <?php endif; ?>
         </div>
+
         <div class="tab-pane fade" id="shop_settings" role="tabpanel">
             <?php
             $bank_account = database()->query("SELECT * FROM `shop_bank_accounts` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null;
@@ -657,7 +757,7 @@
             </form>
 
             <!-- Bank Account -->
-            <form action="<?= url('shop-settings-update') ?>" method="post" class="mb-5">
+            <form action="<?= url('shop-settings-update') ?>" method="post" enctype="multipart/form-data" class="mb-5">
                 <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>" />
                 <input type="hidden" name="section" value="bank" />
 
@@ -775,7 +875,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveVoucher()"><i class="fas fa-save fa-sm mr-1"></i> Save</button>
+        <button type="button" class="btn btn-primary" id="vcSaveBtn" onclick="saveVoucher()"><i class="fas fa-save fa-sm mr-1"></i> Simpan</button>
       </div>
     </div>
   </div>
@@ -808,27 +908,84 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveListing()"><i class="fas fa-save fa-sm mr-1"></i> Save</button>
+        <button type="button" class="btn btn-primary" id="lstSaveBtn" onclick="saveListing()"><i class="fas fa-save fa-sm mr-1"></i> Simpan</button>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+/* ── Toast Notification ── */
+#shop-toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column-reverse;gap:10px;pointer-events:none}
+.shop-toast{display:flex;align-items:center;gap:10px;background:#1e293b;color:#fff;border-radius:12px;padding:13px 18px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:all;min-width:240px;max-width:360px}
+.shop-toast.show{opacity:1;transform:translateY(0)}
+.shop-toast.success .toast-icon{color:#34d399}
+.shop-toast.error   .toast-icon{color:#f87171}
+.shop-toast.warning .toast-icon{color:#fbbf24}
+.toast-icon{font-size:1.1rem;flex-shrink:0}
+</style>
+
+<div id="shop-toast-container"></div>
+
 <script>
 var SHOP_AJAX_URL = '<?= url('shop-ajax') ?>';
 var CSRF_TOKEN   = '<?= \Altum\Csrf::get() ?>';
 
-function shopAjax(action, extra, btn) {
-    if(!confirm('Yakin?')) return;
+function showToast(message, type) {
+    type = type || 'success';
+    var icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-circle' };
+    var c = document.getElementById('shop-toast-container');
+    var t = document.createElement('div');
+    t.className = 'shop-toast ' + type;
+    t.innerHTML = '<i class="fas ' + (icons[type]||icons.success) + ' toast-icon"></i><span>' + message + '</span>';
+    c.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+    setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300); }, 3500);
+}
+
+function shopReload(tabHash) {
+    location.hash = tabHash || '';
+    location.reload();
+}
+
+(function(){
+    var hash = window.location.hash;
+    if(hash) { var tab = document.querySelector('a[href="' + hash + '"]'); if(tab && typeof $ !== 'undefined') $(tab).tab('show'); }
+    if(typeof $ !== 'undefined') {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) { history.replaceState(null, null, $(e.target).attr('href')); });
+    }
+})();
+
+function shopDeleteAjax(action, extra, btn, successMsg) {
+    if(!confirm('Yakin ingin menghapus?')) return;
     if(btn) btn.disabled = true;
     var data = Object.assign({action: action, token: CSRF_TOKEN}, extra);
     fetch(SHOP_AJAX_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(data)})
-    .then(r=>r.json()).then(function(res){
-        if(res.success) { location.reload(); } else { alert(res.message || 'Error'); if(btn) btn.disabled=false; }
-    }).catch(function(){ alert('Request failed'); if(btn) btn.disabled=false; });
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+        if(res.success) {
+            showToast(successMsg || 'Berhasil dihapus!', 'success');
+            var row = btn ? btn.closest('tr') : null;
+            if(row) {
+                row.style.transition = 'opacity 0.25s';
+                row.style.opacity = '0';
+                setTimeout(function(){
+                    var tbody = row.parentNode;
+                    row.remove();
+                    if(tbody && tbody.querySelectorAll('tr').length === 0) {
+                        var emptyRow = document.createElement('tr');
+                        emptyRow.innerHTML = '<td colspan="20" class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x d-block mb-2"></i>Tidak ada data</td>';
+                        tbody.appendChild(emptyRow);
+                    }
+                }, 270);
+            }
+        } else {
+            showToast(res.message || 'Gagal menghapus', 'error');
+            if(btn) btn.disabled = false;
+        }
+    }).catch(function(){ showToast('Request gagal. Coba lagi.', 'error'); if(btn) btn.disabled = false; });
 }
 
-/* Voucher */
 function toggleVcQuota() {
     document.getElementById('vcQuotaGroup').style.display = document.getElementById('vcIsUnlimited').checked ? 'none' : '';
 }
@@ -848,26 +1005,26 @@ function openVoucherEdit(v) {
 }
 function saveVoucher() {
     var id = document.getElementById('vcId').value;
-    var params = {
-        action: id ? 'voucher_update' : 'voucher_create',
-        token: CSRF_TOKEN,
-        id: id,
+    var params = { action: id ? 'voucher_update' : 'voucher_create', token: CSRF_TOKEN, id: id,
         code: document.getElementById('vcCode').value,
         is_active: document.getElementById('vcIsActive').checked ? 1 : 0,
-        valid_from: document.getElementById('vcFrom').value,
-        valid_to: document.getElementById('vcTo').value,
+        valid_from: document.getElementById('vcFrom').value, valid_to: document.getElementById('vcTo').value,
         is_unlimited: document.getElementById('vcIsUnlimited').checked ? 1 : 0,
         quota: document.getElementById('vcQuota').value,
         discount_percentage: document.getElementById('vcDiscount').value,
-        item_id: document.getElementById('vcItemId').value,
-    };
+        item_id: document.getElementById('vcItemId').value };
+    var btn = document.getElementById('vcSaveBtn');
+    if(btn) btn.disabled = true;
     fetch(SHOP_AJAX_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(params)})
-    .then(r=>r.json()).then(function(res){
-        if(res.success) { location.reload(); } else { alert(res.message || 'Error'); }
-    }).catch(function(){ alert('Request failed'); });
+    .then(function(r){ return r.json(); }).then(function(res){
+        if(res.success) {
+            $('#voucherCreateModal').modal('hide');
+            showToast(id ? 'Voucher berhasil diperbarui!' : 'Voucher berhasil dibuat!', 'success');
+            setTimeout(function(){ shopReload('#voucher'); }, 900);
+        } else { showToast(res.message || 'Gagal menyimpan voucher', 'error'); if(btn) btn.disabled = false; }
+    }).catch(function(){ showToast('Request gagal', 'error'); if(btn) btn.disabled = false; });
 }
 
-/* Listing */
 function openListingEdit(l) {
     document.getElementById('lstModalTitle').textContent = 'Edit Listing';
     document.getElementById('lstId').value = l.id;
@@ -879,19 +1036,22 @@ function openListingEdit(l) {
 function saveListing() {
     var id = document.getElementById('lstId').value;
     var itemIds = Array.from(document.querySelectorAll('.lst-item-check:checked')).map(function(cb){ return cb.value; });
-    var params = new URLSearchParams({
-        action: id ? 'listing_update' : 'listing_create',
-        token: CSRF_TOKEN, id: id,
-        name: document.getElementById('lstName').value,
-        description: document.getElementById('lstDesc').value,
-    });
+    var params = new URLSearchParams({ action: id ? 'listing_update' : 'listing_create', token: CSRF_TOKEN, id: id,
+        name: document.getElementById('lstName').value, description: document.getElementById('lstDesc').value });
     itemIds.forEach(function(v){ params.append('item_ids[]', v); });
+    var btn = document.getElementById('lstSaveBtn');
+    if(btn) btn.disabled = true;
     fetch(SHOP_AJAX_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params})
-    .then(r=>r.json()).then(function(res){
-        if(res.success) { location.reload(); } else { alert(res.message || 'Error'); }
-    }).catch(function(){ alert('Request failed'); });
+    .then(function(r){ return r.json(); }).then(function(res){
+        if(res.success) {
+            $('#listingCreateModal').modal('hide');
+            showToast(id ? 'Listing berhasil diperbarui!' : 'Listing berhasil dibuat!', 'success');
+            setTimeout(function(){ shopReload('#listing'); }, 900);
+        } else { showToast(res.message || 'Gagal menyimpan listing', 'error'); if(btn) btn.disabled = false; }
+    }).catch(function(){ showToast('Request gagal', 'error'); if(btn) btn.disabled = false; });
 }
 </script>
+
 
 <script>
 /*

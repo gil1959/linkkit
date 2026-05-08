@@ -2,6 +2,9 @@
 /*
  * Shop Settings Update Controller
  * Handles: info (cover, logo, url, toggles), bank account, notification settings
+ *
+ * NOTE: Menggunakan header() langsung (BUKAN redirect()) untuk menghindari
+ * bug dimana redirect() override tujuan berdasarkan $_GET['original_request'].
  */
 
 namespace Altum\Controllers;
@@ -14,76 +17,74 @@ class ShopSettingsUpdate extends Controller {
 
         \Altum\Authentication::guard();
 
-        if(empty($_POST)) redirect('shop');
+        if(empty($_POST)) {
+            header('Location: ' . url('shop'));
+            die();
+        }
+
         if(!\Altum\Csrf::check()) {
             Alerts::add_error(l('global.error_message.invalid_csrf_token'));
-            redirect('shop#shop_settings');
+            header('Location: ' . url('shop') . '#shop_settings');
+            die();
         }
 
         $shop = database()->query("SELECT * FROM `shops` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null;
-        if(!$shop) redirect('shop');
+        if(!$shop) {
+            header('Location: ' . url('shop'));
+            die();
+        }
 
         $section = input_clean($_POST['section'] ?? '');
 
         switch($section) {
 
             case 'info':
-                $name        = input_clean($_POST['name'] ?? $shop->name);
-                $description = input_clean($_POST['description'] ?? '');
-                $url         = get_slug($_POST['url'] ?? $shop->url);
+                $name              = input_clean($_POST['name'] ?? $shop->name);
+                $description       = strip_tags(input_clean($_POST['description'] ?? ''));
+                $url               = get_slug($_POST['url'] ?? $shop->url);
                 $is_review_enabled = isset($_POST['is_review_enabled']) ? 1 : 0;
-                $is_active   = isset($_POST['is_active']) ? 0 : 1; // checkbox means deactivate
+                $is_active         = isset($_POST['is_active']) ? 0 : 1;
 
                 /* Check URL uniqueness */
                 if($url !== $shop->url) {
                     $exists = database()->query("SELECT `id` FROM `shops` WHERE `url` = '{$url}' AND `id` != {$shop->id}")->fetch_object();
                     if($exists) {
                         Alerts::add_error('URL sudah dipakai toko lain.');
-                        redirect('shop#shop_settings');
+                        header('Location: ' . url('shop') . '#shop_settings');
+                        die();
                     }
                 }
 
-                /* Handle cover image upload using proper Uploads class */
+                /* Handle cover image upload */
                 $cover_image = \Altum\Uploads::process_upload(
-                    $shop->cover_image ?? null,
-                    'shop_covers',
-                    'cover_image',
-                    'cover_image_remove',
-                    5
+                    $shop->cover_image ?? null, 'shop_covers', 'cover_image', 'cover_image_remove', 5
                 );
 
                 /* Handle logo image upload */
                 $logo_image = \Altum\Uploads::process_upload(
-                    $shop->logo_image ?? null,
-                    'shop_logos',
-                    'logo_image',
-                    'logo_image_remove',
-                    2
+                    $shop->logo_image ?? null, 'shop_logos', 'logo_image', 'logo_image_remove', 2
                 );
 
                 if(!Alerts::has_errors()) {
                     $stmt = database()->prepare("
                         UPDATE `shops` SET
-                            `name` = ?,
-                            `description` = ?,
-                            `url` = ?,
-                            `cover_image` = ?,
-                            `logo_image` = ?,
-                            `is_review_enabled` = ?,
-                            `is_active` = ?
+                            `name` = ?, `description` = ?, `url` = ?,
+                            `cover_image` = ?, `logo_image` = ?,
+                            `is_review_enabled` = ?, `is_active` = ?
                         WHERE `id` = ?
                     ");
-                    $stmt->bind_param('ssssssii',
+                    $stmt->bind_param('sssssiii',
                         $name, $description, $url,
                         $cover_image, $logo_image,
                         $is_review_enabled, $is_active,
                         $shop->id
-    );
+                    );
                     $stmt->execute();
                     $stmt->close();
                     Alerts::add_success('Pengaturan toko berhasil disimpan.');
                 }
-                break;
+                header('Location: ' . url('shop') . '#shop_settings');
+                die();
 
             case 'bank':
                 $bank_name      = input_clean($_POST['bank_name'] ?? '');
@@ -101,21 +102,25 @@ class ShopSettingsUpdate extends Controller {
                 $stmt->execute();
                 $stmt->close();
                 Alerts::add_success('Informasi bank berhasil disimpan.');
-                break;
+                header('Location: ' . url('shop') . '#shop_settings');
+                die();
 
             case 'notification':
                 $notification_settings = json_encode([
-                    'notify_purchase' => isset($_POST['notify_purchase']) ? 1 : 0,
-                    'notify_review'   => isset($_POST['notify_review']) ? 1 : 0,
+                    'purchase_success' => isset($_POST['notify_purchase']) ? 1 : 0,
+                    'notify_review'    => isset($_POST['notify_review'])   ? 1 : 0,
                 ]);
                 $stmt = database()->prepare("UPDATE `shops` SET `notification_settings` = ? WHERE `id` = ?");
                 $stmt->bind_param('si', $notification_settings, $shop->id);
                 $stmt->execute();
                 $stmt->close();
                 Alerts::add_success('Pengaturan notifikasi berhasil disimpan.');
-                break;
+                header('Location: ' . url('shop') . '#shop_settings');
+                die();
         }
 
-        redirect('shop#shop_settings');
+        /* Fallback — tetap di shop settings */
+        header('Location: ' . url('shop') . '#shop_settings');
+        die();
     }
 }

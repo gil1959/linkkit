@@ -74,11 +74,6 @@ input[type=radio].pm-radio{display:none}
 
 /* ── test mode banner ── */
 .test-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:.78rem;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:20px}
-/* ── offline instructions ── */
-.offline-panel{background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:16px 18px;margin-top:16px;display:none}
-.offline-panel.show{display:block}
-.offline-panel-title{font-size:.78rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.offline-instructions{font-size:.85rem;color:#78350f;white-space:pre-wrap;line-height:1.7;font-family:monospace}
 </style>
 
 <!-- TOPBAR -->
@@ -188,13 +183,7 @@ input[type=radio].pm-radio{display:none}
                     <?php endforeach ?>
 
 
-                    <?php if(!empty($data->offline_instructions)): ?>
-                    <div class="offline-panel" id="offlinePanel">
-                        <div class="offline-panel-title"><i class="fas fa-university fa-sm"></i> Instruksi Transfer Bank</div>
-                        <div class="offline-instructions"><?= nl2br(htmlspecialchars($data->offline_instructions)) ?></div>
-                        <p style="font-size:.75rem;color:#92400e;margin:10px 0 0"><i class="fas fa-info-circle fa-xs"></i> Transfer sejumlah total di bawah, lalu upload bukti di halaman konfirmasi.</p>
-                    </div>
-                    <?php endif ?>
+
 
                     <button type="submit" class="btn-pay" id="btnPay">
                         <i class="fas fa-lock"></i>
@@ -321,16 +310,8 @@ function selectMethod(code, name, logoWrapEl) {
         txt.textContent = name.substring(0, 3).toUpperCase();
         txt.style.display = 'block';
     }
-    /* toggle offline panel */
-    var panel = document.getElementById('offlinePanel');
     var btnText = document.getElementById('btnPayText');
-    if(code === 'OFFLINE') {
-        if(panel) panel.classList.add('show');
-        if(btnText) btnText.textContent = 'Buat Pesanan & Lihat Instruksi';
-    } else {
-        if(panel) panel.classList.remove('show');
-        if(btnText) btnText.textContent = 'Bayar Sekarang';
-    }
+    if(btnText) btnText.textContent = 'Bayar Sekarang';
 }
 
 /* init with first channel */

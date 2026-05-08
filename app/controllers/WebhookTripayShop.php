@@ -110,7 +110,7 @@ class WebhookTripayShop extends Controller {
             $webhook_url = $item->webhook_url ?? $shop->global_webhook_url ?? null;
             if($webhook_url) {
                 $payload = json_encode([
-                    'event'          => 'order_paid',
+                    'event'          => 'purchase_success',
                     'invoice'        => $order->invoice_number,
                     'customer_name'  => $customer->full_name,
                     'customer_email' => $customer->email,
@@ -161,8 +161,36 @@ class WebhookTripayShop extends Controller {
         $email_html = $this->build_delivery_email($order, $item, $customer, $shop, $fulfilled_content);
         try {
             send_mail($customer->email, 'Pesanan kamu di ' . $shop->name . ' sudah berhasil!', $email_html);
-        } catch(\Exception $e) {
-            /* Abaikan jika email gagal di dev */
+        } catch(\Exception $e) { /* silent */ }
+
+        /* Kirim email notifikasi ke pemilik toko (jika notification_settings aktif) */
+        $notif = json_decode($shop->notification_settings ?? '{}', true);
+        if(!empty($notif['purchase_success'])) {
+            $seller = database()->query("SELECT `email`, `name` FROM `users` WHERE `user_id` = {$shop->user_id}")->fetch_object();
+            if($seller) {
+                $seller_html = '
+<!DOCTYPE html><html><body style="font-family:Inter,sans-serif;background:#f8fafc;padding:20px">
+<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07)">
+    <div style="background:linear-gradient(135deg,#059669,#10b981);padding:24px;text-align:center">
+        <h1 style="color:#fff;font-size:1.2rem;margin:0"><i style="margin-right:8px"></i>Penjualan Baru di Toko Kamu!</h1>
+    </div>
+    <div style="padding:28px">
+        <p>Halo <strong>' . htmlspecialchars($seller->name) . '</strong>,</p>
+        <p>Ada pembelian baru di toko <strong>' . htmlspecialchars($shop->name) . '</strong>!</p>
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem;margin:16px 0">
+            <tr style="background:#f8fafc"><td style="padding:8px 12px;font-weight:600">Produk</td><td style="padding:8px 12px">' . htmlspecialchars($item->name) . '</td></tr>
+            <tr><td style="padding:8px 12px;font-weight:600">Pembeli</td><td style="padding:8px 12px">' . htmlspecialchars($customer->full_name) . ' (' . htmlspecialchars($customer->email) . ')</td></tr>
+            <tr style="background:#f8fafc"><td style="padding:8px 12px;font-weight:600">Invoice</td><td style="padding:8px 12px;font-family:monospace">' . htmlspecialchars($order->invoice_number) . '</td></tr>
+            <tr><td style="padding:8px 12px;font-weight:600">Total</td><td style="padding:8px 12px;color:#059669;font-weight:700">Rp ' . number_format($order->grand_total, 0, ',', '.') . '</td></tr>
+            <tr style="background:#f8fafc"><td style="padding:8px 12px;font-weight:600">Kamu Dapat</td><td style="padding:8px 12px;color:#4f46e5;font-weight:700">Rp ' . number_format($seller_revenue, 0, ',', '.') . '</td></tr>
+        </table>
+        <p style="font-size:.8rem;color:#94a3b8">Dana akan masuk ke saldo setelah settlement (3-5 hari kerja).</p>
+    </div>
+</div></body></html>';
+                try {
+                    send_mail($seller->email, '[' . $shop->name . '] Penjualan Baru — Rp ' . number_format($order->grand_total, 0, ',', '.'), $seller_html);
+                } catch(\Exception $e) { /* silent */ }
+            }
         }
 
         http_response_code(200);

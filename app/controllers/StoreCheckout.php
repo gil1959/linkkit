@@ -7,6 +7,7 @@ namespace Altum\Controllers;
 
 use Altum\Title;
 use Altum\Alerts;
+use Altum\PaymentGateways\Tripay;
 
 class StoreCheckout extends Controller {
 
@@ -47,6 +48,40 @@ class StoreCheckout extends Controller {
         return $fulfilled_content;
     }
 
+    /* ── Email pending payment ── */
+    private function build_pending_email($invoice, $customer_name, $item_name, $shop_name, $grand_total, $checkout_url) {
+        $success_url = SITE_URL . 'store-checkout-success/' . $invoice;
+        $amount_fmt  = 'Rp ' . number_format($grand_total, 0, ',', '.');
+        return '<!DOCTYPE html><html><body style="font-family:Inter,sans-serif;background:#f8fafc;padding:20px;margin:0">
+<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+    <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:28px;text-align:center">
+        <div style="width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+            <span style="font-size:1.5rem">&#9203;</span>
+        </div>
+        <h1 style="color:#fff;font-size:1.15rem;margin:0">Menunggu Pembayaran</h1>
+        <p style="color:rgba(255,255,255,.85);font-size:.82rem;margin:6px 0 0">Pesanan kamu belum dibayar</p>
+    </div>
+    <div style="padding:28px">
+        <p style="color:#374151">Halo <strong>' . htmlspecialchars($customer_name) . '</strong>,</p>
+        <p style="color:#374151">Kamu memiliki pesanan yang menunggu pembayaran di toko <strong>' . htmlspecialchars($shop_name) . '</strong>:</p>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;margin:16px 0">
+            <table style="width:100%;font-size:.85rem;color:#374151;border-collapse:collapse">
+                <tr><td style="padding:6px 0;color:#6b7280">Produk</td><td style="text-align:right;font-weight:600">' . htmlspecialchars($item_name) . '</td></tr>
+                <tr><td style="padding:6px 0;color:#6b7280">Invoice</td><td style="text-align:right;font-family:monospace;color:#4f46e5">' . htmlspecialchars($invoice) . '</td></tr>
+                <tr style="border-top:1px solid #e5e7eb"><td style="padding:10px 0 0;font-weight:700">Total</td><td style="text-align:right;font-weight:800;color:#059669;font-size:1.05rem;padding-top:10px">' . $amount_fmt . '</td></tr>
+            </table>
+        </div>
+        <a href="' . $checkout_url . '" style="display:block;background:#4f46e5;color:#fff;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:700;font-size:.95rem;margin-bottom:12px">
+            &#128179; Bayar Sekarang
+        </a>
+        <a href="' . $success_url . '" style="display:block;background:#f1f5f9;color:#475569;text-align:center;padding:12px;border-radius:12px;text-decoration:none;font-size:.85rem">
+            Lihat Detail Pesanan
+        </a>
+        <p style="font-size:.75rem;color:#94a3b8;margin:16px 0 0;text-align:center">Link pembayaran berlaku 24 jam sejak pesanan dibuat.</p>
+    </div>
+</div></body></html>';
+    }
+
     public function index() {
 
         $item_id = isset($this->params[0]) ? (int) $this->params[0] : null;
@@ -70,27 +105,33 @@ class StoreCheckout extends Controller {
         $tripay_mode    = settings()->tripay->mode ?? 'production';
 
         if($tripay_enabled && !empty($tripay_key)) {
-            $api_url = ($tripay_mode === 'sandbox')
-                ? 'https://tripay.co.id/api-sandbox/payment/channel'
-                : 'https://tripay.co.id/api/payment/channel';
-            $ch = curl_init();
-            curl_setopt_array($ch, [
-                CURLOPT_FRESH_CONNECT  => true,
-                CURLOPT_URL            => $api_url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER         => false,
-                CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $tripay_key],
-                CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
-                CURLOPT_TIMEOUT        => 8,
-            ]);
-            $res     = curl_exec($ch);
-            curl_close($ch);
-            $res_obj = json_decode($res);
-            if(isset($res_obj->success) && $res_obj->success && !empty($res_obj->data)) {
-                foreach($res_obj->data as $c) {
+            $raw_channels = \Altum\PaymentGateways\Tripay::get_channels();
+            if(!empty($raw_channels)) {
+                foreach($raw_channels as $c) {
                     $c->_gateway = 'tripay';
                     $payment_channels[] = $c;
                 }
+                $primary_gateway = 'tripay';
+            } else {
+                $base = 'https://tripay.co.id/images/payment/icon/';
+                $mk   = function($code, $name, $group, $flat, $pct) use ($base) {
+                    return (object)['code' => $code, 'name' => $name, 'group' => $group,
+                        'icon_url' => $base . $code . '.png',
+                        'total_fee' => (object)['flat' => $flat, 'percent' => $pct],
+                        '_gateway'  => 'tripay'];
+                };
+                $payment_channels = [
+                    $mk('QRIS',      'QRIS (Semua E-Wallet)',   'QRIS',            0,    0.7),
+                    $mk('BRIVA',     'BRI Virtual Account',     'Virtual Account', 4000, 0),
+                    $mk('BNIVA',     'BNI Virtual Account',     'Virtual Account', 4000, 0),
+                    $mk('MANDIRIVA', 'Mandiri Virtual Account', 'Virtual Account', 4000, 0),
+                    $mk('BCAVA',     'BCA Virtual Account',     'Virtual Account', 4000, 0),
+                    $mk('DANA',      'DANA',                    'E-Wallet',        1000, 0),
+                    $mk('OVO',       'OVO',                     'E-Wallet',        1000, 0),
+                    $mk('SHOPEEPAY', 'ShopeePay',               'E-Wallet',        1000, 0),
+                    $mk('INDOMARET', 'Indomaret',               'Gerai',           5000, 0),
+                    $mk('ALFAMART',  'Alfamart',                'Gerai',           5000, 0),
+                ];
                 $primary_gateway = 'tripay';
             }
         }
@@ -121,8 +162,7 @@ class StoreCheckout extends Controller {
             if(!$primary_gateway) $primary_gateway = 'paypal';
         }
 
-        /* Tidak ada manual/offline — hanya gunakan gateway yang diaktifkan admin */
-        /* Demo fallback jika tidak ada gateway aktif */
+        /* Demo fallback HANYA jika tidak ada gateway aktif sama sekali */
         $is_demo = empty($primary_gateway);
         if($is_demo) {
             $base = 'https://tripay.co.id/images/payment/icon/';
@@ -147,7 +187,6 @@ class StoreCheckout extends Controller {
             $primary_gateway = 'demo';
         }
 
-        $offline_instructions = '';
 
         /* ── Handle POST ── */
         if(!empty($_POST)) {
@@ -204,10 +243,9 @@ class StoreCheckout extends Controller {
                     $customer_id = $customer->id;
                 }
 
-                /* Order — include voucher_id */
+                /* Order */
                 $datetime  = \Altum\Date::$date;
                 $processor = $primary_gateway;
-                /* Check if voucher_id column exists (graceful fallback) */
                 $stmt = database()->prepare("INSERT INTO `shop_orders`
                     (`shop_id`, `item_id`, `customer_id`, `invoice_number`, `qty`,
                      `total_amount`, `service_fee`, `grand_total`, `payment_processor`, `status`, `datetime`)
@@ -218,7 +256,7 @@ class StoreCheckout extends Controller {
                 $order_id = $stmt->insert_id;
                 $stmt->close();
 
-                /* Store voucher ref & discount on order */
+                /* Store voucher ref */
                 if($voucher_id) {
                     database()->query("UPDATE `shop_vouchers` SET `used` = `used` + 1 WHERE `id` = {$voucher_id}");
                 }
@@ -243,6 +281,7 @@ class StoreCheckout extends Controller {
                         'customer_phone' => $phone,
                         'order_items'    => [['sku' => 'ITEM-'.$item->id, 'name' => $item->name, 'price' => (int)$item->price, 'quantity' => $qty]],
                         'return_url'     => SITE_URL . 'store-checkout-success/' . $invoice_number,
+                        'callback_url'   => SITE_URL . 'webhook-tripay',
                         'expired_time'   => (time() + (24 * 60 * 60)),
                         'signature'      => hash_hmac('sha256', $tripay_mc . $invoice_number . (int)$grand_total, $tripay_pkey),
                     ];
@@ -265,8 +304,24 @@ class StoreCheckout extends Controller {
                     $response_obj = json_decode($response);
 
                     if(isset($response_obj->success) && $response_obj->success == true) {
-                        database()->query("UPDATE `shop_orders` SET `payment_id` = '" . database()->real_escape_string($response_obj->data->reference) . "' WHERE `id` = {$order_id}");
-                        header('Location: ' . $response_obj->data->checkout_url);
+                        $checkout_url = $response_obj->data->checkout_url ?? '';
+                        $tripay_ref   = $response_obj->data->reference ?? '';
+                        $co_url_esc   = database()->real_escape_string($checkout_url);
+                        database()->query("UPDATE `shop_orders` SET
+                            `payment_id`   = '" . database()->real_escape_string($tripay_ref) . "',
+                            `checkout_url` = '{$co_url_esc}'
+                            WHERE `id` = {$order_id}");
+
+                        /* Kirim email pending payment ke pembeli */
+                        try {
+                            $pending_email = $this->build_pending_email(
+                                $invoice_number, $full_name, $item->name, $shop->name,
+                                $grand_total, $checkout_url
+                            );
+                            send_mail($email, 'Selesaikan pembayaran - ' . $invoice_number, $pending_email);
+                        } catch(\Exception $e) { /* silent */ }
+
+                        header('Location: ' . $checkout_url);
                         exit;
                     } else {
                         Alerts::add_error('Tripay Error: ' . ($response_obj->message ?? 'Unknown error'));
@@ -282,12 +337,11 @@ class StoreCheckout extends Controller {
         Title::set('Checkout - ' . $item->name);
 
         $data = [
-            'shop'                 => $shop,
-            'item'                 => $item,
-            'payment_channels'     => $payment_channels,
-            'primary_gateway'      => $primary_gateway,
-            'is_demo'              => $is_demo,
-            'offline_instructions' => $offline_instructions,
+            'shop'             => $shop,
+            'item'             => $item,
+            'payment_channels' => $payment_channels,
+            'primary_gateway'  => $primary_gateway,
+            'is_demo'          => $is_demo,
         ];
 
         $view = new \Altum\View('store_checkout/index', (array) $this);

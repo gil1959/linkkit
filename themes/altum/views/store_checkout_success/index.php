@@ -16,10 +16,6 @@ if($data->item->type === 'random_code' && $fulfilled && $fulfilled !== 'OUT_OF_S
 
 $is_paid    = in_array($data->order->status, ['paid']);
 $is_pending = in_array($data->order->status, ['pending']);
-$is_proof   = $data->order->status === 'proof_uploaded';
-
-/* Offline payment instructions */
-$offline_instructions = settings()->offline_payment->instructions ?? '';
 ?>
 
 <style>
@@ -37,7 +33,7 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
 /* status hero */
 .status-hero{background:#fff;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,.07);padding:36px 32px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
 .status-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,70,229,.03),rgba(16,185,129,.03));pointer-events:none}
-.status-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px}
+.status-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 16px}
 .status-icon.success{background:#d1fae5}
 .status-icon.pending{background:#fef3c7}
 .status-icon.proof{background:#dbeafe}
@@ -107,20 +103,30 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
     <!-- STATUS HERO -->
     <div class="status-hero">
         <?php if($is_paid): ?>
-            <div class="status-icon success">✅</div>
+            <div class="status-icon success"><i class="fas fa-check-circle" style="color:#059669"></i></div>
             <div class="status-title" style="color:#059669">Pembayaran Berhasil!</div>
             <div class="status-sub">Produk kamu sudah siap. Cek detail pengiriman di bawah.</div>
-        <?php elseif($is_proof): ?>
-            <div class="status-icon proof">📤</div>
-            <div class="status-title" style="color:#2563eb">Bukti Pembayaran Diterima</div>
-            <div class="status-sub">Admin sedang memverifikasi pembayaran kamu. Tunggu konfirmasi dalam 1×24 jam.</div>
         <?php else: ?>
-            <div class="status-icon pending">⏳</div>
+            <div class="status-icon pending"><i class="fas fa-clock" style="color:#d97706"></i></div>
             <div class="status-title" style="color:#d97706">Menunggu Pembayaran</div>
-            <div class="status-sub">Selesaikan pembayaran sesuai instruksi di bawah, lalu upload bukti transfer.</div>
+            <div class="status-sub">Selesaikan pembayaran kamu. Link pembayaran juga sudah dikirim ke email kamu.</div>
+            <?php if(!empty($data->order->checkout_url)): ?>
+            <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;max-width:320px;margin-left:auto;margin-right:auto">
+                <a href="<?= htmlspecialchars($data->order->checkout_url) ?>"
+                   style="display:flex;align-items:center;justify-content:center;gap:8px;background:#4f46e5;color:#fff;padding:14px 24px;border-radius:14px;text-decoration:none;font-weight:700;font-size:.95rem;box-shadow:0 4px 12px rgba(79,70,229,.3);transition:.2s"
+                   onmouseover="this.style.background='#3730a3'" onmouseout="this.style.background='#4f46e5'">
+                    <i class="fas fa-credit-card"></i> Bayar Sekarang
+                </a>
+                <a href="<?= url('store-checkout-success/' . $data->order->invoice_number) ?>"
+                   style="display:flex;align-items:center;justify-content:center;gap:8px;background:#f1f5f9;color:#475569;padding:11px 24px;border-radius:12px;text-decoration:none;font-size:.85rem;font-weight:600">
+                    <i class="fas fa-sync-alt fa-sm"></i> Sudah Bayar? Cek Status
+                </a>
+            </div>
+            <?php endif ?>
         <?php endif ?>
         <div class="invoice-badge"><?= htmlspecialchars($data->order->invoice_number) ?></div>
     </div>
+
 
     <?php if($is_paid): ?>
     <!-- ── PRODUCT DELIVERY ── -->
@@ -173,64 +179,7 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
     </div>
     <?php endif ?>
 
-    <?php if($is_pending && $data->item->payment_processor === 'offline' || ($is_pending && !$is_paid && !empty($offline_instructions))): ?>
-    <!-- ── OFFLINE PAYMENT INSTRUCTIONS ── -->
-    <div class="co-card">
-        <div class="co-card-head">
-            <div class="co-card-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-university"></i></div>
-            <h2 class="co-card-title">Instruksi Pembayaran</h2>
-        </div>
-        <div class="co-card-body">
-            <p style="font-size:.82rem;color:#64748b;margin:0 0 12px">Transfer sejumlah <strong style="color:#1e293b">Rp <?= number_format($data->order->grand_total, 0, ',', '.') ?></strong> ke rekening berikut:</p>
-            <div class="instructions-box"><?= nl2br(htmlspecialchars($offline_instructions)) ?></div>
-        </div>
-    </div>
 
-    <!-- ── UPLOAD BUKTI ── -->
-    <div class="co-card">
-        <div class="co-card-head">
-            <div class="co-card-icon" style="background:#dbeafe;color:#2563eb"><i class="fas fa-cloud-upload-alt"></i></div>
-            <h2 class="co-card-title">Upload Bukti Transfer</h2>
-        </div>
-        <div class="co-card-body">
-            <?php if(!empty($data->order->proof_image)): ?>
-            <div class="proof-success">
-                <i class="fas fa-check-circle fa-lg"></i>
-                <div>
-                    <strong>Bukti sudah diunggah!</strong><br>
-                    <span style="font-size:.8rem">Admin sedang memverifikasi. Harap tunggu 1×24 jam.</span>
-                </div>
-            </div>
-            <?php else: ?>
-            <form method="post" enctype="multipart/form-data" action="">
-                <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
-                <div class="upload-area" id="uploadArea">
-                    <input type="file" name="proof_image" accept=".jpg,.jpeg,.png,.pdf" onchange="previewFile(this)" required>
-                    <div class="upload-icon" id="uploadIcon"><i class="fas fa-cloud-upload-alt"></i></div>
-                    <div class="upload-text" id="uploadLabel">Klik atau drag file di sini<br><small style="color:#94a3b8">JPG, PNG, atau PDF (maks. 10 MB)</small></div>
-                </div>
-                <button type="submit" class="btn-upload">
-                    <i class="fas fa-paper-plane"></i> Kirim Bukti Pembayaran
-                </button>
-            </form>
-            <?php endif ?>
-        </div>
-    </div>
-    <?php endif ?>
-
-    <?php if($is_proof): ?>
-    <div class="co-card">
-        <div class="co-card-body">
-            <div class="proof-success">
-                <i class="fas fa-check-circle fa-2x"></i>
-                <div>
-                    <strong>Bukti pembayaran diterima</strong><br>
-                    <span style="font-size:.8rem">Admin akan memproses dan mengirimkan produk setelah verifikasi selesai.</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif ?>
 
     <!-- ── ORDER SUMMARY ── -->
     <div class="co-card">
@@ -255,8 +204,8 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
             <div class="summary-row"><span>Email</span><span><?= htmlspecialchars($data->order->email) ?></span></div>
             <div class="summary-row"><span>Tanggal Pesan</span><span><?= date('d M Y H:i', strtotime($data->order->datetime)) ?></span></div>
             <div class="summary-row"><span>Status</span>
-                <span style="font-weight:700;color:<?= $is_paid ? '#059669' : ($is_proof ? '#2563eb' : '#d97706') ?>">
-                    <?= $is_paid ? 'Lunas' : ($is_proof ? 'Bukti Dikirim' : 'Menunggu Bayar') ?>
+                <span style="font-weight:700;color:<?= $is_paid ? '#059669' : '#d97706' ?>">
+                    <?= $is_paid ? 'Lunas' : 'Menunggu Bayar' ?>
                 </span>
             </div>
             <div class="summary-total">
@@ -334,14 +283,26 @@ function copyCode() {
         });
     }
 }
-function previewFile(input) {
-    var label = document.getElementById('uploadLabel');
-    var icon  = document.getElementById('uploadIcon');
-    if(input.files && input.files[0]) {
-        label.innerHTML = '<strong>' + input.files[0].name + '</strong><br><small style="color:#94a3b8">' + (input.files[0].size / 1024).toFixed(1) + ' KB</small>';
-        icon.innerHTML = '<i class="fas fa-file-check" style="color:#4f46e5"></i>';
-        document.getElementById('uploadArea').style.borderColor = '#6366f1';
-        document.getElementById('uploadArea').style.background = '#f8f7ff';
-    }
-}
+
+<?php if($is_pending && !empty($data->order->payment_id)): ?>
+/* Auto-refresh jika masih pending setelah balik dari Tripay */
+(function() {
+    var maxTries = 6;
+    var tries    = 0;
+    var interval = setInterval(function() {
+        tries++;
+        if(tries >= maxTries) { clearInterval(interval); return; }
+        fetch(window.location.href, { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                /* Cek apakah di response sudah ada 'Pembayaran Berhasil' */
+                if(html.indexOf('Pembayaran Berhasil') !== -1 || html.indexOf('fa-check-circle') !== -1) {
+                    clearInterval(interval);
+                    window.location.reload();
+                }
+            })
+            .catch(function(){});
+    }, 5000); /* Cek setiap 5 detik */
+})();
+<?php endif ?>
 </script>
