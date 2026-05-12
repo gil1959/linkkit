@@ -49,16 +49,18 @@
                     </td>
                     <td>
                         <?php if($w->status === 'pending'): ?>
-                            <a href="<?= url('admin/shop-withdrawals/approve/' . $w->id . '?global_token=' . \Altum\Csrf::get('global_token')) ?>"
-                               class="btn btn-sm btn-success mr-1"
-                               onclick="return confirm('Setujui withdrawal ini?')">
-                                <i class="fas fa-check fa-sm"></i> Approve
-                            </a>
-                            <a href="<?= url('admin/shop-withdrawals/reject/' . $w->id . '?global_token=' . \Altum\Csrf::get('global_token')) ?>"
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('Tolak & kembalikan saldo ke user?')">
-                                <i class="fas fa-times fa-sm"></i> Reject
-                            </a>
+                            <form action="<?= url('admin/shop-withdrawals/approve/' . $w->id) ?>" method="post" style="display:inline-block;margin:0;">
+                                <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
+                                <button type="submit" class="btn btn-sm btn-success mr-1" onclick="return confirm('Setujui withdrawal ini?')">
+                                    <i class="fas fa-check fa-sm"></i> Approve
+                                </button>
+                            </form>
+                            <form action="<?= url('admin/shop-withdrawals/reject/' . $w->id) ?>" method="post" style="display:inline-block;margin:0;">
+                                <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tolak & kembalikan saldo ke user?')">
+                                    <i class="fas fa-times fa-sm"></i> Reject
+                                </button>
+                            </form>
                         <?php endif ?>
                     </td>
                 </tr>

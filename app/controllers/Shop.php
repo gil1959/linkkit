@@ -64,9 +64,15 @@ class Shop extends Controller {
             // Shop exists, display dashboard
             
             // Get basic shop stats
-            $total_income = database()->query("SELECT SUM(`grand_total`) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
+            $total_income = database()->query("SELECT SUM(`grand_total` - `service_fee`) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
             $total_transactions = database()->query("SELECT COUNT(*) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
             $total_pending_withdrawals = database()->query("SELECT SUM(`amount`) AS `total` FROM `shop_withdrawals` WHERE `user_id` = {$this->user->user_id} AND `status` = 'pending'")->fetch_object()->total ?? 0;
+
+            /* Fresh balance & verification status langsung dari DB (bukan dari session) */
+            $fresh_user_data = database()->query("SELECT `withdrawable_funds`, `pending_funds`, `verification_status` FROM `users` WHERE `user_id` = {$this->user->user_id}")->fetch_object();
+            $withdrawable_funds     = (float) ($fresh_user_data->withdrawable_funds ?? 0);
+            $pending_funds          = (float) ($fresh_user_data->pending_funds ?? 0);
+            $verification_status    = $fresh_user_data->verification_status ?? 'unverified';
             
             // Fetch Items
             $items_result = database()->query("SELECT * FROM `shop_items` WHERE `shop_id` = {$shop->id} ORDER BY `datetime` DESC");
@@ -77,10 +83,10 @@ class Shop extends Controller {
 
             // Fetch Orders/Transactions
             $orders_result = database()->query("
-                SELECT o.*, c.email, c.full_name, i.name as item_name 
+                SELECT o.*, c.email, c.full_name, c.phone, i.name as item_name, i.type as item_type 
                 FROM `shop_orders` o 
-                JOIN `shop_customers` c ON o.customer_id = c.id 
-                JOIN `shop_items` i ON o.item_id = i.id 
+                LEFT JOIN `shop_customers` c ON o.customer_id = c.id 
+                LEFT JOIN `shop_items` i ON o.item_id = i.id 
                 WHERE o.shop_id = {$shop->id} 
                 ORDER BY o.datetime DESC LIMIT 50
             ");
@@ -122,11 +128,21 @@ class Shop extends Controller {
             $webhook_events = [];
             while($row = $webhook_events_result->fetch_object()) { $webhook_events[] = $row; }
 
+            // Fetch Withdrawals
+            $withdrawals_result = database()->query("SELECT * FROM `shop_withdrawals` WHERE `user_id` = {$this->user->user_id} ORDER BY `datetime` DESC LIMIT 50");
+            $withdrawals = [];
+            while($row = $withdrawals_result->fetch_object()) {
+                $withdrawals[] = $row;
+            }
+
             $data = [
                 'shop'                     => $shop,
                 'total_income'             => $total_income,
                 'total_transactions'       => $total_transactions,
                 'total_pending_withdrawals'=> $total_pending_withdrawals,
+                'withdrawable_funds'       => $withdrawable_funds,
+                'pending_funds'            => $pending_funds,
+                'verification_status'      => $verification_status,
                 'items'                    => $items,
                 'orders'                   => $orders,
                 'vouchers'                 => $vouchers,
@@ -134,6 +150,7 @@ class Shop extends Controller {
                 'reviews'                  => $reviews,
                 'audience'                 => $audience,
                 'webhook_events'           => $webhook_events,
+                'withdrawals'              => $withdrawals,
             ];
 
             /* Set a custom title */

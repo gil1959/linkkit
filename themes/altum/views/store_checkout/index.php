@@ -32,6 +32,7 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
 .form-label .req{color:#ef4444}
 .form-control{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:.88rem;color:#1e293b;outline:none;transition:.2s;background:#fafafa;font-family:inherit}
 .form-control:focus{border-color:#6366f1;background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-control:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;border-color:#e2e8f0;opacity:1}
 .form-hint{font-size:.73rem;color:#94a3b8;margin-top:5px}
 
 /* ── payment methods ── */
@@ -130,10 +131,62 @@ input[type=radio].pm-radio{display:none}
                 </div>
             </div>
 
-            <!-- STEP 2: Payment Method -->
-            <div class="co-card">
+            <?php if($data->item->type === 'physical'): ?>
+            <!-- STEP 2: Shipping (Only Physical) -->
+            <div class="co-card" style="margin-bottom:20px">
                 <div class="co-card-head">
                     <div class="co-step-num">2</div>
+                    <h2 class="co-card-title">Pengiriman</h2>
+                </div>
+                <div class="co-card-body">
+                    <div class="form-group">
+                        <label class="form-label">Alamat Lengkap <span class="req">*</span></label>
+                        <textarea name="shipping_address" class="form-control" rows="3" required placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kode Pos"></textarea>
+                    </div>
+                    
+                    <div class="form-row" style="display:flex;gap:16px;margin-bottom:18px">
+                        <div class="form-group" style="flex:1;margin-bottom:0">
+                            <label class="form-label">Provinsi <span class="req">*</span></label>
+                            <select id="destProvince" class="form-control" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                            </select>
+                            <input type="hidden" name="shipping_province" id="shippingProvinceName" value="">
+                        </div>
+
+                        <div class="form-group" style="flex:1;margin-bottom:0">
+                            <label class="form-label">Kota Tujuan <span class="req">*</span></label>
+                            <select name="dest_city_id" id="destCity" class="form-control" required disabled>
+                                <option value="">-- Pilih Kota/Kabupaten --</option>
+                            </select>
+                            <input type="hidden" name="shipping_city" id="shippingCityName" value="">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Kurir Ekspedisi <span class="req">*</span></label>
+                        <select id="shippingCourier" class="form-control" required disabled onchange="loadShippingCosts()">
+                            <option value="">-- Pilih Kurir --</option>
+                            <option value="jne">JNE</option>
+                            <option value="tiki">TIKI</option>
+                            <option value="pos">POS Indonesia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="shippingServiceContainer" style="display:none">
+                        <label class="form-label">Layanan Pengiriman <span class="req">*</span></label>
+                        <div id="shippingServicesList" style="display:flex;flex-direction:column;gap:10px"></div>
+                        <input type="hidden" name="shipping_courier" id="selectedCourierInput" value="">
+                        <input type="hidden" name="shipping_service" id="selectedServiceInput" value="">
+                        <input type="hidden" name="shipping_cost" id="selectedCostInput" value="0">
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- STEP <?= $data->item->type === 'physical' ? '3' : '2' ?>: Payment Method -->
+            <div class="co-card">
+                <div class="co-card-head">
+                    <div class="co-step-num"><?= $data->item->type === 'physical' ? '3' : '2' ?></div>
                     <h2 class="co-card-title">Pilih Metode Pembayaran</h2>
                 </div>
                 <div class="co-card-body">
@@ -198,7 +251,7 @@ input[type=radio].pm-radio{display:none}
     <div class="co-summary">
         <div class="co-card">
             <div class="co-card-head">
-                <div class="co-step-num" style="background:#0ea5e9">📋</div>
+                <div class="co-step-num" style="background:#0ea5e9"><i class="fas fa-list-ul"></i></div>
                 <h2 class="co-card-title">Ringkasan Pesanan</h2>
             </div>
             <div class="co-card-body">
@@ -259,10 +312,17 @@ input[type=radio].pm-radio{display:none}
                     </div>
                 </div>
 
-                <div class="co-total-row">
-                    <span class="co-total-label">Total Bayar</span>
-                    <span class="co-total-val">Rp <?= number_format($data->item->price,0,',','.') ?></span>
-                </div>
+                        <?php if($data->item->type === 'physical'): ?>
+                        <div class="summary-row" id="summaryOngkirRow" style="display:none;margin-top:4px">
+                            <span>Ongkos Kirim (<span id="summaryCourierName"></span>)</span>
+                            <span id="summaryOngkirVal" style="color:#1e293b">Rp 0</span>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="summary-total">
+                            <span>Total Bayar</span>
+                            <span class="co-total-val" id="grandTotalLabel">Rp <?= number_format($data->item->price, 0, ',', '.') ?></span>
+                        </div>
 
                 <p style="text-align:center;font-size:.72rem;color:#94a3b8;margin:14px 0 0">
                     <i class="fas fa-shield-alt fa-sm" style="color:#16a34a"></i>
@@ -339,14 +399,14 @@ function applyVoucher() {
     fetch('<?= url('shop-voucher-validate') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params})
     .then(r=>r.json()).then(function(res){
         if(res.success) {
-            msg.innerHTML = '<span style="color:#16a34a">✓ ' + res.message + '</span>';
+            msg.innerHTML = '<span style="color:#16a34a"><i class="fas fa-check"></i> ' + res.message + '</span>';
             document.getElementById('voucherCodeHidden').value = code;
             document.getElementById('discountRow').style.display = 'flex';
             document.getElementById('discountVal').textContent = '-Rp ' + res.discount_amount.toLocaleString('id-ID');
             document.querySelector('.co-total-val').textContent = 'Rp ' + res.final_price.toLocaleString('id-ID');
             document.getElementById('voucherInput').style.borderColor = '#16a34a';
         } else {
-            msg.innerHTML = '<span style="color:#ef4444">✗ ' + res.message + '</span>';
+            msg.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times"></i> ' + res.message + '</span>';
             document.getElementById('voucherCodeHidden').value = '';
             document.getElementById('discountRow').style.display = 'none';
             document.querySelector('.co-total-val').textContent = 'Rp ' + BASE_PRICE.toLocaleString('id-ID');
@@ -354,4 +414,155 @@ function applyVoucher() {
         }
     }).catch(function(){ msg.innerHTML = '<span style="color:#ef4444">Gagal validasi</span>'; });
 }
+
+/* Shipping Logic */
+<?php if($data->item->type === 'physical'): ?>
+var SHOP_ORIGIN_CITY = <?= (int)($data->shop->origin_city_id ?? 0) ?>;
+var ITEM_WEIGHT      = <?= (int)($data->item->weight ?? 1000) ?>;
+var ITEM_BASE_PRICE  = BASE_PRICE;
+var CURRENT_DISCOUNT = 0;
+var CURRENT_ONGKIR   = 0;
+
+document.addEventListener('DOMContentLoaded', function(){
+    loadDestProvinces();
+    
+    document.getElementById('destProvince').addEventListener('change', function(){
+        document.getElementById('destCity').disabled = !this.value;
+        document.getElementById('shippingCourier').disabled = true;
+        document.getElementById('shippingCourier').value = '';
+        if(this.value) {
+            document.getElementById('shippingProvinceName').value = this.options[this.selectedIndex].text;
+            loadDestCities(this.value);
+        } else {
+            document.getElementById('shippingProvinceName').value = '';
+            document.getElementById('destCity').innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+        }
+    });
+
+    document.getElementById('destCity').addEventListener('change', function(){
+        document.getElementById('shippingCourier').disabled = !this.value;
+        if(this.value) {
+            document.getElementById('shippingCityName').value = this.options[this.selectedIndex].text;
+            if(document.getElementById('shippingCourier').value) {
+                loadShippingCosts();
+            }
+        } else {
+            document.getElementById('shippingCityName').value = '';
+        }
+    });
+});
+
+function loadDestProvinces() {
+    var select = document.getElementById('destProvince');
+    select.innerHTML = '<option value="">Loading provinsi...</option>';
+    fetch('<?= url('shop-ajax?action=ongkir_provinces') ?>')
+    .then(r=>r.json()).then(res=>{
+        if(res.success) {
+            select.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+            res.data.forEach(p => {
+                select.innerHTML += `<option value="${p.province_id}">${p.province}</option>`;
+            });
+        }
+    });
+}
+
+function loadDestCities(province_id) {
+    var select = document.getElementById('destCity');
+    select.innerHTML = '<option value="">Loading kota...</option>';
+    fetch('<?= url('shop-ajax?action=ongkir_cities&province_id=') ?>' + province_id)
+    .then(r=>r.json()).then(res=>{
+        if(res.success) {
+            select.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+            res.data.forEach(c => {
+                select.innerHTML += `<option value="${c.city_id}">${c.city_name}</option>`;
+            });
+        }
+    });
+}
+
+function loadShippingCosts() {
+    var dest    = document.getElementById('destCity').value;
+    var courier = document.getElementById('shippingCourier').value;
+    if(!dest || !courier) return;
+
+    var container = document.getElementById('shippingServiceContainer');
+    var list      = document.getElementById('shippingServicesList');
+    
+    container.style.display = 'block';
+    list.innerHTML = '<div style="font-size:.85rem;color:#64748b">Menghitung ongkir...</div>';
+    
+    // Reset inputs & total
+    document.getElementById('selectedCourierInput').value = '';
+    document.getElementById('selectedServiceInput').value = '';
+    document.getElementById('selectedCostInput').value = '0';
+    updateGrandTotal(0, '');
+
+    fetch(`<?= url('shop-ajax?action=ongkir_cost') ?>&origin=${SHOP_ORIGIN_CITY}&dest=${dest}&weight=${ITEM_WEIGHT}`)
+    .then(r=>r.json()).then(res=>{
+        if(res.success && res.data[courier] && res.data[courier].length > 0) {
+            list.innerHTML = '';
+            res.data[courier].forEach(svc => {
+                var cost = svc.cost[0].value;
+                var etd  = svc.cost[0].etd ? `(${svc.cost[0].etd} hari)` : '';
+                var id   = `svc_${courier}_${svc.service}`;
+                list.innerHTML += `
+                    <label style="display:flex;align-items:center;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;background:#fafafa;transition:.2s" onmouseover="this.style.borderColor='#6366f1'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e2e8f0'">
+                        <input type="radio" name="temp_service" value="${svc.service}" data-cost="${cost}" data-courier="${courier}" onchange="selectShippingService(this)" style="margin-right:12px;width:18px;height:18px">
+                        <div style="flex:1">
+                            <div style="font-weight:700;font-size:.88rem;color:#1e293b">${svc.service} <span style="font-weight:400;color:#64748b;font-size:.8rem">${etd}</span></div>
+                            <div style="font-size:.75rem;color:#94a3b8">${svc.description}</div>
+                        </div>
+                        <div style="font-weight:800;color:#4f46e5;font-size:.95rem">Rp ${cost.toLocaleString('id-ID')}</div>
+                    </label>
+                `;
+            });
+        } else {
+            list.innerHTML = '<div style="font-size:.85rem;color:#ef4444">Layanan tidak tersedia untuk rute ini.</div>';
+        }
+    }).catch(err => {
+        list.innerHTML = '<div style="font-size:.85rem;color:#ef4444">Gagal mengambil data ongkir.</div>';
+    });
+}
+
+function selectShippingService(radio) {
+    var cost = parseInt(radio.getAttribute('data-cost'));
+    var courier = radio.getAttribute('data-courier');
+    var service = radio.value;
+
+    document.getElementById('selectedCourierInput').value = courier;
+    document.getElementById('selectedServiceInput').value = service;
+    document.getElementById('selectedCostInput').value = cost;
+    
+    // style all labels
+    var labels = document.getElementById('shippingServicesList').querySelectorAll('label');
+    labels.forEach(l => {
+        l.style.borderColor = '#e2e8f0';
+        l.style.background  = '#fafafa';
+    });
+    radio.closest('label').style.borderColor = '#4f46e5';
+    radio.closest('label').style.background  = '#f0f0ff';
+
+    updateGrandTotal(cost, courier.toUpperCase());
+}
+
+function updateGrandTotal(shippingCost, courierName) {
+    CURRENT_ONGKIR = shippingCost;
+    var currentDiscountStr = document.getElementById('discountVal').textContent.replace(/[^0-9]/g, '');
+    CURRENT_DISCOUNT = currentDiscountStr ? parseInt(currentDiscountStr) : 0;
+    
+    var grandTotal = Math.max(0, ITEM_BASE_PRICE - CURRENT_DISCOUNT) + CURRENT_ONGKIR;
+    
+    // Update labels
+    document.getElementById('grandTotalLabel').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    
+    var row = document.getElementById('summaryOngkirRow');
+    if(CURRENT_ONGKIR > 0) {
+        row.style.display = 'flex';
+        document.getElementById('summaryCourierName').textContent = courierName;
+        document.getElementById('summaryOngkirVal').textContent = 'Rp ' + CURRENT_ONGKIR.toLocaleString('id-ID');
+    } else {
+        row.style.display = 'none';
+    }
+}
+<?php endif; ?>
 </script>

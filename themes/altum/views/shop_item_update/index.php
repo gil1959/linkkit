@@ -93,8 +93,9 @@
                             <select id="type" name="type" class="form-control">
                                 <option value="download_link" <?= $data->item->type == 'download_link' ? 'selected' : '' ?>>Download Link (File/URL)</option>
                                 <option value="webhook_event" <?= $data->item->type == 'webhook_event' ? 'selected' : '' ?>>Webhook Event</option>
-                                <option value="random_code" <?= $data->item->type == 'random_code' ? 'selected' : '' ?>>Random Code (Ticket/Event)</option>
-                                <option value="manual" <?= $data->item->type == 'manual' ? 'selected' : '' ?>>Manual Process</option>
+                                <option value="random_code"   <?= $data->item->type == 'random_code'   ? 'selected' : '' ?>>Random Code (Ticket/Event)</option>
+                                <option value="manual"        <?= $data->item->type == 'manual'        ? 'selected' : '' ?>>Manual Process</option>
+                                <option value="physical"      <?= $data->item->type == 'physical'      ? 'selected' : '' ?>>📦 Produk Fisik (Pengiriman)</option>
                             </select>
                         </div>
 
@@ -102,6 +103,40 @@
                             <label for="download_links">File Link (Google Drive, Dropbox, etc.)</label>
                             <input type="url" id="download_links" name="download_links" class="form-control" placeholder="https://" value="<?= htmlspecialchars($data->existing_download_link) ?>" />
                             <small class="text-muted mt-1 d-block">This link will be automatically sent to the buyer's email upon successful payment.</small>
+                        </div>
+
+                        <!-- Produk Fisik: berat & dimensi -->
+                        <div id="physical_fields_wrapper" style="<?= $data->item->type !== 'physical' ? 'display:none' : '' ?>">
+                            <div class="alert alert-info d-flex align-items-center" style="font-size:.85rem;padding:.6rem 1rem">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Produk fisik dikirim via <strong>JNE, TIKI, atau POS Indonesia</strong>. Ongkos kirim dihitung otomatis saat checkout.
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="weight">Berat Produk (gram) <span class="text-danger">*</span></label>
+                                        <input type="number" id="weight" name="weight" class="form-control" min="1" placeholder="500" value="<?= htmlspecialchars($data->item->weight ?? '') ?>" />
+                                        <small class="text-muted">Termasuk berat kemasan</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="d-block">Dimensi (cm) — Opsional</label>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <input type="number" name="length" class="form-control" placeholder="P" min="0" value="<?= htmlspecialchars($data->item->length ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Panjang</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="width" class="form-control" placeholder="L" min="0" value="<?= htmlspecialchars($data->item->width ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Lebar</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="height" class="form-control" placeholder="T" min="0" value="<?= htmlspecialchars($data->item->height ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Tinggi</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -264,9 +299,16 @@
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <script>
-document.getElementById('type').addEventListener('change', function() {
-    document.getElementById('download_links_wrapper').style.display = this.value === 'download_link' ? 'block' : 'none';
-});
+// Product type toggle
+function toggleProductTypeFields(type) {
+    document.getElementById('download_links_wrapper').style.display  = (type === 'download_link') ? 'block' : 'none';
+    document.getElementById('physical_fields_wrapper').style.display = (type === 'physical')       ? 'block' : 'none';
+    var weightInput = document.getElementById('weight');
+    if(weightInput) weightInput.required = (type === 'physical');
+}
+var typeSelect = document.getElementById('type');
+typeSelect.addEventListener('change', function() { toggleProductTypeFields(this.value); });
+toggleProductTypeFields(typeSelect.value);
 
 function previewImage(input, previewId) {
     if(input.files && input.files[0]) {
@@ -295,9 +337,7 @@ var quill = new Quill('#description_editor', {
 // Load existing description HTML into editor
 (function() {
     var existing = <?= json_encode($data->item->description ?? '') ?>;
-    if(existing) {
-        quill.root.innerHTML = existing;
-    }
+    if(existing) { quill.root.innerHTML = existing; }
 })();
 
 // On submit: copy editor HTML → hidden input
@@ -306,4 +346,5 @@ document.querySelector('form').addEventListener('submit', function() {
     if(html === '<p><br></p>') html = '';
     document.getElementById('description').value = html;
 });
+
 </script>

@@ -44,7 +44,11 @@
                 </li>
 
                 <li class="<?= \Altum\Router::$controller == 'Shop' ? 'active' : null ?>">
-                    <a href="<?= url('shop') ?>"><i class="fas fa-fw fa-sm fa-shopping-cart mr-2"></i> <?= l('shop.menu') ?? 'Shop' ?></a>
+                    <a href="<?= url('shop') ?>"><i class="fas fa-fw fa-sm fa-store mr-2"></i> <?= l('shop.menu') ?? 'Toko Saya' ?></a>
+                </li>
+
+                <li class="<?= \Altum\Router::$controller == 'ShopOrders' ? 'active' : null ?>">
+                    <a href="<?= url('shop-orders') ?>"><i class="fas fa-fw fa-sm fa-shopping-bag mr-2"></i> Pesanan Saya</a>
                 </li>
 
                 <?php if(settings()->links->biolinks_is_enabled): ?>

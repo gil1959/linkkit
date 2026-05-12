@@ -47,6 +47,9 @@
                 <a class="nav-link" data-toggle="tab" href="#transaction" role="tab">Transaction</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#withdrawals" role="tab">Withdrawals</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#webhook_events" role="tab">Webhook Events</a>
             </li>
             <li class="nav-item">
@@ -58,6 +61,32 @@
 
 <section class="container pt-4">
     <?= \Altum\Alerts::output_alerts() ?>
+
+    <?php if(($data->verification_status ?? 'unverified') !== 'verified'): ?>
+    <div class="alert d-flex align-items-center justify-content-between mb-4 p-3" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1.5px solid #fde68a;border-radius:14px">
+        <div class="d-flex align-items-center">
+            <div style="width:36px;height:36px;border-radius:10px;background:#fde68a;display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0">
+                <i class="fas fa-shield-alt" style="color:#92400e"></i>
+            </div>
+            <div>
+                <?php if(($data->verification_status ?? 'unverified') === 'pending'): ?>
+                    <strong style="color:#92400e">Verifikasi sedang diproses.</strong>
+                    <span style="font-size:.85rem;color:#78350f"> Admin akan mereview dokumenmu. Pencairan dana aktif setelah disetujui.</span>
+                <?php elseif(($data->verification_status ?? 'unverified') === 'rejected'): ?>
+                    <strong style="color:#991b1b">Verifikasi ditolak.</strong>
+                    <span style="font-size:.85rem;color:#7f1d1d"> Perbaiki dokumenmu dan upload ulang.</span>
+                <?php else: ?>
+                    <strong style="color:#92400e">Lengkapi Verifikasi KTP</strong>
+                    <span style="font-size:.85rem;color:#78350f"> untuk mengaktifkan pencairan dana saldo toko.</span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <button onclick="document.querySelector('[href=\'#shop_settings\']').click();" class="btn btn-sm font-weight-bold ml-3" style="background:#f59e0b;color:#fff;border-radius:10px;white-space:nowrap;border:none">
+            <i class="fas fa-id-card fa-sm mr-1"></i>
+            <?= ($data->verification_status ?? 'unverified') === 'pending' ? 'Lihat Status' : 'Verifikasi Sekarang' ?> <i class="fas fa-arrow-right fa-sm ml-1"></i>
+        </button>
+    </div>
+    <?php endif; ?>
 
     <div class="tab-content">
         <!-- Summary Tab -->
@@ -368,20 +397,30 @@
                     <div class="h4">Rp <?= number_format($data->total_income, 0, ',', '.') ?></div>
                 </div>
                 <div class="col-4 border-right">
-                    <div class="text-muted">Withdrawable funds</div>
-                    <div class="h4">Rp <?= number_format($this->user->withdrawable_funds ?? 0, 0, ',', '.') ?></div>
+                    <div class="text-muted">Saldo Tersedia</div>
+                    <div class="h4 text-success">Rp <?= number_format($data->withdrawable_funds ?? 0, 0, ',', '.') ?></div>
+                    <?php if(($data->pending_funds ?? 0) > 0): ?>
+                    <small class="text-muted"><i class="fas fa-clock fa-xs mr-1"></i>Pending: Rp <?= number_format($data->pending_funds, 0, ',', '.') ?></small>
+                    <?php endif; ?>
                 </div>
                 <div class="col-4">
                     <div class="text-muted">Pending Withdrawal</div>
                     <div class="h4 text-warning">Rp <?= number_format($data->total_pending_withdrawals ?? 0, 0, ',', '.') ?></div>
-                    <small class="text-muted">Processed in 3-5 days</small>
+                    <small class="text-muted">Diproses 3-5 hari</small>
                 </div>
             </div>
             
             <div class="mb-4 d-flex align-items-center">
-                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#withdraw_modal">
-                    <i class="fas fa-money-bill-wave fa-sm mr-1"></i> Withdraw Funds
-                </button>
+                <?php if(($data->verification_status ?? 'unverified') !== 'verified'): ?>
+                    <!-- Belum verified: tombol buka popup/redirect -->
+                    <button type="button" class="btn btn-success" onclick="showVerifGate()">
+                        <i class="fas fa-money-bill-wave fa-sm mr-1"></i> Withdraw Funds
+                    </button>
+                <?php else: ?>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#withdraw_modal">
+                        <i class="fas fa-money-bill-wave fa-sm mr-1"></i> Withdraw Funds
+                    </button>
+                <?php endif; ?>
                 <small class="text-muted ml-3"><i class="fas fa-info-circle mr-1"></i>Proses pencairan memakan waktu 3-5 hari kerja.</small>
             </div>
 
@@ -398,15 +437,24 @@
                                 <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>" />
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Penarikan akan diproses dalam <strong>3-5 hari kerja</strong> dan akan ditinjau oleh admin sebelum dikirim ke rekening Anda.
+                                    Penarikan akan diproses dalam <strong>3-5 hari kerja</strong> dan ditinjau admin sebelum dikirim ke rekening Anda.
                                 </div>
                                 <div class="card bg-light mb-3">
                                     <div class="card-body py-2">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted">Saldo tersedia</span>
-                                            <strong class="text-success h5 mb-0">Rp <?= number_format($this->user->withdrawable_funds ?? 0, 0, ',', '.') ?></strong>
+                                            <strong class="text-success h5 mb-0">Rp <?= number_format($data->withdrawable_funds ?? 0, 0, ',', '.') ?></strong>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-bold" style="font-size:.85rem">Jumlah Penarikan (Rp)</label>
+                                    <input type="number" name="amount" class="form-control"
+                                           min="50000"
+                                           max="<?= (int)($data->withdrawable_funds ?? 0) ?>"
+                                           value="<?= (int)($data->withdrawable_funds ?? 0) ?>"
+                                           required placeholder="Min Rp 50.000">
+                                    <small class="text-muted">Minimum penarikan Rp 50.000</small>
                                 </div>
                                 <?php $bank = database()->query("SELECT * FROM `shop_bank_accounts` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null ?>
                                 <?php if($bank): ?>
@@ -420,13 +468,13 @@
                                 <?php else: ?>
                                     <div class="alert alert-warning">
                                         <i class="fas fa-exclamation-triangle mr-2"></i>
-                                        Belum ada rekening bank. Tambahkan di tab <strong>Shop Settings &rarr; Bank Account</strong> terlebih dahulu.
+                                        Belum ada rekening bank. Tambahkan di tab <strong>Shop Settings &rarr; Bank Account</strong>.
                                     </div>
                                 <?php endif ?>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-success" <?= (!$bank || $this->user->withdrawable_funds <= 0) ? 'disabled' : '' ?>>
+                                <button type="submit" class="btn btn-success" <?= (!$bank || ($data->withdrawable_funds ?? 0) < 50000) ? 'disabled' : '' ?>>
                                     <i class="fas fa-paper-plane fa-sm mr-1"></i> Ajukan Penarikan
                                 </button>
                             </div>
@@ -439,52 +487,413 @@
                 <table class="table table-custom">
                     <thead>
                     <tr>
-                        <th>Invoice</th>
-                        <th>Customer</th>
-                        <th>Item</th>
-                        <th>Total</th>
-                        <th>Fee</th>
-                        <th>Date</th>
+                        <th>Invoice / Tgl</th>
+                        <th>Pembeli</th>
+                        <th>Produk</th>
+                        <th>Total Bayar</th>
                         <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                     </thead>
                     <tbody>
                         <?php if(count($data->orders) > 0): ?>
                             <?php foreach($data->orders as $order): ?>
                                 <tr>
-                                    <td><?= $order->invoice_number ?></td>
                                     <td>
-                                        <div><?= htmlspecialchars($order->full_name) ?></div>
-                                        <small class="text-muted"><?= htmlspecialchars($order->email) ?></small>
+                                        <div style="font-family:monospace;font-size:.85rem;color:#4f46e5;font-weight:600"><?= htmlspecialchars($order->invoice_number) ?></div>
+                                        <small class="text-muted"><?= date('d M Y, H:i', strtotime($order->datetime)) ?></small>
                                     </td>
-                                    <td><?= htmlspecialchars($order->item_name) ?></td>
-                                    <td>Rp <?= number_format($order->grand_total, 0, ',', '.') ?></td>
-                                    <td>Rp <?= number_format($order->service_fee, 0, ',', '.') ?></td>
-                                    <td><?= \Altum\Date::get($order->datetime, 1) ?></td>
                                     <td>
-                                        <?php if($order->status == 'paid'): ?>
-                                            <span class="badge badge-success">Paid</span>
-                                        <?php elseif($order->status == 'pending'): ?>
-                                            <span class="badge badge-warning">Pending</span>
+                                        <div style="font-weight:600;font-size:.85rem"><?= htmlspecialchars($order->full_name ?? 'Data Terhapus') ?></div>
+                                        <div style="font-size:.75rem;color:#64748b"><?= htmlspecialchars($order->email ?? 'N/A') ?></div>
+                                        <?php if(!empty($order->phone)): ?>
+                                            <div style="font-size:.75rem;color:#059669"><i class="fab fa-whatsapp"></i> <?= htmlspecialchars($order->phone) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:600;font-size:.85rem"><?= htmlspecialchars($order->item_name ?? 'Produk Dihapus') ?></div>
+                                        <span class="badge badge-light" style="font-size:.7rem"><?= ucwords(str_replace('_',' ', $order->item_type ?? 'unknown')) ?></span>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:700;font-size:.85rem">Rp <?= number_format($order->grand_total, 0, ',', '.') ?></div>
+                                        <div style="font-size:.7rem;color:#94a3b8">Fee: Rp <?= number_format($order->service_fee, 0, ',', '.') ?></div>
+                                    </td>
+                                    <td>
+                                        <?php if($order->status === 'paid'): ?>
+                                            <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Paid</span>
+                                        <?php elseif($order->status === 'pending'): ?>
+                                            <span class="badge badge-warning"><i class="fas fa-clock mr-1"></i> Pending</span>
                                         <?php else: ?>
                                             <span class="badge badge-danger"><?= ucfirst($order->status) ?></span>
                                         <?php endif ?>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start">
+                                            <button class="btn btn-sm btn-light" style="font-size:.75rem;padding:4px 8px" onclick="openOrderDetail(<?= htmlspecialchars(json_encode([
+                                                'invoice' => $order->invoice_number,
+                                                'date' => date('d M Y, H:i', strtotime($order->datetime)),
+                                                'buyer_name' => $order->full_name,
+                                                'buyer_email' => $order->email,
+                                                'buyer_phone' => $order->phone ?? '',
+                                                'item_name' => $order->item_name,
+                                                'item_type' => $order->item_type ?? '',
+                                                'qty' => $order->qty,
+                                                'grand_total' => $order->grand_total,
+                                                'service_fee' => $order->service_fee,
+                                                'discount_amount' => $order->discount_amount ?? 0,
+                                                'shipping_cost' => $order->shipping_cost ?? 0,
+                                                'shipping_address' => $order->shipping_address ?? '',
+                                                'shipping_courier' => $order->shipping_courier ?? '',
+                                                'shipping_service' => $order->shipping_service ?? '',
+                                                'tracking_number' => $order->tracking_number ?? '',
+                                                'status' => $order->status
+                                            ])) ?>)">
+                                                <i class="fas fa-eye text-primary"></i> Detail
+                                            </button>
+
+                                            <?php if(($order->item_type ?? '') === 'physical' && $order->status === 'paid'): ?>
+                                                <?php if(empty($order->tracking_number)): ?>
+                                                    <button class="btn btn-sm btn-primary" style="font-size:.75rem;padding:4px 8px" onclick="openResiModal(<?= htmlspecialchars(json_encode([
+                                                        'id' => $order->id,
+                                                        'invoice' => $order->invoice_number,
+                                                        'courier' => $order->shipping_courier,
+                                                        'service' => $order->shipping_service,
+                                                        'address' => $order->shipping_address
+                                                    ])) ?>)">
+                                                        <i class="fas fa-truck"></i> Kirim (Resi)
+                                                    </button>
+                                                <?php else: ?>
+                                                    <div style="font-size:.75rem;color:#1e293b;margin-bottom:2px">
+                                                        <i class="fas fa-truck text-muted"></i> <strong><?= strtoupper(htmlspecialchars($order->shipping_courier ?? '')) ?></strong> <?= htmlspecialchars($order->shipping_service ?? '') ?>
+                                                    </div>
+                                                    <code style="font-size:.8rem;color:#059669;background:#d1fae5;padding:2px 6px;border-radius:4px"><?= htmlspecialchars($order->tracking_number) ?></code>
+                                                    <div style="margin-top:4px">
+                                                        <span class="badge badge-<?= $order->shipping_status === 'delivered' ? 'success' : 'info' ?>"><i class="fas fa-box-open mr-1"></i> <?= ucfirst($order->shipping_status) ?></span>
+                                                        <button class="btn btn-xs btn-outline-secondary ml-1" onclick="openResiModal(<?= htmlspecialchars(json_encode([
+                                                            'id' => $order->id,
+                                                            'invoice' => $order->invoice_number,
+                                                            'courier' => $order->shipping_courier,
+                                                            'service' => $order->shipping_service,
+                                                            'address' => $order->shipping_address,
+                                                            'tracking' => $order->tracking_number,
+                                                            's_status' => $order->shipping_status
+                                                        ])) ?>)"><i class="fas fa-edit"></i></button>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <i class="fas fa-info-circle text-muted mb-2 fa-2x"></i>
-                                    <h5 class="text-muted">Nothing here...</h5>
-                                    <p class="text-muted mb-0">No data found or query doesn't exists</p>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-inbox text-muted mb-2 fa-2x d-block"></i>
+                                    <h5 class="text-muted">Belum ada pesanan</h5>
                                 </td>
                             </tr>
                         <?php endif ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Resi Modal -->
+            <div class="modal fade" id="resi_modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-truck mr-2 text-primary"></i> Update Resi Pengiriman</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <form id="resi_form" onsubmit="event.preventDefault();submitResi()">
+                            <div class="modal-body">
+                                <div class="alert alert-info" style="font-size:.85rem">
+                                    <strong><i class="fas fa-info-circle mr-1"></i> Info:</strong> Memperbarui resi akan memperbarui status pesanan. Anda bisa langsung mengirimkan notifikasi via WhatsApp.
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded mb-3" style="font-size:.85rem">
+                                    <div class="mb-1"><span class="text-muted">Invoice:</span> <strong id="resi_inv"></strong></div>
+                                    <div class="mb-1"><span class="text-muted">Kurir:</span> <strong id="resi_courier" class="text-uppercase"></strong> - <span id="resi_service"></span></div>
+                                    <div><span class="text-muted d-block mb-1">Alamat Pengiriman:</span> <div id="resi_address" style="background:#fff;padding:8px;border:1px solid #e2e8f0;border-radius:6px;color:#1e293b"></div></div>
+                                </div>
+
+                                <input type="hidden" id="resi_order_id" name="order_id">
+                                
+                                <div class="form-group">
+                                    <label>Nomor Resi <span class="text-danger">*</span></label>
+                                    <input type="text" id="resi_tracking_number" name="tracking_number" class="form-control" required placeholder="Masukkan nomor resi yang valid">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Status Pengiriman</label>
+                                    <select id="resi_shipping_status" name="shipping_status" class="form-control">
+                                        <option value="shipped">Sedang Dikirim (Shipped)</option>
+                                        <option value="delivered">Telah Diterima (Delivered)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary" id="btnSubmitResi"><i class="fab fa-whatsapp mr-1"></i> Simpan & Kirim via WA</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Pesanan Modal -->
+            <div class="modal fade" id="order_detail_modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title font-weight-bold"><i class="fas fa-receipt text-primary mr-1"></i> Rincian Pesanan</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="font-size:.85rem;">
+                            <div class="mb-3 d-flex justify-content-between">
+                                <div>
+                                    <span class="text-muted d-block" style="font-size:.75rem">Invoice</span>
+                                    <strong id="det_invoice" class="text-primary" style="font-family:monospace"></strong>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-muted d-block" style="font-size:.75rem">Tanggal</span>
+                                    <span id="det_date"></span>
+                                </div>
+                            </div>
+                            
+                            <h6 class="border-bottom pb-2 mb-2 font-weight-bold">Informasi Pembeli</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user text-muted mr-2" style="width:16px"></i>
+                                <span id="det_name" class="font-weight-bold"></span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div>
+                                    <i class="fas fa-envelope text-muted mr-2" style="width:16px"></i>
+                                    <span id="det_email"></span>
+                                </div>
+                                <a id="btn_email" href="#" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.75rem"><i class="fas fa-paper-plane mr-1"></i> Hubungi</a>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <i class="fab fa-whatsapp text-success mr-2" style="width:16px"></i>
+                                    <span id="det_phone"></span>
+                                </div>
+                                <a id="btn_wa" href="#" target="_blank" class="btn btn-sm btn-success py-0 px-2" style="font-size:.75rem"><i class="fab fa-whatsapp mr-1"></i> Hubungi Customer</a>
+                            </div>
+                            
+                            <h6 class="border-bottom pb-2 mb-2 font-weight-bold">Produk</h6>
+                            <div class="d-flex justify-content-between mb-1">
+                                <div><strong id="det_item_name"></strong> <span id="det_item_type" class="badge badge-light ml-1"></span></div>
+                                <div>x <span id="det_qty"></span></div>
+                            </div>
+
+                            <div id="det_shipping_wrap" style="display:none;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);margin-top:10px;margin-bottom:10px" class="bg-light">
+                                <span class="d-block font-weight-bold text-muted mb-1" style="font-size:.75rem">PENGIRIMAN</span>
+                                <div class="mb-1"><i class="fas fa-truck text-primary mr-1"></i> <strong id="det_courier" class="text-uppercase"></strong> - <span id="det_service"></span></div>
+                                <div id="det_tracking_wrap" class="mb-1 text-success font-weight-bold" style="display:none"><i class="fas fa-barcode mr-1"></i> Resi: <span id="det_tracking"></span></div>
+                                <div class="mt-2 text-muted" style="line-height:1.4;white-space:pre-wrap"><i class="fas fa-map-marker-alt text-danger mr-1"></i><span id="det_address"></span></div>
+                            </div>
+
+                            <h6 class="border-bottom pb-2 mb-2 mt-3 font-weight-bold">Rincian Harga</h6>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Subtotal Produk</span>
+                                <span id="det_subtotal"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Ongkos Kirim</span>
+                                <span id="det_shipping_cost"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1 text-success" id="det_discount_wrap">
+                                <span>Diskon Voucher</span>
+                                <span id="det_discount"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                                <strong>Total Bayar</strong>
+                                <strong id="det_grand_total" class="text-primary" style="font-size:1.1rem"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            function openOrderDetail(data) {
+                document.getElementById('det_invoice').textContent = data.invoice;
+                document.getElementById('det_date').textContent = data.date;
+                document.getElementById('det_name').textContent = data.buyer_name;
+                document.getElementById('det_email').textContent = data.buyer_email;
+                document.getElementById('det_phone').textContent = data.buyer_phone || '-';
+                
+                document.getElementById('btn_email').href = "mailto:" + data.buyer_email;
+                if(data.buyer_phone) {
+                    var waNum = data.buyer_phone.replace(/[^0-9]/g, '');
+                    if(waNum.startsWith('0')) waNum = '62' + waNum.substring(1);
+                    document.getElementById('btn_wa').href = "https://wa.me/" + waNum;
+                    document.getElementById('btn_wa').style.display = 'inline-block';
+                } else {
+                    document.getElementById('btn_wa').style.display = 'none';
+                }
+
+                document.getElementById('det_item_name').textContent = data.item_name;
+                var tType = data.item_type === 'physical' ? 'Produk Fisik' : data.item_type.replace(/_/g, ' ').toUpperCase();
+                document.getElementById('det_item_type').textContent = tType;
+                document.getElementById('det_qty').textContent = data.qty;
+
+                var subtotal = data.grand_total - data.shipping_cost + data.discount_amount;
+                document.getElementById('det_subtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+                document.getElementById('det_shipping_cost').textContent = 'Rp ' + data.shipping_cost.toLocaleString('id-ID');
+                
+                if(data.discount_amount > 0) {
+                    document.getElementById('det_discount_wrap').style.display = 'flex';
+                    document.getElementById('det_discount').textContent = '-Rp ' + data.discount_amount.toLocaleString('id-ID');
+                } else {
+                    document.getElementById('det_discount_wrap').style.display = 'none';
+                }
+                document.getElementById('det_grand_total').textContent = 'Rp ' + data.grand_total.toLocaleString('id-ID');
+
+                if(data.item_type === 'physical') {
+                    document.getElementById('det_shipping_wrap').style.display = 'block';
+                    document.getElementById('det_courier').textContent = data.shipping_courier;
+                    document.getElementById('det_service').textContent = data.shipping_service;
+                    document.getElementById('det_address').textContent = data.shipping_address;
+                    if(data.tracking_number) {
+                        document.getElementById('det_tracking_wrap').style.display = 'block';
+                        document.getElementById('det_tracking').textContent = data.tracking_number;
+                    } else {
+                        document.getElementById('det_tracking_wrap').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('det_shipping_wrap').style.display = 'none';
+                }
+
+                $('#order_detail_modal').modal('show');
+            }
+
+            function openResiModal(data) {
+                document.getElementById('resi_order_id').value = data.id;
+                document.getElementById('resi_inv').textContent = data.invoice;
+                document.getElementById('resi_courier').textContent = data.courier || '-';
+                document.getElementById('resi_service').textContent = data.service || '-';
+                document.getElementById('resi_address').innerHTML = (data.address || '-').replace(/\n/g, '<br>');
+                
+                document.getElementById('resi_tracking_number').value = data.tracking || '';
+                document.getElementById('resi_shipping_status').value = data.s_status || 'shipped';
+                
+                $('#resi_modal').modal('show');
+            }
+
+            function submitResi() {
+                var btn = document.getElementById('btnSubmitResi');
+                var originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...';
+                btn.disabled = true;
+
+                var params = new URLSearchParams({
+                    order_id: document.getElementById('resi_order_id').value,
+                    tracking_number: document.getElementById('resi_tracking_number').value,
+                    shipping_status: document.getElementById('resi_shipping_status').value,
+                    token: '<?= \Altum\Csrf::get() ?>'
+                });
+
+                fetch('<?= url('shop-ajax?action=update_tracking') ?>', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: params
+                })
+                .then(r => r.json())
+                .then(res => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    if(res.success) {
+                        $('#resi_modal').modal('hide');
+                        if(res.wa_url) {
+                            window.open(res.wa_url, '_blank');
+                        } else {
+                            alert(res.message);
+                        }
+                        window.location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }).catch(e => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('Terjadi kesalahan jaringan.');
+                });
+            }
+            </script>
         </div>
+        <!-- WITHDRAWALS TAB -->
+        <div class="tab-pane fade" id="withdrawals" role="tabpanel">
+            <div class="d-flex align-items-center mb-4">
+                <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0;">
+                    <i class="fas fa-money-bill-wave text-white"></i>
+                </div>
+                <div>
+                    <h2 class="h5 mb-0 font-weight-bold">Riwayat Penarikan Dana</h2>
+                    <small class="text-muted">Pantau status pencairan saldo toko kamu</small>
+                </div>
+            </div>
+
+            <div class="table-responsive table-custom-container">
+                <table class="table table-custom">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Jumlah</th>
+                        <th>Rekening Tujuan</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(count($data->withdrawals ?? []) > 0): ?>
+                            <?php foreach($data->withdrawals as $wd): ?>
+                                <tr>
+                                    <td class="text-muted">#<?= $wd->id ?></td>
+                                    <td>
+                                        <div style="font-weight:700;font-size:.9rem;color:#059669">Rp <?= number_format($wd->amount, 0, ',', '.') ?></div>
+                                    </td>
+                                    <td>
+                                        <?php if(!empty($wd->bank_name)): ?>
+                                            <div style="font-weight:600;font-size:.85rem"><?= htmlspecialchars($wd->bank_name) ?></div>
+                                            <div style="font-size:.75rem;color:#64748b"><?= htmlspecialchars($wd->account_number) ?> &bull; <?= htmlspecialchars($wd->account_name) ?></div>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:.85rem"><?= date('d M Y', strtotime($wd->datetime)) ?></div>
+                                        <div style="font-size:.75rem;color:#64748b"><?= date('H:i', strtotime($wd->datetime)) ?></div>
+                                    </td>
+                                    <td>
+                                        <?php if($wd->status === 'pending'): ?>
+                                            <span class="badge badge-warning"><i class="fas fa-clock mr-1"></i> Sedang Diproses</span>
+                                        <?php elseif($wd->status === 'paid'): ?>
+                                            <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Berhasil Transfer</span>
+                                        <?php elseif($wd->status === 'rejected'): ?>
+                                            <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-secondary"><?= ucfirst($wd->status) ?></span>
+                                        <?php endif ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="fas fa-wallet text-muted mb-2 fa-2x d-block"></i>
+                                    <h5 class="text-muted">Belum ada riwayat penarikan</h5>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- WEBHOOK EVENTS TAB -->
         <div class="tab-pane fade" id="webhook_events" role="tabpanel">
 
@@ -629,6 +1038,85 @@
             $bank_account = database()->query("SELECT * FROM `shop_bank_accounts` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null;
             $notification_settings = json_decode($data->shop->notification_settings ?? '{}', true);
             ?>
+
+            <!-- Verifikasi Identitas -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-id-card mr-2"></i> Verifikasi Identitas Seller</h5>
+                </div>
+                <div class="card-body">
+                    <?php $vs = $data->verification_status ?? 'unverified'; ?>
+                    
+                    <?php if($vs === 'verified'): ?>
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check-circle mr-2"></i> <strong>Terverifikasi.</strong> Identitas kamu sudah terverifikasi. Kamu dapat melakukan pencairan dana kapan saja.
+                        </div>
+                    <?php elseif($vs === 'pending'): ?>
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-clock mr-2"></i> <strong>Sedang Direview.</strong> Dokumen kamu sedang direview oleh admin (1-3 hari kerja).
+                        </div>
+                    <?php elseif($vs === 'rejected' || $vs === 'unverified'): ?>
+                        <?php if($vs === 'rejected'): ?>
+                            <div class="alert alert-danger mb-4">
+                                <i class="fas fa-times-circle mr-2"></i> <strong>Ditolak.</strong> Verifikasi sebelumnya ditolak. Silakan perbaiki dokumen dan upload ulang.
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle mr-2"></i> <strong>Belum Verifikasi.</strong> Silakan lengkapi verifikasi identitas (KTP) untuk mengaktifkan fitur pencairan dana.
+                            </div>
+                        <?php endif; ?>
+
+                        <form action="<?= url('shop-verification') ?>" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
+                            
+                            <div class="form-group">
+                                <label for="full_name"><i class="fas fa-user mr-1"></i> Nama Lengkap (Sesuai KTP) <span class="text-danger">*</span></label>
+                                <input type="text" id="full_name" name="full_name" class="form-control" required placeholder="Masukkan nama lengkap">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nik"><i class="fas fa-id-badge mr-1"></i> Nomor Induk Kependudukan (NIK) <span class="text-danger">*</span></label>
+                                <input type="text" id="nik" name="nik" class="form-control" required minlength="16" maxlength="16" pattern="[0-9]{16}" placeholder="16 Digit NIK">
+                                <small class="form-text text-muted">Hanya masukkan 16 digit angka NIK tanpa spasi.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-image mr-1"></i> Foto KTP <span class="text-danger">*</span></label>
+                                <!-- KTP Preview Dropzone -->
+                                <div style="position:relative;width:100%;padding-top:56.25%;background:var(--gray-100, #f3f4f6);border-radius:10px;overflow:hidden;border:2px dashed var(--gray-300, #d1d5db);margin-bottom:8px;cursor:pointer;" onclick="document.getElementById('ktp_image').click()" id="ktp_dropzone">
+                                    <img id="ktp_preview" src="" alt="KTP" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+                                    <div id="ktp_placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+                                        <i class="fas fa-id-card" style="font-size:2rem;color:#9ca3af;"></i>
+                                        <span style="font-size:.82rem;font-weight:500;">Klik untuk pilih foto KTP</span>
+                                        <span style="font-size:.74rem;color:#9ca3af;">JPG / PNG / WEBP, maks. 5 MB</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="ktp_image" name="ktp_image" accept="image/*" required style="display:none;"
+                                       onchange="previewShopImage(this,'ktp_preview','ktp_placeholder')">
+                                <small class="form-text text-muted">Pastikan foto KTP jelas, terang, dan semua tulisan terbaca.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-camera mr-1"></i> Foto Selfie dengan KTP <span class="text-danger">*</span></label>
+                                <!-- Selfie Preview Dropzone -->
+                                <div style="position:relative;width:100%;padding-top:56.25%;background:var(--gray-100, #f3f4f6);border-radius:10px;overflow:hidden;border:2px dashed var(--gray-300, #d1d5db);margin-bottom:8px;cursor:pointer;" onclick="document.getElementById('selfie_image').click()" id="selfie_dropzone">
+                                    <img id="selfie_preview" src="" alt="Selfie" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+                                    <div id="selfie_placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+                                        <i class="fas fa-camera" style="font-size:2rem;color:#9ca3af;"></i>
+                                        <span style="font-size:.82rem;font-weight:500;">Klik untuk pilih foto selfie</span>
+                                        <span style="font-size:.74rem;color:#9ca3af;">Wajah + KTP dalam satu foto</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="selfie_image" name="selfie_image" accept="image/*" required style="display:none;"
+                                       onchange="previewShopImage(this,'selfie_preview','selfie_placeholder')">
+                                <small class="form-text text-muted">Pegang KTP di dekat wajah kamu. Pastikan wajah dan KTP tidak terpotong.</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane mr-1"></i> Kirim Verifikasi</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <!-- Shop Info -->
             <form action="<?= url('shop-settings-update') ?>" method="post" enctype="multipart/form-data" class="mb-5">
@@ -811,9 +1299,122 @@
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save fa-sm mr-1"></i> Save Notifications</button>
             </form>
+
+            <!-- ── Alamat Asal Pengiriman (Produk Fisik) ── -->
+            <form action="<?= url('shop-settings-update') ?>" method="post" id="origin_city_form" class="mb-3">
+                <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>" />
+                <input type="hidden" name="section" value="origin_city" />
+                <input type="hidden" name="origin_city_id"   id="origin_city_id_input"   value="<?= htmlspecialchars($data->shop->origin_city_id ?? '') ?>">
+                <input type="hidden" name="origin_city_name" id="origin_city_name_input" value="<?= htmlspecialchars($data->shop->origin_city_name ?? '') ?>">
+                <input type="hidden" name="origin_province"  id="origin_province_input"  value="<?= htmlspecialchars($data->shop->origin_province ?? '') ?>">
+
+                <h5 class="mb-1 border-bottom pb-2" id="shop_settings_origin">
+                    <i class="fas fa-map-marker-alt fa-sm text-success mr-2"></i> Alamat Asal Pengiriman
+                </h5>
+                <small class="text-muted d-block mb-3">Digunakan untuk menghitung ongkos kirim produk fisik via RajaOngkir.</small>
+
+                <?php if(!empty($data->shop->origin_city_name)): ?>
+                <div class="alert alert-success d-flex align-items-center py-2 mb-3">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>Kota asal saat ini: <strong><?= htmlspecialchars($data->shop->origin_province) ?> — <?= htmlspecialchars($data->shop->origin_city_name) ?></strong></span>
+                </div>
+                <?php else: ?>
+                <div class="alert alert-warning d-flex align-items-center py-2 mb-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span>Belum ada kota asal. Isi sekarang untuk bisa menjual produk fisik.</span>
+                </div>
+                <?php endif; ?>
+
+                <div class="row">
+                    <div class="col-md-5 form-group">
+                        <label class="font-weight-bold">Provinsi</label>
+                        <select id="origin_province_select" class="form-control" onchange="loadOriginCities(this.value, this.options[this.selectedIndex].text)">
+                            <option value="">-- Pilih Provinsi --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 form-group">
+                        <label class="font-weight-bold">Kota / Kabupaten</label>
+                        <select id="origin_city_select" class="form-control" onchange="selectOriginCity(this.value, this.options[this.selectedIndex].text)">
+                            <option value="">-- Pilih Kota --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save fa-sm mr-1"></i> Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <script>
+            (function() {
+                var AJAX = '<?= url('shop-ajax') ?>';
+
+                // Load provinces on page load
+                fetch(AJAX + '?action=ongkir_provinces')
+                .then(function(r){ return r.json(); })
+                .then(function(res) {
+                    if(!res.success) return;
+                    var sel = document.getElementById('origin_province_select');
+                    var currentProv = '<?= addslashes($data->shop->origin_province ?? '') ?>';
+                    res.data.forEach(function(p) {
+                        var opt = new Option(p.province, p.province_id);
+                        if(p.province === currentProv) opt.selected = true;
+                        sel.add(opt);
+                    });
+                    // Refresh Select2 if available
+                    if (typeof $ !== 'undefined') {
+                        $(sel).trigger('change.select2');
+                    }
+                    
+                    // Auto-load cities if province already selected
+                    if(sel.value) {
+                        loadOriginCities(sel.value, sel.options[sel.selectedIndex].text, true);
+                    }
+                });
+
+                window.loadOriginCities = function(province_id, province_name, skipProvSave) {
+                    if(!province_id) return;
+                    if(!skipProvSave) {
+                        document.getElementById('origin_province_input').value = province_name;
+                    }
+                    var citySelect = document.getElementById('origin_city_select');
+                    citySelect.innerHTML = '<option>Memuat...</option>';
+                    fetch(AJAX + '?action=ongkir_cities&province_id=' + province_id)
+                    .then(function(r){ return r.json(); })
+                    .then(function(res) {
+                        if(!res.success) return;
+                        var currentCityId = '<?= addslashes($data->shop->origin_city_id ?? '') ?>';
+                        citySelect.innerHTML = '<option value="">-- Pilih Kota --</option>';
+                        res.data.forEach(function(c) {
+                            var label = c.type + ' ' + c.city_name;
+                            var opt   = new Option(label, c.city_id);
+                            if(c.city_id === currentCityId) {
+                                opt.selected = true;
+                                document.getElementById('origin_city_id_input').value   = c.city_id;
+                                document.getElementById('origin_city_name_input').value = label;
+                            }
+                            citySelect.add(opt);
+                        });
+                        
+                        // Refresh Select2 if available
+                        if (typeof $ !== 'undefined') {
+                            $(citySelect).trigger('change.select2');
+                        }
+                    });
+                };
+
+                window.selectOriginCity = function(city_id, city_name) {
+                    document.getElementById('origin_city_id_input').value   = city_id;
+                    document.getElementById('origin_city_name_input').value = city_name;
+                };
+            })();
+            </script>
+
         </div>
     </div>
 </section>
+
 
 <!-- VOUCHER CREATE MODAL -->
 <div class="modal fade" id="voucherCreateModal" tabindex="-1" role="dialog">
@@ -1095,4 +1696,33 @@ function previewShopImage(input, imgId, placeholderId) {
         }
     });
 })();
+</script>
+
+<script>
+/* ── Verification Gate Popup ── */
+function showVerifGate() {
+    var overlay = document.getElementById('verif_gate_overlay');
+    if(!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'verif_gate_overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+        overlay.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+            '<div style="width:64px;height:64px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">' +
+                '<i class="fas fa-shield-alt" style="font-size:1.6rem;color:#d97706"></i>' +
+            '</div>' +
+            '<h5 style="font-weight:800;margin-bottom:8px">Verifikasi KTP Diperlukan</h5>' +
+            '<p style="color:#6b7280;font-size:.88rem;margin-bottom:20px">Kamu perlu menyelesaikan verifikasi identitas KTP terlebih dahulu untuk bisa melakukan pencairan dana.</p>' +
+            '<button onclick="document.getElementById(\'verif_gate_overlay\').remove(); document.querySelector(\'[href=\\\'#shop_settings\\\']\').click();" style="display:block;width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:13px;border-radius:12px;border:none;font-weight:700;margin-bottom:10px">' +
+                '<i class="fas fa-id-card mr-2"></i>Verifikasi Sekarang' +
+            '</button>' +
+            '<button onclick="document.getElementById(\'verif_gate_overlay\').remove()" style="background:#f1f5f9;border:none;width:100%;padding:11px;border-radius:12px;cursor:pointer;font-weight:600;color:#475569">' +
+                'Nanti Saja' +
+            '</button>' +
+        '</div>';
+        overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+    } else {
+        overlay.style.display = 'flex';
+    }
+}
 </script>

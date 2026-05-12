@@ -166,6 +166,12 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
                     <p style="font-size:.85rem;color:#475569;margin:0">Pesanan kamu sedang diproses secara otomatis oleh sistem penjual. Kamu akan dihubungi via email <strong><?= htmlspecialchars($data->order->email) ?></strong>.</p>
                 </div>
 
+            <?php elseif($data->item->type === 'physical'): ?>
+                <div class="delivery-box">
+                    <div class="delivery-label"><i class="fas fa-truck fa-sm"></i> Pengiriman Fisik</div>
+                    <p style="font-size:.85rem;color:#475569;margin:0">Pesanan fisik kamu sedang disiapkan oleh penjual. Nomor resi pengiriman akan dikirimkan ke email <strong><?= htmlspecialchars($data->order->email) ?></strong> jika pesanan sudah dikirim.</p>
+                </div>
+
             <?php elseif($data->item->type === 'manual'): ?>
                 <div class="delivery-box">
                     <div class="delivery-label"><i class="fas fa-user fa-sm"></i> Proses Manual</div>
@@ -260,7 +266,7 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
         fetch('<?= url('store-review-create') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
         .then(r=>r.json()).then(function(res){
             if(res.success) {
-                document.getElementById('reviewForm').innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:2rem">⭐</div><div style="font-weight:700;color:#059669">Terima kasih atas ulasan kamu!</div></div>';
+                document.getElementById('reviewForm').innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:2rem;color:#f59e0b"><i class="fas fa-star"></i></div><div style="font-weight:700;color:#059669">Terima kasih atas ulasan kamu!</div></div>';
             } else {
                 document.getElementById('reviewMsg').innerHTML = '<span style="color:#ef4444">' + (res.message||'Error') + '</span>';
             }

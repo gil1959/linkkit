@@ -1,0 +1,69 @@
+[12-May-2026 04:39:18 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Libraries\RajaOngkir" not found in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php:49
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php(15): Altum\Controllers\ShopAjax->ongkir_provinces()
+#1 [internal function]: Altum\Controllers\ShopAjax->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php on line 49
+[12-May-2026 04:39:24 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Libraries\RajaOngkir" not found in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php:49
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php(15): Altum\Controllers\ShopAjax->ongkir_provinces()
+#1 [internal function]: Altum\Controllers\ShopAjax->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php on line 49
+[12-May-2026 04:39:33 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Libraries\RajaOngkir" not found in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php:49
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php(15): Altum\Controllers\ShopAjax->ongkir_provinces()
+#1 [internal function]: Altum\Controllers\ShopAjax->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php on line 49
+[12-May-2026 04:39:54 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Libraries\RajaOngkir" not found in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php:49
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php(15): Altum\Controllers\ShopAjax->ongkir_provinces()
+#1 [internal function]: Altum\Controllers\ShopAjax->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php on line 49
+[12-May-2026 04:47:05 UTC] PHP Fatal error:  Uncaught Error: Class "Altum\Libraries\RajaOngkir" not found in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php:49
+Stack trace:
+#0 D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php(15): Altum\Controllers\ShopAjax->ongkir_provinces()
+#1 [internal function]: Altum\Controllers\ShopAjax->index()
+#2 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#3 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#4 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#5 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\ShopAjax.php on line 49
+[12-May-2026 04:57:55 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on false in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php:243
+Stack trace:
+#0 [internal function]: Altum\Controllers\StoreCheckout->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php on line 243
+[12-May-2026 04:59:51 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on false in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php:243
+Stack trace:
+#0 [internal function]: Altum\Controllers\StoreCheckout->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php on line 243
+[12-May-2026 05:00:10 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on false in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php:243
+Stack trace:
+#0 [internal function]: Altum\Controllers\StoreCheckout->index()
+#1 D:\Kerjoan\Coding\linkkit\app\core\App.php(331): call_user_func_array()
+#2 D:\Kerjoan\Coding\linkkit\index.php(22): Altum\App->__construct()
+#3 D:\Kerjoan\Coding\linkkit\router.php(36): require('...')
+#4 {main}
+  thrown in D:\Kerjoan\Coding\linkkit\app\controllers\StoreCheckout.php on line 243

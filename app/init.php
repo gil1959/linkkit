@@ -59,8 +59,8 @@ spl_autoload_register (function ($class) {
         require_once APP_PATH . 'core/' . $split[1] . '.php';
     }
 
-    /* Traits, Models, Helpers */
-    if(isset($split[1], $split[2]) && in_array($split[1], ['Traits', 'Models', 'Helpers'])) {
+    /* Traits, Models, Helpers, Libraries */
+    if(isset($split[1], $split[2]) && in_array($split[1], ['Traits', 'Models', 'Helpers', 'Libraries'])) {
         $folder = mb_strtolower($split[1]);
         require_once APP_PATH . $folder . '/' . $split[2] . '.php';
     }

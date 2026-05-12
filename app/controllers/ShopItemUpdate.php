@@ -36,10 +36,19 @@ class ShopItemUpdate extends Controller {
                 '<p><br><strong><em><u><s><h1><h2><h3><ul><ol><li><blockquote><a><span>'
             );
             $_POST['price']       = abs((float) ($_POST['price'] ?? 0));
-            $_POST['type']        = in_array($_POST['type'] ?? '', ['download_link', 'webhook_event', 'random_code', 'manual'])
+            $_POST['type']        = in_array($_POST['type'] ?? '', ['download_link', 'webhook_event', 'random_code', 'manual', 'physical'])
                                     ? $_POST['type'] : 'download_link';
             $_POST['stock']       = (isset($_POST['stock']) && $_POST['stock'] !== '') ? abs((int) $_POST['stock']) : null;
             $_POST['status']      = isset($_POST['status']) ? 1 : 0;
+
+            /* Physical product fields */
+            $weight = null; $length = null; $width = null; $height = null;
+            if($_POST['type'] === 'physical') {
+                $weight = isset($_POST['weight']) && $_POST['weight'] !== '' ? abs((float)$_POST['weight']) : null;
+                $length = isset($_POST['length']) && $_POST['length'] !== '' ? abs((int)$_POST['length']) : null;
+                $width  = isset($_POST['width'])  && $_POST['width']  !== '' ? abs((int)$_POST['width'])  : null;
+                $height = isset($_POST['height']) && $_POST['height'] !== '' ? abs((int)$_POST['height']) : null;
+            }
 
             $download_links = !empty($_POST['download_links']) ? json_encode([$_POST['download_links']]) : $item->download_links;
 
@@ -60,11 +69,15 @@ class ShopItemUpdate extends Controller {
                         `image` = ?,
                         `price` = ?,
                         `stock` = ?,
+                        `weight` = ?,
+                        `length` = ?,
+                        `width` = ?,
+                        `height` = ?,
                         `status` = ?
                     WHERE `id` = ? AND `shop_id` = ?
                 ");
                 $stmt->bind_param(
-                    'sssssdiiii',
+                    'sssssdidiiiiii',
                     $_POST['type'],
                     $download_links,
                     $_POST['name'],
@@ -72,6 +85,10 @@ class ShopItemUpdate extends Controller {
                     $image,
                     $_POST['price'],
                     $_POST['stock'],
+                    $weight,
+                    $length,
+                    $width,
+                    $height,
                     $_POST['status'],
                     $item->id,
                     $shop->id

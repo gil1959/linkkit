@@ -91,10 +91,11 @@
                         <div class="form-group">
                             <label for="type">Product Type</label>
                             <select id="type" name="type" class="form-control">
-                                <option value="download_link">Download Link (File/URL)</option>
-                                <option value="webhook_event">Webhook Event</option>
-                                <option value="random_code">Random Code (Ticket/Event)</option>
-                                <option value="manual">Manual Process</option>
+                                <option value="download_link" <?= isset($data->draft['type']) && $data->draft['type']=='download_link' ? 'selected' : '' ?>>Download Link (File/URL)</option>
+                                <option value="webhook_event" <?= isset($data->draft['type']) && $data->draft['type']=='webhook_event' ? 'selected' : '' ?>>Webhook Event</option>
+                                <option value="random_code"   <?= isset($data->draft['type']) && $data->draft['type']=='random_code'   ? 'selected' : '' ?>>Random Code (Ticket/Event)</option>
+                                <option value="manual"        <?= isset($data->draft['type']) && $data->draft['type']=='manual'        ? 'selected' : '' ?>>Manual Process</option>
+                                <option value="physical"      <?= isset($data->draft['type']) && $data->draft['type']=='physical'      ? 'selected' : '' ?>>📦 Produk Fisik (Pengiriman)</option>
                             </select>
                             <small class="text-muted mt-1 d-block">Determine how the product is delivered after payment.</small>
                         </div>
@@ -103,6 +104,40 @@
                             <label for="download_links">File Link (Google Drive, Dropbox, etc.)</label>
                             <input type="url" id="download_links" name="download_links" class="form-control" placeholder="https://" />
                             <small class="text-muted mt-1 d-block">This link will be automatically sent to the buyer's email upon successful payment.</small>
+                        </div>
+
+                        <!-- Produk Fisik: berat & dimensi -->
+                        <div id="physical_fields_wrapper" style="display:none">
+                            <div class="alert alert-info d-flex align-items-center" style="font-size:.85rem;padding:.6rem 1rem">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Produk fisik dikirim via <strong>JNE, TIKI, atau POS Indonesia</strong>. Ongkos kirim dihitung otomatis saat checkout.
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="weight">Berat Produk (gram) <span class="text-danger">*</span></label>
+                                        <input type="number" id="weight" name="weight" class="form-control" min="1" placeholder="500" value="<?= htmlspecialchars($data->draft['weight'] ?? '') ?>" />
+                                        <small class="text-muted">Termasuk berat kemasan</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="d-block">Dimensi (cm) — Opsional</label>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <input type="number" name="length" class="form-control" placeholder="P" min="0" value="<?= htmlspecialchars($data->draft['length'] ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Panjang</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="width" class="form-control" placeholder="L" min="0" value="<?= htmlspecialchars($data->draft['width'] ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Lebar</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="height" class="form-control" placeholder="T" min="0" value="<?= htmlspecialchars($data->draft['height'] ?? '') ?>">
+                                            <small class="text-muted text-center d-block">Tinggi</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -260,17 +295,30 @@
         theme: 'snow'
     });
 
+    <?php if(!empty($data->draft['description'])): ?>
+    quill.root.innerHTML = <?= json_encode($data->draft['description']) ?>;
+    <?php endif; ?>
+
     // Inject HTML into hidden input before form submit
     document.querySelector('form').addEventListener('submit', function() {
         var html = quill.root.innerHTML;
-        // Treat empty editor as empty string
         if(html === '<p><br></p>') html = '';
         document.getElementById('description').value = html;
     });
 
     // Product type toggle
-    document.getElementById('type').addEventListener('change', function() {
-        var dlWrapper = document.getElementById('download_links_wrapper');
-        dlWrapper.style.display = (this.value === 'download_link') ? 'block' : 'none';
+    function toggleProductTypeFields(type) {
+        document.getElementById('download_links_wrapper').style.display    = (type === 'download_link') ? 'block' : 'none';
+        document.getElementById('physical_fields_wrapper').style.display   = (type === 'physical')       ? 'block' : 'none';
+        // weight required only for physical
+        var weightInput = document.getElementById('weight');
+        if(weightInput) weightInput.required = (type === 'physical');
+    }
+
+    var typeSelect = document.getElementById('type');
+    typeSelect.addEventListener('change', function() {
+        toggleProductTypeFields(this.value);
     });
+    // Init on load (handles draft restore)
+    toggleProductTypeFields(typeSelect.value);
 </script>

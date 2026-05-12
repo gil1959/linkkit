@@ -122,6 +122,22 @@ class Router {
                 ]
             ],
 
+            'shop-verification' => [
+                'controller' => 'ShopVerification',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'ads' => true,
+                ]
+            ],
+
+            'shop-orders' => [
+                'controller' => 'ShopOrders',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'ads' => true,
+                ]
+            ],
+
             'shop-ajax' => [
                 'controller' => 'ShopAjax',
                 'settings' => [
@@ -1638,6 +1654,10 @@ class Router {
 
             'shop-withdrawals' => [
                 'controller' => 'AdminShopWithdrawals',
+            ],
+
+            'shop-verifications' => [
+                'controller' => 'AdminShopVerifications',
             ],
         ],
 

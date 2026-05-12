@@ -180,6 +180,12 @@
                     </a>
                 </li>
 
+                <li class="<?= \Altum\Router::$controller == 'AdminShopVerifications' ? 'active' : null ?>">
+                    <a class="nav-link text-truncate" href="<?= url('admin/shop-verifications') ?>">
+                        <i class="fas fa-fw fa-sm fa-id-card mr-2"></i> Verifikasi Seller
+                    </a>
+                </li>
+
             <div class="divider-wrapper">
                 <div class="divider"></div>
             </div>

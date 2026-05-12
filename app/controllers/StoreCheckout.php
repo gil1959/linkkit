@@ -1,6 +1,7 @@
 <?php
 /*
- * Store Checkout Controller
+ * StoreCheckout Controller
+ * Supports: digital, physical (with shipping via RajaOngkir)
  */
 
 namespace Altum\Controllers;
@@ -36,6 +37,9 @@ class StoreCheckout extends Controller {
 
         } elseif($item->type === 'manual') {
             $fulfilled_content = 'manual_pending';
+
+        } elseif($item->type === 'physical') {
+            $fulfilled_content = 'physical_pending'; // seller will update resi later
         }
 
         if($fulfilled_content !== null) {
@@ -56,7 +60,7 @@ class StoreCheckout extends Controller {
 <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
     <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:28px;text-align:center">
         <div style="width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
-            <span style="font-size:1.5rem">&#9203;</span>
+            <svg style="width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <h1 style="color:#fff;font-size:1.15rem;margin:0">Menunggu Pembayaran</h1>
         <p style="color:rgba(255,255,255,.85);font-size:.82rem;margin:6px 0 0">Pesanan kamu belum dibayar</p>
@@ -72,7 +76,7 @@ class StoreCheckout extends Controller {
             </table>
         </div>
         <a href="' . $checkout_url . '" style="display:block;background:#4f46e5;color:#fff;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:700;font-size:.95rem;margin-bottom:12px">
-            &#128179; Bayar Sekarang
+            Bayar Sekarang
         </a>
         <a href="' . $success_url . '" style="display:block;background:#f1f5f9;color:#475569;text-align:center;padding:12px;border-radius:12px;text-decoration:none;font-size:.85rem">
             Lihat Detail Pesanan
@@ -93,11 +97,10 @@ class StoreCheckout extends Controller {
         $shop = database()->query("SELECT * FROM `shops` WHERE `id` = {$item->shop_id} AND `is_active` = 1")->fetch_object() ?? null;
         if(!$shop) redirect();
 
-        /* ── Collect payment channels dari gateway yang aktif ── */
+        /* ── Collect payment channels ── */
         $payment_channels = [];
         $primary_gateway  = null;
 
-        /* 1. Tripay */
         $tripay_enabled = !empty(settings()->tripay->is_enabled);
         $tripay_key     = settings()->tripay->api_key     ?? null;
         $tripay_pkey    = settings()->tripay->private_key ?? null;
@@ -107,102 +110,90 @@ class StoreCheckout extends Controller {
         if($tripay_enabled && !empty($tripay_key)) {
             $raw_channels = \Altum\PaymentGateways\Tripay::get_channels();
             if(!empty($raw_channels)) {
-                foreach($raw_channels as $c) {
-                    $c->_gateway = 'tripay';
-                    $payment_channels[] = $c;
-                }
+                foreach($raw_channels as $c) { $c->_gateway = 'tripay'; $payment_channels[] = $c; }
                 $primary_gateway = 'tripay';
             } else {
                 $base = 'https://tripay.co.id/images/payment/icon/';
-                $mk   = function($code, $name, $group, $flat, $pct) use ($base) {
-                    return (object)['code' => $code, 'name' => $name, 'group' => $group,
-                        'icon_url' => $base . $code . '.png',
-                        'total_fee' => (object)['flat' => $flat, 'percent' => $pct],
-                        '_gateway'  => 'tripay'];
+                $mk = function($code, $name, $group, $flat, $pct) use ($base) {
+                    return (object)['code'=>$code,'name'=>$name,'group'=>$group,'icon_url'=>$base.$code.'.png','total_fee'=>(object)['flat'=>$flat,'percent'=>$pct],'_gateway'=>'tripay'];
                 };
                 $payment_channels = [
-                    $mk('QRIS',      'QRIS (Semua E-Wallet)',   'QRIS',            0,    0.7),
-                    $mk('BRIVA',     'BRI Virtual Account',     'Virtual Account', 4000, 0),
-                    $mk('BNIVA',     'BNI Virtual Account',     'Virtual Account', 4000, 0),
-                    $mk('MANDIRIVA', 'Mandiri Virtual Account', 'Virtual Account', 4000, 0),
-                    $mk('BCAVA',     'BCA Virtual Account',     'Virtual Account', 4000, 0),
-                    $mk('DANA',      'DANA',                    'E-Wallet',        1000, 0),
-                    $mk('OVO',       'OVO',                     'E-Wallet',        1000, 0),
-                    $mk('SHOPEEPAY', 'ShopeePay',               'E-Wallet',        1000, 0),
-                    $mk('INDOMARET', 'Indomaret',               'Gerai',           5000, 0),
-                    $mk('ALFAMART',  'Alfamart',                'Gerai',           5000, 0),
+                    $mk('QRIS','QRIS (Semua E-Wallet)','QRIS',0,0.7), $mk('BRIVA','BRI Virtual Account','Virtual Account',4000,0),
+                    $mk('BNIVA','BNI Virtual Account','Virtual Account',4000,0), $mk('MANDIRIVA','Mandiri Virtual Account','Virtual Account',4000,0),
+                    $mk('BCAVA','BCA Virtual Account','Virtual Account',4000,0), $mk('DANA','DANA','E-Wallet',1000,0),
+                    $mk('OVO','OVO','E-Wallet',1000,0), $mk('SHOPEEPAY','ShopeePay','E-Wallet',1000,0),
+                    $mk('INDOMARET','Indomaret','Gerai',5000,0), $mk('ALFAMART','Alfamart','Gerai',5000,0),
                 ];
                 $primary_gateway = 'tripay';
             }
         }
 
-        /* 2. Midtrans */
         if(!empty(settings()->midtrans->is_enabled) && $primary_gateway !== 'tripay') {
-            $payment_channels[] = (object)[
-                'code'      => 'MIDTRANS',
-                'name'      => 'Midtrans (Semua Metode)',
-                'group'     => 'Online Payment',
-                'icon_url'  => 'https://api.midtrans.com/v2/assets/svg/brand/midtrans.svg',
-                'total_fee' => (object)['flat' => 0, 'percent' => 0],
-                '_gateway'  => 'midtrans',
-            ];
+            $payment_channels[] = (object)['code'=>'MIDTRANS','name'=>'Midtrans (Semua Metode)','group'=>'Online Payment','icon_url'=>'https://api.midtrans.com/v2/assets/svg/brand/midtrans.svg','total_fee'=>(object)['flat'=>0,'percent'=>0],'_gateway'=>'midtrans'];
             if(!$primary_gateway) $primary_gateway = 'midtrans';
         }
 
-        /* 3. PayPal */
         if(!empty(settings()->paypal->is_enabled)) {
-            $payment_channels[] = (object)[
-                'code'      => 'PAYPAL',
-                'name'      => 'PayPal',
-                'group'     => 'Online Payment',
-                'icon_url'  => 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg',
-                'total_fee' => (object)['flat' => 0, 'percent' => 0],
-                '_gateway'  => 'paypal',
-            ];
+            $payment_channels[] = (object)['code'=>'PAYPAL','name'=>'PayPal','group'=>'Online Payment','icon_url'=>'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg','total_fee'=>(object)['flat'=>0,'percent'=>0],'_gateway'=>'paypal'];
             if(!$primary_gateway) $primary_gateway = 'paypal';
         }
 
-        /* Demo fallback HANYA jika tidak ada gateway aktif sama sekali */
         $is_demo = empty($primary_gateway);
         if($is_demo) {
             $base = 'https://tripay.co.id/images/payment/icon/';
-            $mk   = function($code, $name, $group, $flat, $pct) use ($base) {
-                return (object)['code' => $code, 'name' => $name, 'group' => $group,
-                    'icon_url' => $base . $code . '.png',
-                    'total_fee' => (object)['flat' => $flat, 'percent' => $pct],
-                    '_gateway' => 'demo'];
+            $mk = function($code,$name,$group,$flat,$pct) use ($base) {
+                return (object)['code'=>$code,'name'=>$name,'group'=>$group,'icon_url'=>$base.$code.'.png','total_fee'=>(object)['flat'=>$flat,'percent'=>$pct],'_gateway'=>'demo'];
             };
             $payment_channels = [
-                $mk('QRIS',      'QRIS (Semua E-Wallet)',   'QRIS',            0,    0.7),
-                $mk('BRIVA',     'BRI Virtual Account',     'Virtual Account', 4000, 0),
-                $mk('BNIVA',     'BNI Virtual Account',     'Virtual Account', 4000, 0),
-                $mk('MANDIRIVA', 'Mandiri Virtual Account', 'Virtual Account', 4000, 0),
-                $mk('BCAVA',     'BCA Virtual Account',     'Virtual Account', 4000, 0),
-                $mk('DANA',      'DANA',                    'E-Wallet',        1000, 0),
-                $mk('OVO',       'OVO',                     'E-Wallet',        1000, 0),
-                $mk('SHOPEEPAY', 'ShopeePay',               'E-Wallet',        1000, 0),
-                $mk('INDOMARET', 'Indomaret',               'Gerai',           5000, 0),
-                $mk('ALFAMART',  'Alfamart',                'Gerai',           5000, 0),
+                $mk('QRIS','QRIS (Semua E-Wallet)','QRIS',0,0.7),$mk('BRIVA','BRI Virtual Account','Virtual Account',4000,0),
+                $mk('BNIVA','BNI Virtual Account','Virtual Account',4000,0),$mk('MANDIRIVA','Mandiri Virtual Account','Virtual Account',4000,0),
+                $mk('BCAVA','BCA Virtual Account','Virtual Account',4000,0),$mk('DANA','DANA','E-Wallet',1000,0),
+                $mk('OVO','OVO','E-Wallet',1000,0),$mk('SHOPEEPAY','ShopeePay','E-Wallet',1000,0),
+                $mk('INDOMARET','Indomaret','Gerai',5000,0),$mk('ALFAMART','Alfamart','Gerai',5000,0),
             ];
             $primary_gateway = 'demo';
         }
 
-
         /* ── Handle POST ── */
         if(!empty($_POST)) {
-            $email        = input_clean($_POST['email']);
-            $full_name    = input_clean($_POST['full_name']);
-            $phone        = input_clean($_POST['phone']);
-            $method       = input_clean($_POST['payment_method'] ?? ($payment_channels[0]->code ?? 'QRIS'));
-            $voucher_code = strtoupper(input_clean($_POST['voucher_code'] ?? ''));
-            $qty          = 1;
+            $email          = input_clean($_POST['email'] ?? '');
+            $full_name      = input_clean($_POST['full_name'] ?? '');
+            $phone          = input_clean($_POST['phone'] ?? '');
+            $method         = input_clean($_POST['payment_method'] ?? ($payment_channels[0]->code ?? 'QRIS'));
+            $voucher_code   = strtoupper(input_clean($_POST['voucher_code'] ?? ''));
+            $qty            = 1;
+
+            /* Physical shipping inputs */
+            $shipping_address = null;
+            $shipping_courier = null;
+            $shipping_service = null;
+            $shipping_cost    = 0;
+            $dest_city_id     = null;
+
+            if($item->type === 'physical') {
+                $shipping_address = input_clean($_POST['shipping_address'] ?? '');
+                $shipping_courier = input_clean($_POST['shipping_courier'] ?? '');
+                $shipping_service = input_clean($_POST['shipping_service'] ?? '');
+                $shipping_cost    = (float)($_POST['shipping_cost'] ?? 0);
+                $dest_city_id     = (int)($_POST['dest_city_id'] ?? 0);
+                
+                $shipping_province = input_clean($_POST['shipping_province'] ?? '');
+                $shipping_city     = input_clean($_POST['shipping_city'] ?? '');
+                if($shipping_province && $shipping_city) {
+                    $shipping_address .= "\n" . $shipping_city . ", " . $shipping_province;
+                }
+
+                if(empty($shipping_address)) Alerts::add_error('Alamat pengiriman wajib diisi.');
+                if(empty($shipping_courier)) Alerts::add_error('Pilih ekspedisi pengiriman.');
+                if($shipping_cost <= 0)       Alerts::add_error('Pilih layanan ongkir terlebih dahulu.');
+            }
 
             $service_fee     = $item->price * 0.05;
-            $grand_total     = (float)$item->price;
+            $base_total      = (float)$item->price;
             $discount_amount = 0;
             $voucher_id      = null;
 
-            /* Validasi dan terapkan voucher */
+            /* Voucher */
             if(!empty($voucher_code)) {
                 $now = date('Y-m-d H:i:s');
                 $voucher = database()->query("
@@ -216,18 +207,17 @@ class StoreCheckout extends Controller {
                 ")->fetch_object() ?? null;
 
                 if($voucher && ($voucher->is_unlimited || $voucher->quota === null || $voucher->used < $voucher->quota)) {
-                    $discount_amount = round($item->price * $voucher->discount_percentage / 100);
-                    $grand_total     = max(0, $item->price - $discount_amount);
+                    $discount_amount = round($base_total * $voucher->discount_percentage / 100);
                     $voucher_id      = $voucher->id;
                 } else {
                     Alerts::add_error('Voucher tidak valid, sudah kadaluarsa, atau kuota habis.');
                 }
             }
 
+            $grand_total    = max(0, $base_total - $discount_amount) + $shipping_cost;
             $invoice_number = 'INV-SHOP-' . strtoupper(substr(md5(uniqid()), 0, 10));
 
             if(!Alerts::has_errors()) {
-
                 /* Customer */
                 $customer = database()->query("SELECT `id` FROM `shop_customers`
                     WHERE `shop_id` = {$shop->id} AND `email` = '" . database()->real_escape_string($email) . "'"
@@ -246,17 +236,28 @@ class StoreCheckout extends Controller {
                 /* Order */
                 $datetime  = \Altum\Date::$date;
                 $processor = $primary_gateway;
+                $sa_esc    = database()->real_escape_string($shipping_address ?? '');
+                $sc_esc    = database()->real_escape_string($shipping_courier ?? '');
+                $ss_esc    = database()->real_escape_string($shipping_service ?? '');
+
                 $stmt = database()->prepare("INSERT INTO `shop_orders`
                     (`shop_id`, `item_id`, `customer_id`, `invoice_number`, `qty`,
-                     `total_amount`, `service_fee`, `grand_total`, `payment_processor`, `status`, `datetime`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)");
-                $stmt->bind_param('iiisidddss', $shop->id, $item->id, $customer_id,
-                    $invoice_number, $qty, $item->price, $service_fee, $grand_total, $processor, $datetime);
+                     `total_amount`, `service_fee`, `grand_total`, `discount_amount`, `voucher_id`,
+                     `shipping_address`, `shipping_courier`, `shipping_service`, `shipping_cost`,
+                     `payment_processor`, `status`, `datetime`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)");
+                $stmt->bind_param(
+                    'iiisiddddisssdss',
+                    $shop->id, $item->id, $customer_id,
+                    $invoice_number, $qty,
+                    $base_total, $service_fee, $grand_total, $discount_amount, $voucher_id,
+                    $sa_esc, $sc_esc, $ss_esc, $shipping_cost,
+                    $processor, $datetime
+                );
                 $stmt->execute();
                 $order_id = $stmt->insert_id;
                 $stmt->close();
 
-                /* Store voucher ref */
                 if($voucher_id) {
                     database()->query("UPDATE `shop_vouchers` SET `used` = `used` + 1 WHERE `id` = {$voucher_id}");
                 }
@@ -267,7 +268,6 @@ class StoreCheckout extends Controller {
                     database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$grand_total} WHERE `id` = {$customer_id}");
                     $seller_revenue = $grand_total - $service_fee;
                     database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$shop->user_id}");
-
                     $this->fulfill_order($order_id, $item, $customer_id);
                     redirect('store-checkout-success/' . $invoice_number);
 
@@ -312,14 +312,10 @@ class StoreCheckout extends Controller {
                             `checkout_url` = '{$co_url_esc}'
                             WHERE `id` = {$order_id}");
 
-                        /* Kirim email pending payment ke pembeli */
                         try {
-                            $pending_email = $this->build_pending_email(
-                                $invoice_number, $full_name, $item->name, $shop->name,
-                                $grand_total, $checkout_url
-                            );
+                            $pending_email = $this->build_pending_email($invoice_number, $full_name, $item->name, $shop->name, $grand_total, $checkout_url);
                             send_mail($email, 'Selesaikan pembayaran - ' . $invoice_number, $pending_email);
-                        } catch(\Exception $e) { /* silent */ }
+                        } catch(\Exception $e) {}
 
                         header('Location: ' . $checkout_url);
                         exit;
@@ -330,8 +326,7 @@ class StoreCheckout extends Controller {
                 } else {
                     Alerts::add_error('Metode pembayaran belum didukung untuk toko ini.');
                 }
-
-            } // end if !Alerts::has_errors()
+            }
         }
 
         Title::set('Checkout - ' . $item->name);

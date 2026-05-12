@@ -141,11 +141,17 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
         </div>
     </div>
 
-    <button class="cart-btn" onclick="toggleCart()">
-        <i class="fas fa-shopping-cart"></i>
-        <span id="cartLabel">Keranjang</span>
-        <span class="cart-badge" id="cartBadge">0</span>
-    </button>
+    <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="cart-btn" onclick="toggleOrders()" style="background:#eef2ff;color:#4f46e5;margin-left:0">
+            <i class="fas fa-receipt"></i>
+            <span class="d-none d-sm-inline">Pesanan</span>
+        </button>
+        <button class="cart-btn" onclick="toggleCart()" style="margin-left:0">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartLabel">Keranjang</span>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+    </div>
 </header>
 
 
@@ -257,6 +263,31 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
         <div class="cart-footer-row">
             <button class="btn-clear" onclick="clearCart()"><i class="fas fa-trash mr-1"></i>Hapus Semua</button>
             <button class="btn-continue" onclick="toggleCart()"><i class="fas fa-arrow-left mr-1"></i>Lanjut Belanja</button>
+        </div>
+    </div>
+</div>
+
+<!-- ORDERS PANEL -->
+<div class="cart-panel" id="ordersPanel">
+    <div class="cart-panel-head">
+        <h3><i class="fas fa-receipt mr-2" style="color:#4f46e5"></i>Cek Pesanan</h3>
+        <button class="cart-close" onclick="toggleOrders()"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="padding:20px;flex:1;overflow-y:auto">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,.03)">
+            <p style="font-size:.85rem;color:#64748b;margin:0 0 12px">Masukkan Nomor Invoice dan Email yang digunakan saat checkout untuk melihat status pesanan kamu.</p>
+            <div style="margin-bottom:12px">
+                <input type="text" id="chk_invoice" placeholder="Contoh: INV-..." style="width:100%;background:#f9fafb;color:#1e293b;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:.85rem;outline:none;transition:.2s" onfocus="this.style.borderColor='#6366f1';this.style.background='#fff'" onblur="this.style.borderColor='#cbd5e1';this.style.background='#f9fafb'">
+            </div>
+            <div style="margin-bottom:12px">
+                <input type="email" id="chk_email" placeholder="Alamat Email" style="width:100%;background:#f9fafb;color:#1e293b;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:.85rem;outline:none;transition:.2s" onfocus="this.style.borderColor='#6366f1';this.style.background='#fff'" onblur="this.style.borderColor='#cbd5e1';this.style.background='#f9fafb'">
+            </div>
+            <button onclick="checkOrder()" id="btn_check_order" style="width:100%;background:#4f46e5;color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;font-size:.85rem;cursor:pointer;transition:.2s"><i class="fas fa-search mr-1"></i> Cek Pesanan</button>
+            <div id="chk_msg" style="margin-top:10px;font-size:.8rem;text-align:center"></div>
+        </div>
+
+        <div id="chk_result" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <!-- Render result here -->
         </div>
     </div>
 </div>
@@ -418,13 +449,126 @@ function updateCartUI(){
 
 function toggleCart(){
     document.getElementById('cartPanel').classList.toggle('open');
+    document.getElementById('ordersPanel').classList.remove('open');
 }
 function showCart(){
     document.getElementById('cartPanel').classList.add('open');
+    document.getElementById('ordersPanel').classList.remove('open');
+}
+function toggleOrders(){
+    document.getElementById('ordersPanel').classList.toggle('open');
+    document.getElementById('cartPanel').classList.remove('open');
 }
 function doCheckout(){
     if(cart.length === 0) return;
     window.location = STORE_URL + cart[0].id;
+}
+
+/* ── Check Order ── */
+function checkOrder() {
+    var inv = document.getElementById('chk_invoice').value.trim();
+    var eml = document.getElementById('chk_email').value.trim();
+    var msg = document.getElementById('chk_msg');
+    var res = document.getElementById('chk_result');
+    var btn = document.getElementById('btn_check_order');
+
+    if(!inv || !eml) {
+        msg.innerHTML = '<span style="color:#ef4444">Invoice dan Email wajib diisi</span>';
+        return;
+    }
+
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Mengecek...';
+    btn.disabled = true;
+    msg.innerHTML = '';
+    res.style.display = 'none';
+
+    var params = new URLSearchParams({
+        action: 'buyer_check_order',
+        shop_id: <?= $data->shop->id ?>,
+        invoice: inv,
+        email: eml
+    });
+
+    fetch('<?= SITE_URL . 'shop-ajax' ?>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+    })
+    .then(r => r.json())
+    .then(function(d) {
+        btn.innerHTML = '<i class="fas fa-search mr-1"></i> Cek Pesanan';
+        btn.disabled = false;
+
+        if(!d.success) {
+            msg.innerHTML = '<span style="color:#ef4444"><i class="fas fa-exclamation-circle"></i> ' + d.message + '</span>';
+        } else {
+            var o = d.data;
+            var statHtml = '';
+            if(o.status === 'paid') statHtml = '<span style="color:#059669;font-weight:700;font-size:.8rem;background:#d1fae5;padding:4px 8px;border-radius:6px"><i class="fas fa-check-circle mr-1"></i> Lunas</span>';
+            else if(o.status === 'pending') statHtml = '<span style="color:#d97706;font-weight:700;font-size:.8rem;background:#fef3c7;padding:4px 8px;border-radius:6px"><i class="fas fa-clock mr-1"></i> Menunggu Bayar</span>';
+            else statHtml = '<span style="color:#dc2626;font-weight:700;font-size:.8rem;background:#fee2e2;padding:4px 8px;border-radius:6px">' + o.status.toUpperCase() + '</span>';
+
+            var imgHtml = o.item_image 
+                ? '<img src="'+o.item_image+'" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0" alt="">' 
+                : '<div style="width:40px;height:40px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8"><i class="fas fa-box"></i></div>';
+
+            var shipHtml = '';
+            var typeName = o.item_type === 'physical' ? 'Produk Fisik' : o.item_type.replace(/_/g, ' ').toUpperCase();
+
+            if(o.item_type === 'physical') {
+                var trackStatus = o.shipping_status || 'diproses';
+                var sDiproses = 'color:#059669;font-weight:bold';
+                var sDikirim  = trackStatus === 'shipped' || trackStatus === 'delivered' ? 'color:#059669;font-weight:bold' : 'color:#94a3b8';
+                var sDiterima = trackStatus === 'delivered' ? 'color:#059669;font-weight:bold' : 'color:#94a3b8';
+
+                var trackerHtml = '<div style="display:flex;align-items:center;gap:8px;font-size:.75rem;margin-top:10px;background:#f1f5f9;padding:6px 12px;border-radius:20px;width:fit-content">'+
+                                  '<span style="'+sDiproses+'">Diproses</span>'+
+                                  '<i class="fas fa-chevron-right" style="color:#cbd5e1;font-size:.65rem"></i>'+
+                                  '<span style="'+sDikirim+'">Dikirim</span>'+
+                                  '<i class="fas fa-chevron-right" style="color:#cbd5e1;font-size:.65rem"></i>'+
+                                  '<span style="'+sDiterima+'">Diterima</span>'+
+                                  '</div>';
+
+                var tracking = o.tracking_number ? '<div style="margin-top:8px;font-size:.8rem;color:#059669">Resi: <strong>'+o.tracking_number+'</strong></div>' : '';
+                var addrStr = o.shipping_address ? '<div style="margin-top:8px;font-size:.75rem;color:#64748b;white-space:pre-wrap;line-height:1.4"><i class="fas fa-map-marker-alt text-danger"></i> '+o.shipping_address+'</div>' : '';
+                
+                shipHtml = '<div style="padding:16px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:.8rem"><div style="color:#475569;margin-bottom:4px"><strong>Pengiriman:</strong> '+(o.shipping_courier||'').toUpperCase()+' - '+o.shipping_service+'</div>' + trackerHtml + tracking + addrStr + '</div>';
+            }
+
+            var payBtn = '';
+            if(o.status === 'pending' && o.checkout_url) {
+                payBtn = '<div style="padding:12px;background:#fff"><a href="'+o.checkout_url+'" target="_blank" style="display:block;text-align:center;background:#4f46e5;color:#fff;border-radius:8px;padding:8px;text-decoration:none;font-weight:600;font-size:.85rem"><i class="fas fa-credit-card mr-1"></i> Bayar Sekarang</a></div>';
+            }
+
+            res.innerHTML = 
+                '<div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">' +
+                    '<div style="font-family:monospace;font-weight:700;color:#1e293b">' + o.invoice_number + '</div>' +
+                    '<div>' + statHtml + '</div>' +
+                '</div>' +
+                '<div style="padding:16px">' +
+                    '<div style="display:flex;gap:12px;margin-bottom:12px">' +
+                        imgHtml + 
+                        '<div>' +
+                            '<div style="font-weight:600;font-size:.85rem;color:#1e293b">' + o.item_name + '</div>' +
+                            '<div style="font-size:.7rem;color:#7c3aed;background:#ede9fe;padding:2px 6px;border-radius:8px;display:inline-block;margin-top:4px">' + typeName + '</div>' +
+                            '<div style="font-size:.75rem;color:#64748b;margin-top:6px">' + o.datetime + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-top:16px;border-top:1px dashed #cbd5e1;padding-top:12px">' +
+                        '<span style="color:#64748b">Total Belanja</span>' +
+                        '<strong style="color:#4f46e5">Rp ' + Number(o.grand_total).toLocaleString('id-ID') + '</strong>' +
+                    '</div>' +
+                '</div>' +
+                shipHtml + payBtn;
+
+            res.style.display = 'block';
+        }
+    })
+    .catch(function(){
+        btn.innerHTML = '<i class="fas fa-search mr-1"></i> Cek Pesanan';
+        btn.disabled = false;
+        msg.innerHTML = '<span style="color:#ef4444">Terjadi kesalahan sistem.</span>';
+    });
 }
 
 /* ── init: load dari localStorage dulu ── */

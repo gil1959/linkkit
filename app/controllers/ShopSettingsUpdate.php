@@ -117,6 +117,31 @@ class ShopSettingsUpdate extends Controller {
                 Alerts::add_success('Pengaturan notifikasi berhasil disimpan.');
                 header('Location: ' . url('shop') . '#shop_settings');
                 die();
+            case 'origin_city':
+                $origin_city_id   = (int)($_POST['origin_city_id'] ?? 0);
+                $origin_city_name = input_clean($_POST['origin_city_name'] ?? '');
+                $origin_province  = input_clean($_POST['origin_province'] ?? '');
+
+                if(!$origin_city_id || empty($origin_city_name)) {
+                    Alerts::add_error('Pilih kota asal pengiriman terlebih dahulu.');
+                    header('Location: ' . url('shop') . '#shop_settings');
+                    die();
+                }
+
+                $stmt = database()->prepare("UPDATE `shops` SET `origin_city_id`=?, `origin_city_name`=?, `origin_province`=? WHERE `id`=?");
+                $stmt->bind_param('issi', $origin_city_id, $origin_city_name, $origin_province, $shop->id);
+                $stmt->execute();
+                $stmt->close();
+                Alerts::add_success('Alamat asal pengiriman berhasil disimpan.');
+
+                /* Jika ada draft produk fisik yang pending, redirect balik ke create */
+                if(!empty($_SESSION['pending_physical_product'])) {
+                    header('Location: ' . url('shop-item-create') . '?restore_draft=1');
+                } else {
+                    header('Location: ' . url('shop') . '#shop_settings');
+                }
+                die();
+
         }
 
         /* Fallback — tetap di shop settings */
