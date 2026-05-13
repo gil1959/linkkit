@@ -73,17 +73,105 @@
                             <small class="text-muted mt-1 d-block">Supports <strong>bold</strong>, <em>italic</em>, lists, headings, and hyperlinks. No image upload.</small>
                         </div>
 
+                        <!-- Product Listing Dropdown -->
+                        <div class="form-group">
+                            <label for="listing_id">Product Listing</label>
+                            <select id="listing_id" name="listing_id" class="form-control">
+                                <option value="">No Listing</option>
+                                <?php foreach($data->listings as $listing): ?>
+                                    <option value="<?= $listing->id ?>"
+                                        <?= isset($data->draft['listing_id']) && $data->draft['listing_id'] == $listing->id ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($listing->name) ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <small class="text-muted mt-1 d-block">Products that will be compiled in listing format</small>
+                        </div>
+
+                        <!-- Flexible Amount -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-sliders-h text-primary mr-2"></i><strong>Flexible Amount</strong></div>
+                                    <small class="text-muted">Let buyers determine the amount they want to pay.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="is_flexible_amount" name="is_flexible_amount" value="1">
+                                    <label class="custom-control-label" for="is_flexible_amount"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Variants -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-layer-group text-primary mr-2"></i><strong>Product Variants</strong></div>
+                                    <small class="text-muted">Add product variants with different prices.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="has_variants" name="has_variants" value="1">
+                                    <label class="custom-control-label" for="has_variants"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price & Stock -->
                         <div class="row">
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
                                     <label for="price">Price (Rp)</label>
-                                    <input type="number" id="price" name="price" class="form-control" required="required" step="1" placeholder="50000" />
+                                    <div class="input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
+                                        <input type="number" id="price" name="price" class="form-control" required="required" step="1" placeholder="50000" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
-                                    <label for="stock">Stock (Leave empty for unlimited)</label>
-                                    <input type="number" id="stock" name="stock" class="form-control" />
+                                    <label>Stock</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number" id="stock" name="stock" class="form-control mr-2" placeholder="0" />
+                                        <div class="custom-control custom-switch" style="white-space:nowrap">
+                                            <input type="checkbox" class="custom-control-input" id="unlimited_stock" onchange="toggleStockInput(this)">
+                                            <label class="custom-control-label" for="unlimited_stock">Unlimited</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Qty per Transaction -->
+                        <div class="form-group">
+                            <label for="qty_per_transaction"><i class="fas fa-sort-amount-up-alt fa-sm mr-1"></i> Qty per Transaction</label>
+                            <input type="number" id="qty_per_transaction" name="qty_per_transaction" class="form-control" min="0" value="0" placeholder="0" />
+                            <small class="text-muted">Maximum items per transaction. Leave 0 for no limit.</small>
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-tag text-warning mr-2"></i><strong>Discount</strong></div>
+                                    <small class="text-muted">Offer price discounts to attract more buyers.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="has_discount" name="has_discount" value="1">
+                                    <label class="custom-control-label" for="has_discount"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flash Sale -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-bolt text-warning mr-2"></i><strong>Flash Sale</strong></div>
+                                    <small class="text-muted">Show flash sale badge and countdown to create purchase urgency.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="is_flash_sale" name="is_flash_sale" value="1">
+                                    <label class="custom-control-label" for="is_flash_sale"></label>
                                 </div>
                             </div>
                         </div>
@@ -144,9 +232,21 @@
                     
                     <div class="col-12 col-md-4">
                         <div class="form-group">
-                            <label for="image">Product Image</label>
-                            <input id="image" type="file" name="image" accept=".gif, .png, .jpg, .jpeg, .svg" class="form-control-file" />
+                            <label for="image">Foto Produk Utama</label>
+                            <input id="image" type="file" name="image" accept=".gif, .png, .jpg, .jpeg, .svg, .webp" class="form-control-file" />
                             <small class="text-muted mt-1 d-block">Recommended size 500x500px.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="image2">Foto Produk 2</label>
+                            <input id="image2" type="file" name="image2" accept=".gif, .png, .jpg, .jpeg, .svg, .webp" class="form-control-file" />
+                        </div>
+                        <div class="form-group">
+                            <label for="image3">Foto Produk 3</label>
+                            <input id="image3" type="file" name="image3" accept=".gif, .png, .jpg, .jpeg, .svg, .webp" class="form-control-file" />
+                        </div>
+                        <div class="form-group">
+                            <label for="image4">Foto Produk 4</label>
+                            <input id="image4" type="file" name="image4" accept=".gif, .png, .jpg, .jpeg, .svg, .webp" class="form-control-file" />
                         </div>
                     </div>
                 </div>
@@ -305,6 +405,19 @@
         if(html === '<p><br></p>') html = '';
         document.getElementById('description').value = html;
     });
+
+    // Unlimited stock toggle
+    function toggleStockInput(cb) {
+        var stockInput = document.getElementById('stock');
+        if(cb.checked) {
+            stockInput.value = '';
+            stockInput.disabled = true;
+            stockInput.placeholder = 'Unlimited';
+        } else {
+            stockInput.disabled = false;
+            stockInput.placeholder = '0';
+        }
+    }
 
     // Product type toggle
     function toggleProductTypeFields(type) {

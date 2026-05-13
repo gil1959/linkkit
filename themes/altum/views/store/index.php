@@ -46,7 +46,7 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .s-card-img{position:relative;padding-top:100%;background:#f3f4f6;overflow:hidden}
 .s-card-img img,.s-card-img .s-no-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .s-no-img{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ede9fe,#ddd6fe);font-size:2.2rem;color:#7c3aed}
-.s-type-badge{position:absolute;top:8px;left:8px;background:rgba(79,70,229,.85);color:#fff;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px}
+.s-type-badge{position:absolute;top:8px;right:8px;background:rgba(79,70,229,.85);color:#fff;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:2}
 .s-quick-cart{position:absolute;bottom:8px;right:8px;width:34px;height:34px;background:#4f46e5;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.4);transition:.2s;font-size:.85rem}
 .s-quick-cart:hover{background:#3730a3;transform:scale(1.1)}
 .s-card-body{padding:12px;flex:1;display:flex;flex-direction:column}
@@ -66,6 +66,15 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .s-modal-close:hover{color:#111827}
 .s-modal-img{width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:18px;background:#f3f4f6}
 .s-modal-no-img{width:100%;height:220px;border-radius:12px;margin-bottom:18px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;font-size:3.5rem;color:#7c3aed}
+.s-modal-slider { position: relative; width: 100%; height: 220px; border-radius: 12px; margin-bottom: 18px; overflow: hidden; background: #f3f4f6; }
+.s-modal-slider .slide-img { width: 100%; height: 100%; object-fit: cover; }
+.s-modal-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; z-index: 10; }
+.s-modal-nav:hover { background: rgba(0,0,0,0.8); }
+.s-modal-nav.prev { left: 8px; }
+.s-modal-nav.next { right: 8px; }
+.s-modal-dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 10; }
+.s-modal-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.s-modal-dot.active { background: #fff; transform: scale(1.2); }
 .s-modal-name{font-size:1.2rem;font-weight:800;margin:0 0 6px}
 .s-modal-price{font-size:1.4rem;font-weight:800;color:#4f46e5;margin-bottom:8px}
 .s-modal-stock{font-size:.8rem;color:#6b7280;margin-bottom:12px}
@@ -183,12 +192,18 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
     <div class="s-bar">
         <div class="s-tabs">
             <button class="s-tab active" data-cat="all">Semua</button>
-            <?php
-            $cats = array_unique(array_map(fn($i) => $i->type, $data->items));
-            foreach($cats as $c):
-            ?>
-                <button class="s-tab" data-cat="<?= $c ?>"><?= ucwords(str_replace('_',' ',$c)) ?></button>
-            <?php endforeach ?>
+            <?php if(!empty($data->listings)): ?>
+                <?php foreach($data->listings as $l): ?>
+                    <button class="s-tab" data-cat="list-<?= $l->id ?>"><?= htmlspecialchars($l->name) ?></button>
+                <?php endforeach ?>
+            <?php else: ?>
+                <?php
+                $cats = array_unique(array_map(fn($i) => $i->type, $data->items));
+                foreach($cats as $c):
+                ?>
+                    <button class="s-tab" data-cat="<?= $c ?>"><?= ucwords(str_replace('_',' ',$c)) ?></button>
+                <?php endforeach ?>
+            <?php endif ?>
         </div>
     </div>
 
@@ -198,22 +213,33 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
             <?php foreach($data->items as $item): ?>
                 <div class="s-card"
                      data-name="<?= strtolower(htmlspecialchars($item->name)) ?>"
-                     data-cat="<?= $item->type ?>"
+                     data-cat="<?= !empty($item->listing_id) ? 'list-'.$item->listing_id : $item->type ?>"
                      onclick="openDetail(<?= $item->id ?>)">
                     <div class="s-card-img">
+                        <?php if(!empty($item->is_flash_sale)): ?>
+                            <div style="position:absolute;top:8px;left:8px;background:#ef4444;color:#fff;font-size:.65rem;padding:3px 8px;border-radius:12px;font-weight:700;z-index:2;box-shadow:0 2px 4px rgba(0,0,0,0.1)"><i class="fas fa-bolt" style="margin-right:4px"></i>Flash Sale</div>
+                        <?php endif ?>
+                        <?php if(!empty($item->has_discount)): ?>
+                            <div style="position:absolute;top:<?= !empty($item->is_flash_sale) ? '34px' : '8px' ?>;left:8px;background:#f59e0b;color:#fff;font-size:.65rem;padding:3px 8px;border-radius:12px;font-weight:700;z-index:2;box-shadow:0 2px 4px rgba(0,0,0,0.1)"><i class="fas fa-tag" style="margin-right:4px"></i>Diskon</div>
+                        <?php endif ?>
                         <?php if($item->image): ?>
                             <img src="<?= \Altum\Uploads::get_full_url('shop_items') . $item->image ?>" alt="">
                         <?php else: ?>
                             <div class="s-no-img"><i class="fas fa-box"></i></div>
                         <?php endif ?>
-                        <span class="s-type-badge"><?= ucwords(str_replace('_',' ',$item->type)) ?></span>
-                        <button class="s-quick-cart" onclick="event.stopPropagation(); quickAddCart(<?= $item->id ?>)" title="Tambah ke keranjang">
-                            <i class="fas fa-cart-plus"></i>
+                        <span class="s-type-badge"><?= $item->type === 'physical' ? 'Produk Fisik' : ucwords(str_replace('_',' ',$item->type)) ?></span>
+                        <button class="s-quick-cart" onclick="event.stopPropagation(); <?= !empty($item->has_variants) || !empty($item->is_flexible_amount) ? 'openDetail('.$item->id.')' : 'quickAddCart('.$item->id.')' ?>" title="<?= !empty($item->has_variants) ? 'Pilih Varian' : 'Tambah ke keranjang' ?>">
+                            <i class="<?= !empty($item->has_variants) || !empty($item->is_flexible_amount) ? 'fas fa-list' : 'fas fa-cart-plus' ?>"></i>
                         </button>
                     </div>
                     <div class="s-card-body">
                         <div class="s-card-name"><?= htmlspecialchars($item->name) ?></div>
-                        <div class="s-card-price">Rp <?= number_format($item->price,0,',','.') ?></div>
+                        <div class="s-card-price">
+                            <?php if(!empty($item->is_flexible_amount)): ?>
+                                <span style="font-size:.7rem;color:#6b7280;font-weight:normal">Mulai dari</span> 
+                            <?php endif ?>
+                            Rp <?= number_format($item->price,0,',','.') ?>
+                        </div>
                         <div class="s-card-stock">
                             <?php if($item->stock === null): ?>
                                 <i class="fas fa-infinity fa-xs"></i> Unlimited
@@ -297,13 +323,22 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 var STORE_URL = '<?= SITE_URL ?>store-checkout/';
 var PRODUCTS = <?= json_encode(array_map(function($i){
     return [
-        'id'    => $i->id,
-        'name'  => $i->name,
-        'price' => (float)$i->price,
-        'stock' => $i->stock,
-        'type'  => $i->type,
-        'image' => $i->image ? \Altum\Uploads::get_full_url('shop_items') . $i->image : null,
-        'description' => $i->description ?? '',
+        'id'                  => $i->id,
+        'name'                => $i->name,
+        'price'               => (float)$i->price,
+        'stock'               => $i->stock,
+        'type'                => $i->type,
+        'image'               => $i->image ? \Altum\Uploads::get_full_url('shop_items') . $i->image : null,
+        'image2'              => isset($i->image2) && $i->image2 ? \Altum\Uploads::get_full_url('shop_items') . $i->image2 : null,
+        'image3'              => isset($i->image3) && $i->image3 ? \Altum\Uploads::get_full_url('shop_items') . $i->image3 : null,
+        'image4'              => isset($i->image4) && $i->image4 ? \Altum\Uploads::get_full_url('shop_items') . $i->image4 : null,
+        'description'         => $i->description ?? '',
+        'is_flexible_amount'  => !empty($i->is_flexible_amount),
+        'has_variants'        => !empty($i->has_variants),
+        'has_discount'        => !empty($i->has_discount),
+        'is_flash_sale'       => !empty($i->is_flash_sale),
+        'listing_id'          => $i->listing_id ?? null,
+        'qty_per_transaction' => $i->qty_per_transaction ?? 0,
     ];
 }, $data->items)) ?>;
 
@@ -348,26 +383,95 @@ function filterStore(){
 function openDetail(id){
     var p = findProduct(id);
     if(!p) return;
-    var imgHtml = p.image
-        ? '<img class="s-modal-img" src="'+p.image+'" alt="">'
-        : '<div class="s-modal-no-img"><i class="fas fa-box"></i></div>';
+    
+    var images = [];
+    if(p.image) images.push(p.image);
+    if(p.image2) images.push(p.image2);
+    if(p.image3) images.push(p.image3);
+    if(p.image4) images.push(p.image4);
+    
+    var imgHtml = '';
+    if(images.length > 0) {
+        var sliderHtml = images.map(function(img, idx) {
+            return '<img class="s-modal-img slide-img" data-idx="'+idx+'" src="'+img+'" alt="" style="display:'+(idx===0?'block':'none')+'; margin-bottom: 0;">';
+        }).join('');
+        
+        var navHtml = '';
+        if(images.length > 1) {
+            navHtml = '<button class="s-modal-nav prev" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>' +
+                      '<button class="s-modal-nav next" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>' +
+                      '<div class="s-modal-dots">' +
+                      images.map(function(img, idx) { return '<span class="s-modal-dot '+(idx===0?'active':'')+'" onclick="goToSlide('+idx+')"></span>'; }).join('') +
+                      '</div>';
+        }
+        
+        imgHtml = '<div class="s-modal-slider" id="productSlider" data-current="0" data-total="'+images.length+'">' + sliderHtml + navHtml + '</div>';
+    } else {
+        imgHtml = '<div class="s-modal-no-img"><i class="fas fa-box"></i></div>';
+    }
+
     var stockHtml = p.stock === null
         ? 'Stok unlimited'
         : (p.stock > 0 ? p.stock+' tersedia' : 'Habis');
+        
+    var flashSaleBadge = p.is_flash_sale ? '<span style="background:#ef4444;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-bolt" style="margin-right:4px"></i>Flash Sale</span>' : '';
+    var discountBadge = p.has_discount ? '<span style="background:#f59e0b;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-tag" style="margin-right:4px"></i>Diskon</span>' : '';
+    var priceDisplay = p.is_flexible_amount ? '<span style="font-size:0.9rem;color:#6b7280;font-weight:normal">Mulai dari</span> ' + fmtRp(p.price) : fmtRp(p.price);
+
+    var btnAddHtml = p.has_variants ? '' : '<button class="btn-add-cart" id="btnAddCart_'+id+'"><i class="fas fa-cart-plus" style="margin-right:4px"></i>Tambah ke Keranjang</button>';
+    var btnBuyHtml = p.has_variants 
+        ? '<button class="btn-buy-now" id="btnBuyNow_'+id+'"><i class="fas fa-list" style="margin-right:4px"></i>Pilih Varian</button>'
+        : '<button class="btn-buy-now" id="btnBuyNow_'+id+'"><i class="fas fa-bolt" style="margin-right:4px"></i>Beli Sekarang</button>';
+
+    var maxQty = p.stock !== null ? p.stock : 9999;
+    if(p.qty_per_transaction > 0 && p.qty_per_transaction < maxQty) {
+        maxQty = p.qty_per_transaction;
+    }
+    
+    var inputsHtml = '';
+    if (!p.has_variants) {
+        var qtyInput = '<div style="flex:1"><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:6px">Kuantitas</label><input type="number" id="s_qty_'+id+'" value="1" min="1" max="'+maxQty+'" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;outline:none" onfocus="this.style.borderColor=\'#6366f1\'" onblur="this.style.borderColor=\'#cbd5e1\'"></div>';
+        
+        var priceInput = '';
+        if (p.is_flexible_amount) {
+            priceInput = '<div style="flex:2"><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:6px">Harga Anda (Min: '+fmtRp(p.price)+')</label><input type="number" id="s_price_'+id+'" value="'+p.price+'" min="'+p.price+'" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;outline:none" onfocus="this.style.borderColor=\'#6366f1\'" onblur="this.style.borderColor=\'#cbd5e1\'"></div>';
+        }
+        
+        inputsHtml = '<div style="display:flex;gap:12px;margin-bottom:18px">' + qtyInput + priceInput + '</div>';
+    }
+
     document.getElementById('modalContent').innerHTML =
         imgHtml +
+        (flashSaleBadge || discountBadge ? '<div style="margin-bottom:10px">' + flashSaleBadge + discountBadge + '</div>' : '') +
         '<p class="s-modal-name">'+escHtml(p.name)+'</p>'+
-        '<p class="s-modal-price">'+fmtRp(p.price)+'</p>'+
+        '<p class="s-modal-price">'+priceDisplay+'</p>'+
         '<p class="s-modal-stock">'+escHtml(stockHtml)+'</p>'+
         (p.description ? '<div class="s-modal-desc">'+p.description+'</div>' : '')+
+        inputsHtml +
         '<div class="s-modal-actions">'+
-            '<button class="btn-add-cart" id="btnAddCart_'+id+'"><i class="fas fa-cart-plus" style="margin-right:4px"></i>Tambah ke Keranjang</button>'+
-            '<button class="btn-buy-now" id="btnBuyNow_'+id+'"><i class="fas fa-bolt" style="margin-right:4px"></i>Beli Sekarang</button>'+
+            btnAddHtml +
+            btnBuyHtml +
         '</div>';
     /* attach listeners setelah render */
-    document.getElementById('btnAddCart_'+id).onclick = function(){
-        addCart(id); closeDetail(); showCart();
-    };
+    if(document.getElementById('btnAddCart_'+id)) {
+        document.getElementById('btnAddCart_'+id).onclick = function(){
+            var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
+            var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || p.price : p.price;
+            
+            if(q > maxQty) {
+                alert('Maksimal pembelian ' + maxQty + ' item per transaksi.');
+                return;
+            }
+            if(pr < p.price) {
+                alert('Harga minimal adalah ' + fmtRp(p.price));
+                return;
+            }
+            
+            addCart(id, q, pr); 
+            closeDetail(); 
+            showCart();
+        };
+    }
     document.getElementById('btnBuyNow_'+id).onclick = function(){
         window.location = STORE_URL + id;
     };
@@ -377,14 +481,47 @@ function closeDetail(){
     document.getElementById('detailOverlay').classList.remove('show');
 }
 
+function changeSlide(dir) {
+    var slider = document.getElementById('productSlider');
+    if(!slider) return;
+    var total = parseInt(slider.getAttribute('data-total'));
+    var current = parseInt(slider.getAttribute('data-current'));
+    var next = current + dir;
+    if(next >= total) next = 0;
+    if(next < 0) next = total - 1;
+    goToSlide(next);
+}
+
+function goToSlide(idx) {
+    var slider = document.getElementById('productSlider');
+    if(!slider) return;
+    
+    var slides = slider.querySelectorAll('.slide-img');
+    var dots = slider.querySelectorAll('.s-modal-dot');
+    
+    slides.forEach(function(s) { s.style.display = 'none'; });
+    dots.forEach(function(d) { d.classList.remove('active'); });
+    
+    slides[idx].style.display = 'block';
+    if(dots[idx]) dots[idx].classList.add('active');
+    
+    slider.setAttribute('data-current', idx);
+}
+
 /* ── cart functions ── */
-function addCart(id){
+function addCart(id, qty = 1, price = null){
     id = Number(id);
     var p = findProduct(id);
     if(!p) return;
-    var exist = cart.find(function(c){ return c.id === id; });
-    if(exist){ exist.qty++; }
-    else{ cart.push({id:id, name:p.name, price:Number(p.price), image:p.image, qty:1}); }
+    
+    var finalPrice = price !== null ? price : Number(p.price);
+    
+    var exist = cart.find(function(c){ return c.id === id && c.price === finalPrice; });
+    if(exist){ 
+        exist.qty += qty; 
+    } else { 
+        cart.push({id:id, name:p.name, price:finalPrice, image:p.image, qty:qty}); 
+    }
     saveCart();
     updateCartUI();
 }

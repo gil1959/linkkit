@@ -15,7 +15,8 @@ class ShopVerification extends Controller {
 
         \Altum\Authentication::guard();
 
-        $verification = database()->query("SELECT * FROM `shop_verifications` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null;
+        $result = database()->query("SELECT * FROM `shop_verifications` WHERE `user_id` = " . (int)$this->user->user_id);
+        $verification = $result ? $result->fetch_object() : null;
         $status       = $this->user->verification_status ?? 'unverified';
 
         if(!empty($_POST)) {

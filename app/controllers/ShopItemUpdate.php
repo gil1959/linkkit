@@ -24,6 +24,15 @@ class ShopItemUpdate extends Controller {
             redirect('shop');
         }
 
+        /* Ambil daftar listing/kategori toko untuk dropdown Product Listing */
+        $listings_result = database()->query("SELECT * FROM `shop_listings` WHERE `shop_id` = {$shop->id}");
+        $listings = [];
+        if ($listings_result) {
+            while($row = $listings_result->fetch_object()) {
+                $listings[] = $row;
+            }
+        }
+
         if(!empty($_POST)) {
             if(!\Altum\Csrf::check()) {
                 Alerts::add_error(l('global.error_message.invalid_csrf_token'));
@@ -40,6 +49,13 @@ class ShopItemUpdate extends Controller {
                                     ? $_POST['type'] : 'download_link';
             $_POST['stock']       = (isset($_POST['stock']) && $_POST['stock'] !== '') ? abs((int) $_POST['stock']) : null;
             $_POST['status']      = isset($_POST['status']) ? 1 : 0;
+
+            $_POST['listing_id']          = (isset($_POST['listing_id']) && $_POST['listing_id'] !== '') ? (int) $_POST['listing_id'] : null;
+            $_POST['is_flexible_amount']  = isset($_POST['is_flexible_amount']) ? 1 : 0;
+            $_POST['has_variants']        = isset($_POST['has_variants']) ? 1 : 0;
+            $_POST['qty_per_transaction'] = (isset($_POST['qty_per_transaction']) && (int)$_POST['qty_per_transaction'] > 0) ? (int) $_POST['qty_per_transaction'] : null;
+            $_POST['has_discount']        = isset($_POST['has_discount']) ? 1 : 0;
+            $_POST['is_flash_sale']       = isset($_POST['is_flash_sale']) ? 1 : 0;
 
             /* Physical product fields */
             $weight = null; $length = null; $width = null; $height = null;
@@ -58,17 +74,29 @@ class ShopItemUpdate extends Controller {
 
             /* Handle image upload */
             $image = \Altum\Uploads::process_upload($item->image, 'shop_items', 'image', 'image_remove', 5);
+            $image2 = \Altum\Uploads::process_upload($item->image2 ?? null, 'shop_items', 'image2', 'image2_remove', 5);
+            $image3 = \Altum\Uploads::process_upload($item->image3 ?? null, 'shop_items', 'image3', 'image3_remove', 5);
+            $image4 = \Altum\Uploads::process_upload($item->image4 ?? null, 'shop_items', 'image4', 'image4_remove', 5);
 
             if(!Alerts::has_field_errors() && !Alerts::has_errors()) {
                 $stmt = database()->prepare("
                     UPDATE `shop_items` SET
+                        `listing_id` = ?,
                         `type` = ?,
                         `download_links` = ?,
                         `name` = ?,
                         `description` = ?,
                         `image` = ?,
+                        `image2` = ?,
+                        `image3` = ?,
+                        `image4` = ?,
                         `price` = ?,
+                        `is_flexible_amount` = ?,
+                        `has_variants` = ?,
                         `stock` = ?,
+                        `qty_per_transaction` = ?,
+                        `has_discount` = ?,
+                        `is_flash_sale` = ?,
                         `weight` = ?,
                         `length` = ?,
                         `width` = ?,
@@ -77,14 +105,23 @@ class ShopItemUpdate extends Controller {
                     WHERE `id` = ? AND `shop_id` = ?
                 ");
                 $stmt->bind_param(
-                    'sssssdidiiiiii',
+                    'issssssssdiiiiiiidiiiii',
+                    $_POST['listing_id'],
                     $_POST['type'],
                     $download_links,
                     $_POST['name'],
                     $_POST['description'],
                     $image,
+                    $image2,
+                    $image3,
+                    $image4,
                     $_POST['price'],
+                    $_POST['is_flexible_amount'],
+                    $_POST['has_variants'],
                     $_POST['stock'],
+                    $_POST['qty_per_transaction'],
+                    $_POST['has_discount'],
+                    $_POST['is_flash_sale'],
                     $weight,
                     $length,
                     $width,
@@ -111,9 +148,10 @@ class ShopItemUpdate extends Controller {
         Title::set('Edit Product - ' . $item->name);
         $view = new \Altum\View('shop_item_update/index', (array) $this);
         $this->add_view_content('content', $view->run([
-            'shop' => $shop,
-            'item' => $item,
+            'shop'                   => $shop,
+            'item'                   => $item,
             'existing_download_link' => $existing_download_link,
+            'listings'               => $listings,
         ]));
     }
 }

@@ -272,6 +272,24 @@ class StoreCheckout extends Controller {
                     redirect('store-checkout-success/' . $invoice_number);
 
                 } elseif($primary_gateway === 'tripay') {
+                    $tripay_order_items = [
+                        [
+                            'sku'      => 'ITEM-' . $item->id,
+                            'name'     => $item->name,
+                            'price'    => (int) max(0, $base_total - $discount_amount),
+                            'quantity' => $qty
+                        ]
+                    ];
+
+                    if($shipping_cost > 0) {
+                        $tripay_order_items[] = [
+                            'sku'      => 'SHIP',
+                            'name'     => 'Ongkos Kirim (' . strtoupper($shipping_courier) . ')',
+                            'price'    => (int) $shipping_cost,
+                            'quantity' => 1
+                        ];
+                    }
+
                     $payload = [
                         'method'         => $method,
                         'merchant_ref'   => $invoice_number,
@@ -279,7 +297,7 @@ class StoreCheckout extends Controller {
                         'customer_name'  => $full_name,
                         'customer_email' => $email,
                         'customer_phone' => $phone,
-                        'order_items'    => [['sku' => 'ITEM-'.$item->id, 'name' => $item->name, 'price' => (int)$item->price, 'quantity' => $qty]],
+                        'order_items'    => $tripay_order_items,
                         'return_url'     => SITE_URL . 'store-checkout-success/' . $invoice_number,
                         'callback_url'   => SITE_URL . 'webhook-tripay',
                         'expired_time'   => (time() + (24 * 60 * 60)),

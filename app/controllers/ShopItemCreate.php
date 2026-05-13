@@ -24,6 +24,15 @@ class ShopItemCreate extends Controller {
             unset($_SESSION['pending_physical_product']);
         }
 
+        /* Ambil daftar listing/kategori toko untuk dropdown Product Listing */
+        $listings_result = database()->query("SELECT * FROM `shop_listings` WHERE `shop_id` = {$shop->id}");
+        $listings = [];
+        if ($listings_result) {
+            while($row = $listings_result->fetch_object()) {
+                $listings[] = $row;
+            }
+        }
+
         if(!empty($_POST)) {
             /* Input validation */
             if(!\Altum\Csrf::check()) {
@@ -42,6 +51,13 @@ class ShopItemCreate extends Controller {
             $_POST['price']       = abs((float) ($_POST['price'] ?? 0));
             $_POST['type']        = in_array($_POST['type'] ?? '', $allowed_types) ? $_POST['type'] : 'download_link';
             $_POST['stock']       = (isset($_POST['stock']) && $_POST['stock'] !== '') ? abs((int) $_POST['stock']) : null;
+            
+            $_POST['listing_id']          = (isset($_POST['listing_id']) && $_POST['listing_id'] !== '') ? (int) $_POST['listing_id'] : null;
+            $_POST['is_flexible_amount']  = isset($_POST['is_flexible_amount']) ? 1 : 0;
+            $_POST['has_variants']        = isset($_POST['has_variants']) ? 1 : 0;
+            $_POST['qty_per_transaction'] = (isset($_POST['qty_per_transaction']) && (int)$_POST['qty_per_transaction'] > 0) ? (int) $_POST['qty_per_transaction'] : null;
+            $_POST['has_discount']        = isset($_POST['has_discount']) ? 1 : 0;
+            $_POST['is_flash_sale']       = isset($_POST['is_flash_sale']) ? 1 : 0;
 
             /* Physical product fields */
             $weight = null; $length = null; $width = null; $height = null;
@@ -69,24 +85,36 @@ class ShopItemCreate extends Controller {
 
             /* Handle image upload */
             $image = \Altum\Uploads::process_upload(null, 'shop_items', 'image', 'image_remove', 5);
+            $image2 = \Altum\Uploads::process_upload(null, 'shop_items', 'image2', 'image2_remove', 5);
+            $image3 = \Altum\Uploads::process_upload(null, 'shop_items', 'image3', 'image3_remove', 5);
+            $image4 = \Altum\Uploads::process_upload(null, 'shop_items', 'image4', 'image4_remove', 5);
 
             if(!Alerts::has_field_errors() && !Alerts::has_errors()) {
                 $datetime = \Altum\Date::$date;
                 $stmt = database()->prepare("
                     INSERT INTO `shop_items`
-                    (`shop_id`, `type`, `download_links`, `name`, `description`, `image`, `price`, `stock`, `weight`, `length`, `width`, `height`, `status`, `datetime`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                    (`shop_id`, `listing_id`, `type`, `download_links`, `name`, `description`, `image`, `image2`, `image3`, `image4`, `price`, `is_flexible_amount`, `has_variants`, `stock`, `qty_per_transaction`, `has_discount`, `is_flash_sale`, `weight`, `length`, `width`, `height`, `status`, `datetime`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
                 ");
                 $stmt->bind_param(
-                    'isssssdidiiis',
+                    'iissssssssdiiiiiidiiis',
                     $shop->id,
+                    $_POST['listing_id'],
                     $_POST['type'],
                     $download_links,
                     $_POST['name'],
                     $_POST['description'],
                     $image,
+                    $image2,
+                    $image3,
+                    $image4,
                     $_POST['price'],
+                    $_POST['is_flexible_amount'],
+                    $_POST['has_variants'],
                     $_POST['stock'],
+                    $_POST['qty_per_transaction'],
+                    $_POST['has_discount'],
+                    $_POST['is_flash_sale'],
                     $weight,
                     $length,
                     $width,
@@ -104,8 +132,9 @@ class ShopItemCreate extends Controller {
         Title::set('Add Product - ' . $shop->name);
         $view = new \Altum\View('shop_item_create/index', (array) $this);
         $this->add_view_content('content', $view->run([
-            'shop'  => $shop,
-            'draft' => $draft,
+            'shop'     => $shop,
+            'draft'    => $draft,
+            'listings' => $listings,
         ]));
     }
 }

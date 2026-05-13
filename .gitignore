@@ -1,0 +1,46 @@
+# Configuration & Secrets
+config.php
+.env
+*.env
+*.secret
+
+# Vendor & Dependencies
+vendor/
+node_modules/
+
+# Uploads & User Data
+uploads/
+!uploads/.htaccess
+!uploads/index.html
+
+# Logs
+*.log
+error_log
+
+# OS Generated
+.DS_Store
+Thumbs.db
+
+# IDE & Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing & Scratch Files (Not needed for production codebase)
+scratch/
+gen_sql.php
+db_fix.php
+db_insert_test.php
+check_schema.php
+db_check*.php
+run_migration.php
+schema_dump.json
+test_*.php
+*.ps1
+
+# Docker cache
+.docker/

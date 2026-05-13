@@ -61,7 +61,7 @@ class AdminShopVerifications extends Controller {
             if(!\Altum\Csrf::check('token')) {
                 Alerts::add_error('Invalid CSRF token.');
             } else {
-                $reason = input_clean($_POST['rejection_reason'] ?? 'Dokumen tidak valid.');
+                $reason = input_clean($_POST['rejection_reason'] ?? ($_POST['reason'] ?? 'Dokumen tidak valid.'));
                 $v = database()->query("SELECT * FROM `shop_verifications` WHERE `id` = {$verify_id}")->fetch_object();
                 if($v) {
                     $reviewed_at = \Altum\Date::$date;
@@ -104,20 +104,22 @@ class AdminShopVerifications extends Controller {
         $filter    = input_clean($_GET['status'] ?? 'pending');
         $status_q  = in_array($filter, ['pending','verified','rejected']) ? "WHERE v.`status` = '{$filter}'" : '';
 
-        $verifications = database()->query("
+        $result = database()->query("
             SELECT v.*, u.email, u.name AS user_name
             FROM `shop_verifications` v
             JOIN `users` u ON v.user_id = u.user_id
             {$status_q}
             ORDER BY v.submitted_at DESC
             LIMIT 100
-        ")->fetch_all(MYSQLI_ASSOC);
+        ");
+        $verifications = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
         $verifications = array_map(fn($r) => (object)$r, $verifications);
 
-        $counts = database()->query("
+        $result_counts = database()->query("
             SELECT `status`, COUNT(*) as cnt FROM `shop_verifications` GROUP BY `status`
-        ")->fetch_all(MYSQLI_ASSOC);
+        ");
+        $counts = $result_counts ? $result_counts->fetch_all(MYSQLI_ASSOC) : [];
         $cnt = ['pending' => 0, 'verified' => 0, 'rejected' => 0];
         foreach($counts as $c) $cnt[$c['status']] = (int)$c['cnt'];
 

@@ -29,10 +29,7 @@
 
                         <div class="form-group">
                             <label for="description_editor">Product Description</label>
-                            <!-- Hidden input carries the HTML to the server -->
                             <input type="hidden" id="description" name="description" value="" />
-
-                            <!-- Quill toolbar -->
                             <div id="ql-toolbar" class="ql-toolbar ql-snow">
                                 <span class="ql-formats">
                                     <select class="ql-header">
@@ -69,25 +66,118 @@
                                 </span>
                             </div>
                             <div id="description_editor" style="min-height: 180px;"></div>
-
-                            <small class="text-muted mt-1 d-block">Supports <strong>bold</strong>, <em>italic</em>, lists, headings, and hyperlinks. No image upload.</small>
+                            <small class="text-muted mt-1 d-block">Supports <strong>bold</strong>, <em>italic</em>, lists, headings, and hyperlinks.</small>
                         </div>
 
+                        <!-- Product Listing Dropdown -->
+                        <div class="form-group">
+                            <label for="listing_id">Product Listing</label>
+                            <select id="listing_id" name="listing_id" class="form-control">
+                                <option value="">No Listing</option>
+                                <?php foreach($data->listings as $listing): ?>
+                                    <option value="<?= $listing->id ?>"
+                                        <?= (isset($data->item->listing_id) && $data->item->listing_id == $listing->id) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($listing->name) ?>
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <small class="text-muted mt-1 d-block">Products that will be compiled in listing format</small>
+                        </div>
+
+                        <!-- Flexible Amount -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-sliders-h text-primary mr-2"></i><strong>Flexible Amount</strong></div>
+                                    <small class="text-muted">Let buyers determine the amount they want to pay.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="is_flexible_amount" name="is_flexible_amount" value="1" <?= !empty($data->item->is_flexible_amount) ? 'checked' : '' ?>>
+                                    <label class="custom-control-label" for="is_flexible_amount"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Variants -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-layer-group text-primary mr-2"></i><strong>Product Variants</strong></div>
+                                    <small class="text-muted">Add product variants with different prices.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="has_variants" name="has_variants" value="1" <?= !empty($data->item->has_variants) ? 'checked' : '' ?>>
+                                    <label class="custom-control-label" for="has_variants"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price & Stock -->
                         <div class="row">
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
                                     <label for="price">Price (Rp)</label>
-                                    <input type="number" id="price" name="price" class="form-control" required step="1" value="<?= $data->item->price ?>" />
+                                    <div class="input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
+                                        <input type="number" id="price" name="price" class="form-control" required step="1" value="<?= $data->item->price ?>" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
-                                    <label for="stock">Stock (Leave empty for unlimited)</label>
-                                    <input type="number" id="stock" name="stock" class="form-control" value="<?= $data->item->stock ?>" />
+                                    <label>Stock</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number" id="stock" name="stock" class="form-control mr-2"
+                                            value="<?= $data->item->stock !== null ? $data->item->stock : '' ?>"
+                                            <?= $data->item->stock === null ? 'disabled placeholder="Unlimited"' : '' ?> />
+                                        <div class="custom-control custom-switch" style="white-space:nowrap">
+                                            <input type="checkbox" class="custom-control-input" id="unlimited_stock"
+                                                onchange="toggleStockInput(this)"
+                                                <?= $data->item->stock === null ? 'checked' : '' ?>>
+                                            <label class="custom-control-label" for="unlimited_stock">Unlimited</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Qty per Transaction -->
+                        <div class="form-group">
+                            <label for="qty_per_transaction"><i class="fas fa-sort-amount-up-alt fa-sm mr-1"></i> Qty per Transaction</label>
+                            <input type="number" id="qty_per_transaction" name="qty_per_transaction" class="form-control" min="0"
+                                value="<?= htmlspecialchars($data->item->qty_per_transaction ?? 0) ?>" />
+                            <small class="text-muted">Maximum items per transaction. Leave 0 for no limit.</small>
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-tag text-warning mr-2"></i><strong>Discount</strong></div>
+                                    <small class="text-muted">Offer price discounts to attract more buyers.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="has_discount" name="has_discount" value="1" <?= !empty($data->item->has_discount) ? 'checked' : '' ?>>
+                                    <label class="custom-control-label" for="has_discount"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flash Sale -->
+                        <div class="card mb-3" style="border:1px solid #e5e7eb;border-radius:10px">
+                            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div><i class="fas fa-bolt text-warning mr-2"></i><strong>Flash Sale</strong></div>
+                                    <small class="text-muted">Show flash sale badge and countdown to create purchase urgency.</small>
+                                </div>
+                                <div class="custom-control custom-switch ml-3">
+                                    <input type="checkbox" class="custom-control-input" id="is_flash_sale" name="is_flash_sale" value="1" <?= !empty($data->item->is_flash_sale) ? 'checked' : '' ?>>
+                                    <label class="custom-control-label" for="is_flash_sale"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Type -->
                         <div class="form-group">
                             <label for="type">Product Type</label>
                             <select id="type" name="type" class="form-control">
@@ -95,7 +185,7 @@
                                 <option value="webhook_event" <?= $data->item->type == 'webhook_event' ? 'selected' : '' ?>>Webhook Event</option>
                                 <option value="random_code"   <?= $data->item->type == 'random_code'   ? 'selected' : '' ?>>Random Code (Ticket/Event)</option>
                                 <option value="manual"        <?= $data->item->type == 'manual'        ? 'selected' : '' ?>>Manual Process</option>
-                                <option value="physical"      <?= $data->item->type == 'physical'      ? 'selected' : '' ?>>📦 Produk Fisik (Pengiriman)</option>
+                                <option value="physical"      <?= $data->item->type == 'physical'      ? 'selected' : '' ?>>&#x1F4E6; Produk Fisik (Pengiriman)</option>
                             </select>
                         </div>
 
@@ -120,7 +210,7 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <label class="d-block">Dimensi (cm) — Opsional</label>
+                                    <label class="d-block">Dimensi (cm) &mdash; Opsional</label>
                                     <div class="row">
                                         <div class="col-4">
                                             <input type="number" name="length" class="form-control" placeholder="P" min="0" value="<?= htmlspecialchars($data->item->length ?? '') ?>">
@@ -139,6 +229,7 @@
                             </div>
                         </div>
 
+                        <!-- Status Active -->
                         <div class="form-group">
                             <label>Status</label>
                             <div class="custom-control custom-switch">
@@ -150,23 +241,64 @@
 
                     <div class="col-12 col-md-4">
                         <div class="form-group">
-                            <label>Current Image</label>
+                            <label>Foto Produk Utama</label>
                             <?php if($data->item->image): ?>
                                 <div class="mb-2">
                                     <img id="current_image_preview" src="<?= \Altum\Uploads::get_full_url('shop_items') . $data->item->image ?>" class="img-fluid rounded" style="max-height: 200px; object-fit: cover; width: 100%;">
                                 </div>
                                 <div class="custom-control custom-checkbox mb-2">
                                     <input type="checkbox" class="custom-control-input" id="image_remove" name="image_remove">
-                                    <label class="custom-control-label text-danger" for="image_remove">Remove image</label>
+                                    <label class="custom-control-label text-danger" for="image_remove">Hapus Foto Utama</label>
                                 </div>
                             <?php else: ?>
                                 <div id="image_placeholder" class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height:150px;">
                                     <i class="fas fa-image fa-3x text-muted"></i>
                                 </div>
                             <?php endif ?>
-                            <label for="image" class="mt-1">Replace Image</label>
                             <input id="image" type="file" name="image" accept=".gif, .png, .jpg, .jpeg, .webp" class="form-control-file" onchange="previewImage(this, 'current_image_preview')" />
                             <small class="text-muted mt-1 d-block">Recommended size 500x500px.</small>
+                        </div>
+
+                        <div class="form-group border-top pt-3">
+                            <label>Foto Produk 2</label>
+                            <?php if(isset($data->item->image2) && $data->item->image2): ?>
+                                <div class="mb-2">
+                                    <img id="current_image2_preview" src="<?= \Altum\Uploads::get_full_url('shop_items') . $data->item->image2 ?>" class="img-fluid rounded" style="max-height: 200px; object-fit: cover; width: 100%;">
+                                </div>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    <input type="checkbox" class="custom-control-input" id="image2_remove" name="image2_remove">
+                                    <label class="custom-control-label text-danger" for="image2_remove">Hapus Foto 2</label>
+                                </div>
+                            <?php endif ?>
+                            <input id="image2" type="file" name="image2" accept=".gif, .png, .jpg, .jpeg, .webp" class="form-control-file" onchange="previewImage(this, 'current_image2_preview')" />
+                        </div>
+
+                        <div class="form-group border-top pt-3">
+                            <label>Foto Produk 3</label>
+                            <?php if(isset($data->item->image3) && $data->item->image3): ?>
+                                <div class="mb-2">
+                                    <img id="current_image3_preview" src="<?= \Altum\Uploads::get_full_url('shop_items') . $data->item->image3 ?>" class="img-fluid rounded" style="max-height: 200px; object-fit: cover; width: 100%;">
+                                </div>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    <input type="checkbox" class="custom-control-input" id="image3_remove" name="image3_remove">
+                                    <label class="custom-control-label text-danger" for="image3_remove">Hapus Foto 3</label>
+                                </div>
+                            <?php endif ?>
+                            <input id="image3" type="file" name="image3" accept=".gif, .png, .jpg, .jpeg, .webp" class="form-control-file" onchange="previewImage(this, 'current_image3_preview')" />
+                        </div>
+
+                        <div class="form-group border-top pt-3">
+                            <label>Foto Produk 4</label>
+                            <?php if(isset($data->item->image4) && $data->item->image4): ?>
+                                <div class="mb-2">
+                                    <img id="current_image4_preview" src="<?= \Altum\Uploads::get_full_url('shop_items') . $data->item->image4 ?>" class="img-fluid rounded" style="max-height: 200px; object-fit: cover; width: 100%;">
+                                </div>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    <input type="checkbox" class="custom-control-input" id="image4_remove" name="image4_remove">
+                                    <label class="custom-control-label text-danger" for="image4_remove">Hapus Foto 4</label>
+                                </div>
+                            <?php endif ?>
+                            <input id="image4" type="file" name="image4" accept=".gif, .png, .jpg, .jpeg, .webp" class="form-control-file" onchange="previewImage(this, 'current_image4_preview')" />
                         </div>
                     </div>
                 </div>
@@ -186,9 +318,6 @@
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 
 <style>
-/* ── Quill Editor — integrated with app theme ── */
-
-/* Toolbar */
 #ql-toolbar.ql-snow {
     border: 1px solid var(--gray-200);
     border-top-left-radius: var(--border-radius);
@@ -196,8 +325,6 @@
     background: var(--gray-50, #f8f9fa);
     padding: 6px 10px;
 }
-
-/* Editor area */
 #description_editor {
     background: var(--white);
     border: 1px solid var(--gray-200);
@@ -208,10 +335,7 @@
     font-size: .875rem;
     line-height: 1.6;
     color: var(--gray-900);
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
-
-/* Focus ring */
 #description_editor:focus-within,
 #ql-toolbar.ql-snow:focus-within { outline: none; }
 .ql-container.ql-snow.ql-focused,
@@ -219,86 +343,55 @@
     border-color: var(--primary);
     box-shadow: 0 0 0 .2rem rgba(var(--primary-rgb, 79,70,229), .15);
 }
-#ql-toolbar.ql-snow:has(+ #description_editor:focus-within),
-#ql-toolbar.ql-snow:focus-within { border-color: var(--primary); }
-
-.ql-editor {
-    min-height: 180px;
-    padding: 10px 14px;
-    color: var(--gray-900);
-}
-.ql-editor.ql-blank::before {
-    color: var(--gray-400, #9ca3af);
-    font-style: normal;
-}
+.ql-editor { min-height: 180px; padding: 10px 14px; color: var(--gray-900); }
+.ql-editor.ql-blank::before { color: var(--gray-400, #9ca3af); font-style: normal; }
 .ql-editor a { color: var(--primary); text-decoration: underline; }
-
-/* Toolbar icons */
 .ql-snow .ql-stroke { stroke: var(--gray-600); }
 .ql-snow .ql-fill  { fill:   var(--gray-600); }
-.ql-snow .ql-picker { color:  var(--gray-700); }
+.ql-snow .ql-picker { color: var(--gray-700); }
 .ql-snow .ql-picker-options { background: var(--white); border-color: var(--gray-200); }
 .ql-snow .ql-picker-label:hover .ql-stroke,
 .ql-snow .ql-toolbar button:hover .ql-stroke { stroke: var(--primary); }
-.ql-snow .ql-toolbar button.ql-active .ql-stroke,
-.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke { stroke: var(--primary); }
+.ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: var(--primary); }
 .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: var(--primary); }
-
-/* Tooltip */
 .ql-snow .ql-tooltip {
-    z-index: 9999;
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    color: var(--gray-800);
-    box-shadow: 0 4px 16px rgba(0,0,0,.08);
-    padding: 6px 12px;
+    z-index: 9999; background: var(--white); border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius); color: var(--gray-800);
+    box-shadow: 0 4px 16px rgba(0,0,0,.08); padding: 6px 12px;
 }
 .ql-snow .ql-tooltip input[type="text"] {
-    background: var(--white);
-    border: 1px solid var(--gray-300);
-    border-radius: var(--border-radius);
-    color: var(--gray-800);
-    padding: 2px 6px;
+    background: var(--white); border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius); color: var(--gray-800); padding: 2px 6px;
 }
-
-/* ── DARK MODE overrides ── */
-[data-theme-style="dark"] #ql-toolbar.ql-snow {
-    background: var(--gray-100);
-    border-color: var(--gray-300);
-}
-[data-theme-style="dark"] #description_editor {
-    background: var(--gray-50, #1a1d20);
-    border-color: var(--gray-300);
-    color: var(--gray-900);
-}
+[data-theme-style="dark"] #ql-toolbar.ql-snow { background: var(--gray-100); border-color: var(--gray-300); }
+[data-theme-style="dark"] #description_editor { background: var(--gray-50, #1a1d20); border-color: var(--gray-300); color: var(--gray-900); }
 [data-theme-style="dark"] .ql-editor { color: var(--gray-900); }
 [data-theme-style="dark"] .ql-editor.ql-blank::before { color: var(--gray-500); }
 [data-theme-style="dark"] .ql-snow .ql-stroke { stroke: var(--gray-700); }
-[data-theme-style="dark"] .ql-snow .ql-fill  { fill:   var(--gray-700); }
-[data-theme-style="dark"] .ql-snow .ql-picker { color:  var(--gray-800); }
-[data-theme-style="dark"] .ql-snow .ql-picker-options {
-    background: var(--gray-100);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-}
-[data-theme-style="dark"] .ql-snow .ql-tooltip {
-    background: var(--gray-100);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-    box-shadow: 0 4px 16px rgba(0,0,0,.3);
-}
-[data-theme-style="dark"] .ql-snow .ql-tooltip input[type="text"] {
-    background: var(--gray-200);
-    border-color: var(--gray-400);
-    color: var(--gray-900);
-}
+[data-theme-style="dark"] .ql-snow .ql-fill  { fill: var(--gray-700); }
+[data-theme-style="dark"] .ql-snow .ql-picker { color: var(--gray-800); }
+[data-theme-style="dark"] .ql-snow .ql-picker-options { background: var(--gray-100); border-color: var(--gray-300); color: var(--gray-800); }
+[data-theme-style="dark"] .ql-snow .ql-tooltip { background: var(--gray-100); border-color: var(--gray-300); color: var(--gray-800); box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+[data-theme-style="dark"] .ql-snow .ql-tooltip input[type="text"] { background: var(--gray-200); border-color: var(--gray-400); color: var(--gray-900); }
 </style>
 
 <!-- Quill.js JS -->
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <script>
+// Unlimited stock toggle
+function toggleStockInput(cb) {
+    var stockInput = document.getElementById('stock');
+    if(cb.checked) {
+        stockInput.value = '';
+        stockInput.disabled = true;
+        stockInput.placeholder = 'Unlimited';
+    } else {
+        stockInput.disabled = false;
+        stockInput.placeholder = '0';
+    }
+}
+
 // Product type toggle
 function toggleProductTypeFields(type) {
     document.getElementById('download_links_wrapper').style.display  = (type === 'download_link') ? 'block' : 'none';
@@ -334,17 +427,14 @@ var quill = new Quill('#description_editor', {
     theme: 'snow'
 });
 
-// Load existing description HTML into editor
 (function() {
     var existing = <?= json_encode($data->item->description ?? '') ?>;
     if(existing) { quill.root.innerHTML = existing; }
 })();
 
-// On submit: copy editor HTML → hidden input
 document.querySelector('form').addEventListener('submit', function() {
     var html = quill.root.innerHTML;
     if(html === '<p><br></p>') html = '';
     document.getElementById('description').value = html;
 });
-
 </script>
