@@ -74,7 +74,7 @@ class ShopAjax extends Controller {
         }
 
         $all_costs = \Altum\Libraries\RajaOngkir::get_all_costs($origin, $destination, $weight);
-        die(json_encode(['success' => true, 'data' => $all_costs, 'couriers' => \Altum\Libraries\RajaOngkir::COURIERS]));
+        die(json_encode(['success' => true, 'data' => $all_costs, 'couriers' => \Altum\Libraries\RajaOngkir::get_couriers()]));
     }
 
     /* ─────────────────────────────────────────────

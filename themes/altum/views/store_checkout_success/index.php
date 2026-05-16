@@ -214,8 +214,30 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
                     <?= $is_paid ? 'Lunas' : 'Menunggu Bayar' ?>
                 </span>
             </div>
+            
+            <hr style="border:none;border-top:1px dashed #e2e8f0;margin:12px 0 14px">
+            
+            <div class="summary-row">
+                <span>Harga Produk <?= $data->order->qty > 1 ? '(x' . $data->order->qty . ')' : '' ?></span>
+                <span>Rp <?= number_format($data->order->total_amount, 0, ',', '.') ?></span>
+            </div>
+            
+            <?php if($data->order->discount_amount > 0): ?>
+            <div class="summary-row" style="color:#16a34a">
+                <span>Diskon Voucher</span>
+                <span>-Rp <?= number_format($data->order->discount_amount, 0, ',', '.') ?></span>
+            </div>
+            <?php endif; ?>
+            
+            <?php if($data->order->shipping_cost > 0): ?>
+            <div class="summary-row">
+                <span>Ongkos Kirim (<?= strtoupper($data->order->shipping_courier) ?>)</span>
+                <span>Rp <?= number_format($data->order->shipping_cost, 0, ',', '.') ?></span>
+            </div>
+            <?php endif; ?>
+            
             <div class="summary-total">
-                <span>Total</span>
+                <span>Total Bayar</span>
                 <span style="color:#4f46e5">Rp <?= number_format($data->order->grand_total, 0, ',', '.') ?></span>
             </div>
         </div>

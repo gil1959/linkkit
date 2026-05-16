@@ -473,7 +473,19 @@ function openDetail(id){
         };
     }
     document.getElementById('btnBuyNow_'+id).onclick = function(){
-        window.location = STORE_URL + id;
+        var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
+        var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || p.price : p.price;
+        
+        if(q > maxQty) {
+            alert('Maksimal pembelian ' + maxQty + ' item per transaksi.');
+            return;
+        }
+        if(pr < p.price) {
+            alert('Harga minimal adalah ' + fmtRp(p.price));
+            return;
+        }
+
+        window.location = STORE_URL + id + '?qty=' + q + '&price=' + pr;
     };
     document.getElementById('detailOverlay').classList.add('show');
 }
@@ -598,7 +610,8 @@ function toggleOrders(){
 }
 function doCheckout(){
     if(cart.length === 0) return;
-    window.location = STORE_URL + cart[0].id;
+    var c = cart[0];
+    window.location = STORE_URL + c.id + '?qty=' + c.qty + '&price=' + c.price;
 }
 
 /* ── Check Order ── */
