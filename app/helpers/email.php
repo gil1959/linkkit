@@ -173,7 +173,16 @@ function send_mail($to, $title, $content, $data = [], $reply_to = null, $debug =
         $mail->isHTML(true);
 
         /* Set the debugging for phpMailer */
-        $mail->SMTPDebug = $debug ? 2 : 0;
+        $mail->SMTPDebug = $debug ? 4 : 0;
+
+        /* Bypass SSL certificate issues for local cPanel environments */
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
 
         /* SMTP settings */
         if(settings()->smtp->encryption != '0') {
