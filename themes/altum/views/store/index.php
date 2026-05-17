@@ -240,6 +240,11 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
                             <?php endif ?>
                             Rp <?= number_format($item->price,0,',','.') ?>
                         </div>
+                        <?php if(isset($item->review_count) && $item->review_count > 0): ?>
+                        <div style="font-size:.75rem;color:#f59e0b;margin-top:2px;display:flex;align-items:center;gap:4px">
+                            <i class="fas fa-star"></i> <span style="font-weight:700;color:#374151"><?= $item->rating ?></span> <span style="color:#9ca3af">(<?= $item->review_count ?> ulasan)</span>
+                        </div>
+                        <?php endif ?>
                         <div class="s-card-stock">
                             <?php if($item->stock === null): ?>
                                 <i class="fas fa-infinity fa-xs"></i> Unlimited
@@ -339,6 +344,9 @@ var PRODUCTS = <?= json_encode(array_map(function($i){
         'is_flash_sale'       => !empty($i->is_flash_sale),
         'listing_id'          => $i->listing_id ?? null,
         'qty_per_transaction' => $i->qty_per_transaction ?? 0,
+        'rating'              => $i->rating ?? 0,
+        'review_count'        => $i->review_count ?? 0,
+        'reviews'             => $i->reviews ?? [],
     ];
 }, $data->items)) ?>;
 
@@ -440,18 +448,50 @@ function openDetail(id){
         inputsHtml = '<div style="display:flex;gap:12px;margin-bottom:18px">' + qtyInput + priceInput + '</div>';
     }
 
+    var priceAndRating = '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;">' +
+                         '<p class="s-modal-price" style="margin-bottom:0;">'+priceDisplay+'</p>';
+    if(p.review_count && p.review_count > 0) {
+        priceAndRating += '<div style="color:#f59e0b;font-size:0.85rem;display:flex;align-items:center;gap:4px;margin-bottom:4px;"><i class="fas fa-star"></i> <strong style="color:#374151">'+p.rating+'</strong> <span style="color:#9ca3af">('+p.review_count+' ulasan)</span></div>';
+    }
+    priceAndRating += '</div>';
+
+    var reviewsHtml = '';
+    if(p.review_count && p.review_count > 0 && p.reviews) {
+        var listStr = '<div style="display:flex;flex-direction:column;gap:12px;">';
+        p.reviews.forEach(function(r) {
+            var rStars = '';
+            for(var i=1; i<=5; i++) {
+                rStars += '<i class="fas fa-star" style="color:' + (i <= r.rating ? '#f59e0b' : '#e2e8f0') + ';font-size:0.7rem;"></i>';
+            }
+            var reviewerName = r.customer_name || r.customer_email || 'Pembeli';
+            listStr += '<div style="background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #f1f5f9;">' +
+                       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+                           '<div style="font-weight:700;font-size:0.85rem;color:#334155;">' + escHtml(reviewerName) + '</div>' +
+                           '<div style="font-size:0.7rem;color:#94a3b8;">' + (r.datetime ? r.datetime.substring(0,10) : '') + '</div>' +
+                       '</div>' +
+                       '<div style="margin-bottom:6px;">' + rStars + '</div>' +
+                       '<div style="font-size:0.85rem;color:#475569;line-height:1.5;">' + escHtml(r.review) + '</div>' +
+                       '</div>';
+        });
+        listStr += '</div>';
+
+        reviewsHtml = '<div style="margin-top:24px;padding-top:20px;border-top:1px solid #e2e8f0;">' +
+                      '<h4 style="font-size:1rem;font-weight:800;margin:0 0 16px;color:#1e293b;">Ulasan Pembeli</h4>' +
+                      listStr + '</div>';
+    }
+
     document.getElementById('modalContent').innerHTML =
         imgHtml +
         (flashSaleBadge || discountBadge ? '<div style="margin-bottom:10px">' + flashSaleBadge + discountBadge + '</div>' : '') +
         '<p class="s-modal-name">'+escHtml(p.name)+'</p>'+
-        '<p class="s-modal-price">'+priceDisplay+'</p>'+
+        priceAndRating +
         '<p class="s-modal-stock">'+escHtml(stockHtml)+'</p>'+
         (p.description ? '<div class="s-modal-desc">'+p.description+'</div>' : '')+
         inputsHtml +
         '<div class="s-modal-actions">'+
             btnAddHtml +
             btnBuyHtml +
-        '</div>';
+        '</div>' + reviewsHtml;
     /* attach listeners setelah render */
     if(document.getElementById('btnAddCart_'+id)) {
         document.getElementById('btnAddCart_'+id).onclick = function(){
