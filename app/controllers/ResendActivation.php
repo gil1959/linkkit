@@ -81,33 +81,23 @@ class ResendActivation extends Controller {
 
                 if($user && !$user->status) {
                     /* Generate new email code */
-                    $email_code = md5(uniqid('', true) . random_bytes(16));
+                    $email_code = sprintf("%06d", mt_rand(1, 999999));
 
                     /* Update the current activation email */
                     db()->where('user_id', $user->user_id)->update('users', ['email_activation_code' => $email_code]);
 
                     /* Prepare the email */
-                    $email_template = get_email_template(
-                        [
-                            '{{NAME}}' => $user->name,
-                        ],
-                        l('global.emails.user_activation.subject', $user->language),
-                        [
-                            '{{ACTIVATION_LINK}}' => url('activate-user?email=' . md5($_POST['email']) . '&email_activation_code=' . $email_code . '&type=user_activation' . '&redirect=' . $redirect),
-                            '{{NAME}}' => $user->name,
-                        ],
-                        l('global.emails.user_activation.body', $user->language)
-                    );
+                    $subject = "Kirim Ulang: Kode Verifikasi Email Anda";
+                    $body = "Halo " . $user->name . ",<br><br>Sesuai permintaan Anda, berikut adalah kode verifikasi email Anda yang baru: <b>" . $email_code . "</b><br><br>Silakan masukkan kode tersebut di halaman verifikasi.";
 
                     /* Send the email */
-                    send_mail($_POST['email'], $email_template->subject, $email_template->body);
+                    send_mail($_POST['email'], $subject, $body);
 
                     Logger::users($user->user_id, 'resend_activation.request_sent');
                 }
 
                 /* Redirect to email verify */
-                session_set('sent_activation_email', $_POST['email']);
-                redirect('sent-activation?email=' . $_POST['email']);
+                redirect('verify-email?email=' . urlencode($_POST['email']));
             }
         }
 

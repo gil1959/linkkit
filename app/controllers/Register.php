@@ -159,8 +159,8 @@ class Register extends Controller {
                 ];
 
                 /* Define some needed variables */
-                $active 	                = (int) !settings()->users->email_confirmation;
-                $email_code                 = md5(uniqid('', true) . random_bytes(16));
+                $active 	                = 0; // Force to 0 for OTP verification
+                $email_code                 = sprintf("%06d", mt_rand(1, 999999)); // 6-digit OTP
 
                 /* Determine what plan is set by default */
                 $plan_id                    = 'free';
@@ -171,7 +171,7 @@ class Register extends Controller {
                     $_POST['email'],
                     $_POST['password'],
                     $_POST['name'],
-                    (int) !settings()->users->email_confirmation,
+                    $active,
                     'direct',
                     $email_code,
                     null,
@@ -281,23 +281,13 @@ class Register extends Controller {
                 } else {
 
                     /* Prepare the email */
-                    $email_template = get_email_template(
-                        [
-                            '{{NAME}}' => str_replace('.', '. ', $_POST['name']),
-                        ],
-                        l('global.emails.user_activation.subject'),
-                        [
-                            '{{ACTIVATION_LINK}}' => url('activate-user?email=' . md5($_POST['email']) . '&email_activation_code=' . $email_code . '&type=user_activation' . '&redirect=' . $redirect),
-                            '{{NAME}}' => str_replace('.', '. ', $_POST['name']),
-                        ],
-                        l('global.emails.user_activation.body')
-                    );
-
-                    send_mail($_POST['email'], $email_template->subject, $email_template->body);
+                    $subject = "Kode Verifikasi Email Anda";
+                    $body = "Halo " . str_replace('.', '. ', $_POST['name']) . ",<br><br>Kode verifikasi email Anda adalah: <b>" . $email_code . "</b><br><br>Silakan masukkan kode tersebut di halaman verifikasi untuk mengaktifkan akun Anda.";
+                    
+                    send_mail($_POST['email'], $subject, $body);
 
                     /* Redirect to email verify */
-                    session_set('sent_activation_email', $_POST['email']);
-                    redirect('sent-activation?email=' . $_POST['email']);
+                    redirect('verify-email?email=' . urlencode($_POST['email']));
                 }
 
             }

@@ -68,6 +68,44 @@ class Shop extends Controller {
             $total_transactions = database()->query("SELECT COUNT(*) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
             $total_pending_withdrawals = database()->query("SELECT SUM(`amount`) AS `total` FROM `shop_withdrawals` WHERE `user_id` = {$this->user->user_id} AND `status` = 'pending'")->fetch_object()->total ?? 0;
 
+            // Product View & Conversion
+            $total_product_views = 0;
+            try {
+                $stats_query = database()->query("SELECT COUNT(*) AS `total` FROM `shop_statistics` WHERE `shop_id` = {$shop->id} AND `type` = 'click'");
+                if ($stats_query) $total_product_views = $stats_query->fetch_object()->total ?? 0;
+            } catch(\Exception $e) {}
+
+            $conversion_rate = $total_product_views > 0 ? number_format(($total_transactions / $total_product_views) * 100, 2) : '0.00';
+
+            // Chart Logic (Last 30 days)
+            $views_data = [];
+            $clicks_data = [];
+            $date_labels = [];
+            
+            for($i = 29; $i >= 0; $i--) {
+                $date_obj = (new \DateTime())->modify('-' . $i . ' days');
+                $date = $date_obj->format('Y-m-d');
+                $date_labels[] = $date_obj->format('j M');
+                $views_data[$date] = 0;
+                $clicks_data[$date] = 0;
+            }
+
+            try {
+                $stats_result = database()->query("SELECT DATE(`datetime`) as date, `type`, COUNT(*) as count FROM `shop_statistics` WHERE `shop_id` = {$shop->id} AND `datetime` >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(`datetime`), `type`");
+                if($stats_result) {
+                    while($row = $stats_result->fetch_object()) {
+                        if(isset($views_data[$row->date])) {
+                            if($row->type == 'view') $views_data[$row->date] = $row->count;
+                            if($row->type == 'click') $clicks_data[$row->date] = $row->count;
+                        }
+                    }
+                }
+            } catch(\Exception $e) {}
+
+            $chart_labels = json_encode(array_values($date_labels));
+            $chart_views = json_encode(array_values($views_data));
+            $chart_clicks = json_encode(array_values($clicks_data));
+
             /* Fresh balance & verification status langsung dari DB (bukan dari session) */
             $fresh_user_data = database()->query("SELECT `withdrawable_funds`, `pending_funds`, `verification_status` FROM `users` WHERE `user_id` = {$this->user->user_id}")->fetch_object();
             $withdrawable_funds     = (float) ($fresh_user_data->withdrawable_funds ?? 0);
@@ -143,6 +181,11 @@ class Shop extends Controller {
                 'withdrawable_funds'       => $withdrawable_funds,
                 'pending_funds'            => $pending_funds,
                 'verification_status'      => $verification_status,
+                'total_product_views'      => $total_product_views,
+                'conversion_rate'          => $conversion_rate,
+                'chart_labels'             => $chart_labels,
+                'chart_views'              => $chart_views,
+                'chart_clicks'             => $chart_clicks,
                 'items'                    => $items,
                 'orders'                   => $orders,
                 'vouchers'                 => $vouchers,

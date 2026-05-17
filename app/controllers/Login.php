@@ -407,7 +407,8 @@ class Login extends Controller {
                 } else {
 
                     if($user->status != 1) {
-                        Alerts::add_error(l('login.error_message.user_not_active'));
+                        $verify_url = url('verify-email?email=' . urlencode($user->email));
+                        Alerts::add_error('Akun Anda belum diverifikasi. <a href="' . $verify_url . '"><strong>Klik di sini untuk memverifikasi email Anda.</strong></a>');
                     } else
 
                         if(!password_verify($_POST['password'], $user->password)) {
