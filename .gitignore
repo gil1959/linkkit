@@ -44,3 +44,7 @@ test_*.php
 
 # Docker cache
 .docker/
+
+# Additional ignores
+.htaccess
+cache/

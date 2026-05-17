@@ -705,6 +705,14 @@ class Router {
                 ]
             ],
 
+            'verify-email' => [
+                'controller' => 'VerifyEmail',
+                'settings' => [
+                    'wrapper' => 'basic_wrapper',
+                    'no_browser_language_detection' => true,
+                ]
+            ],
+
             'affiliate' => [
                 'controller' => 'Affiliate'
             ],
