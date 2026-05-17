@@ -186,6 +186,12 @@
                     </a>
                 </li>
 
+                <li class="<?= \Altum\Router::$controller == 'AdminShopReviews' ? 'active' : null ?>">
+                    <a class="nav-link text-truncate" href="<?= url('admin/shop-reviews') ?>">
+                        <i class="fas fa-fw fa-sm fa-star mr-2"></i> Shop Reviews
+                    </a>
+                </li>
+
             <div class="divider-wrapper">
                 <div class="divider"></div>
             </div>

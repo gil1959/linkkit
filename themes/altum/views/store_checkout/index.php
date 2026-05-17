@@ -103,7 +103,7 @@ input[type=radio].pm-radio{display:none}
         </div>
         <?php endif ?>
 
-        <form action="" method="post" id="checkoutForm">
+        <form action="" method="post" id="checkoutForm" enctype="multipart/form-data">
             <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
             <input type="hidden" name="payment_method" id="selectedMethod" value="QRIS">
 
@@ -235,7 +235,16 @@ input[type=radio].pm-radio{display:none}
                     </div>
                     <?php endforeach ?>
 
+                    <div id="offline_payment_processor_wrapper" style="display: none; margin-top: 20px;">
+                        <label class="form-label"><?= l('pay.custom_plan.offline_payment_instructions') ?></label>
+                        <div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:16px;font-size:0.85rem;color:#374151;">
+                            <?= nl2br(settings()->offline_payment->instructions) ?>
+                        </div>
 
+                        <label class="form-label"><?= l('pay.custom_plan.offline_payment_proof') ?> <span class="req">*</span></label>
+                        <input id="offline_payment_proof" type="file" name="offline_payment_proof" accept="<?= \Altum\Uploads::get_whitelisted_file_extensions_accept('offline_payment_proofs') ?>" class="form-control" />
+                        <div class="form-hint"><?= sprintf(l('global.accessibility.whitelisted_file_extensions'), \Altum\Uploads::get_whitelisted_file_extensions_accept('offline_payment_proofs')) . ' ' . sprintf(l('global.accessibility.file_size_limit'), settings()->offline_payment->proof_size_limit) ?></div>
+                    </div>
 
 
                     <button type="submit" class="btn-pay" id="btnPay">
@@ -370,6 +379,17 @@ function selectMethod(code, name, logoWrapEl) {
         txt.textContent = name.substring(0, 3).toUpperCase();
         txt.style.display = 'block';
     }
+    
+    var wrapper = document.getElementById('offline_payment_processor_wrapper');
+    var proof_input = document.getElementById('offline_payment_proof');
+    if(code === 'offline_payment') {
+        wrapper.style.display = 'block';
+        proof_input.required = true;
+    } else {
+        wrapper.style.display = 'none';
+        proof_input.required = false;
+    }
+
     var btnText = document.getElementById('btnPayText');
     if(btnText) btnText.textContent = 'Bayar Sekarang';
 }

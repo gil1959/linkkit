@@ -12,7 +12,7 @@
         <tr>
             <th>#</th>
             <th>User</th>
-            <th>Jumlah</th>
+            <th>Jumlah (Netto/Fee)</th>
             <th>Rekening Tujuan</th>
             <th>Tanggal</th>
             <th>Status</th>
@@ -28,7 +28,12 @@
                         <div class="font-weight-bold"><?= htmlspecialchars($w->user_name) ?></div>
                         <small class="text-muted"><?= htmlspecialchars($w->user_email) ?></small>
                     </td>
-                    <td><strong class="text-success">Rp <?= number_format($w->amount, 0, ',', '.') ?></strong></td>
+                    <td>
+                        <strong class="text-success" style="font-size:1.1rem">Rp <?= number_format($w->net_amount > 0 ? $w->net_amount : $w->amount, 0, ',', '.') ?></strong>
+                        <?php if(isset($w->fee) && $w->fee > 0): ?>
+                            <div class="text-muted small mt-1">Fee: Rp <?= number_format($w->fee, 0, ',', '.') ?></div>
+                        <?php endif; ?>
+                    </td>
                     <td>
                         <?php if(!empty($w->bank_name)): ?>
                             <div><strong><?= htmlspecialchars($w->bank_name) ?></strong></div>
@@ -41,6 +46,8 @@
                     <td>
                         <?php if($w->status === 'pending'): ?>
                             <span class="badge badge-warning">Pending</span>
+                        <?php elseif($w->status === 'paid'): ?>
+                            <span class="badge badge-success">Paid</span>
                         <?php elseif($w->status === 'approved'): ?>
                             <span class="badge badge-success">Approved</span>
                         <?php else: ?>
