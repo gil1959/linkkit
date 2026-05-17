@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/linkkit/public_html/
-    - /bin/rsync -av --delete --exclude='.git/' --exclude='.htaccess' --exclude='config.php' --exclude='uploads/' --exclude='cache/' /home/linkkit/repositories/linkkit/ $DEPLOYPATH
+    - /bin/cp -R /home/linkkit/repositories/linkkit/. $DEPLOYPATH
