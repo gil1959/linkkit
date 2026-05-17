@@ -27,6 +27,9 @@ class Store extends Controller {
             redirect();
         }
 
+        /* Track shop view */
+        database()->query("INSERT INTO `shop_statistics` (`shop_id`, `item_id`, `type`, `datetime`) VALUES ({$shop->id}, NULL, 'view', '" . \Altum\Date::$date . "')");
+
         /* Get shop listings (categories) */
         $listings_result = database()->query("SELECT * FROM `shop_listings` WHERE `shop_id` = {$shop->id}");
         $listings = [];

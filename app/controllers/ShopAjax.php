@@ -10,12 +10,13 @@ class ShopAjax extends Controller {
         $action = input_clean($_POST['action'] ?? $_GET['action'] ?? '');
 
         /* ── Public endpoints (no auth needed, called from checkout) ── */
-        if(in_array($action, ['ongkir_provinces', 'ongkir_cities', 'ongkir_cost', 'buyer_check_order'])) {
+        if(in_array($action, ['ongkir_provinces', 'ongkir_cities', 'ongkir_cost', 'buyer_check_order', 'track_product_view'])) {
             switch($action) {
                 case 'ongkir_provinces':  $this->ongkir_provinces();  break;
                 case 'ongkir_cities':     $this->ongkir_cities();     break;
                 case 'ongkir_cost':       $this->ongkir_cost();       break;
                 case 'buyer_check_order': $this->buyer_check_order(); break;
+                case 'track_product_view':$this->track_product_view();break;
             }
             return;
         }
@@ -120,6 +121,18 @@ class ShopAjax extends Controller {
         ];
 
         die(json_encode(['success' => true, 'data' => $data]));
+    }
+
+    /* ─────────────────────────────────────────────
+     *  Track Product View (Public)
+     * ───────────────────────────────────────────── */
+    private function track_product_view() {
+        $shop_id = (int)($_POST['shop_id'] ?? 0);
+        $item_id = (int)($_POST['item_id'] ?? 0);
+        if($shop_id && $item_id) {
+            database()->query("INSERT INTO `shop_statistics` (`shop_id`, `item_id`, `type`, `datetime`) VALUES ({$shop_id}, {$item_id}, 'click', '" . \Altum\Date::$date . "')");
+        }
+        die(json_encode(['success' => true]));
     }
 
     /* ─────────────────────────────────────────────

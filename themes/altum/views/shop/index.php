@@ -120,17 +120,21 @@
                             <small class="text-muted">Transaction</small>
                         </div>
                         <div class="col-6 col-md-3 border-right">
-                            <div class="h4 mb-0">0</div>
+                            <div class="h4 mb-0"><?= number_format($data->total_product_views) ?></div>
                             <small class="text-muted">Product View</small>
                         </div>
                         <div class="col-6 col-md-3">
-                            <div class="h4 mb-0">0.00%</div>
+                            <div class="h4 mb-0"><?= $data->conversion_rate ?>%</div>
                             <small class="text-muted">Conversion</small>
                         </div>
                     </div>
 
-                    <div class="chart-container" style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: .25rem;">
-                        <span class="text-muted">Chart placeholder</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0 text-muted">Total Views & Clicks</h6>
+                        <div class="text-muted small"><i class="fas fa-calendar-alt"></i> Last 30 Days</div>
+                    </div>
+                    <div class="chart-container" style="position: relative; height:300px; width:100%;">
+                        <canvas id="shopStatsChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -1820,3 +1824,65 @@ function showVerifGate() {
     }
 }
 </script>
+
+<?php \Altum\Event::add_content(function() use ($data) { ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    if(document.getElementById('shopStatsChart')) {
+        let css = window.getComputedStyle(document.body)
+        let views_color = css.getPropertyValue('--primary') || '#f59e0b'; // Yellow/Orange
+        let clicks_color = '#10b981'; // Green
+        let views_gradient = null;
+        let clicks_gradient = null;
+
+        let chart = document.getElementById('shopStatsChart').getContext('2d');
+
+        views_gradient = chart.createLinearGradient(0, 0, 0, 250);
+        views_gradient.addColorStop(0, 'rgba(245, 158, 11, .1)');
+        views_gradient.addColorStop(1, 'rgba(245, 158, 11, 0.025)');
+
+        clicks_gradient = chart.createLinearGradient(0, 0, 0, 250);
+        clicks_gradient.addColorStop(0, 'rgba(16, 185, 129, .1)');
+        clicks_gradient.addColorStop(1, 'rgba(16, 185, 129, 0.025)');
+
+        new Chart(chart, {
+            type: 'line',
+            data: {
+                labels: <?= $data->chart_labels ?>,
+                datasets: [
+                    {
+                        label: 'Views',
+                        data: <?= $data->chart_views ?>,
+                        backgroundColor: views_gradient,
+                        borderColor: views_color,
+                        fill: true
+                    },
+                    {
+                        label: 'Clicks',
+                        data: <?= $data->chart_clicks ?>,
+                        backgroundColor: clicks_gradient,
+                        borderColor: clicks_color,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                elements: {
+                    line: { tension: 0.3 },
+                    point: { radius: 4 }
+                },
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    }
+</script>
+<?php }, 'javascript') ?>

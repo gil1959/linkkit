@@ -476,6 +476,17 @@ function openDetail(id){
         window.location = STORE_URL + id;
     };
     document.getElementById('detailOverlay').classList.add('show');
+    
+    // Track product view
+    fetch(SITE_URL + 'shop-ajax', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'track_product_view',
+            shop_id: <?= $data->shop->id ?>,
+            item_id: id
+        })
+    });
 }
 function closeDetail(){
     document.getElementById('detailOverlay').classList.remove('show');
