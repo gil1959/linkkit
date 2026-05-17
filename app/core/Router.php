@@ -1656,6 +1656,10 @@ class Router {
                 'controller' => 'AdminShopWithdrawals',
             ],
 
+            'shop-reviews' => [
+                'controller' => 'AdminShopReviews',
+            ],
+
             'shop-verifications' => [
                 'controller' => 'AdminShopVerifications',
             ],

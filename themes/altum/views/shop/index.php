@@ -266,11 +266,22 @@
                                     <i class="fas fa-star fa-sm" style="color:<?= $s<=$review->rating?'#f59e0b':'#d1d5db' ?>"></i>
                                 <?php endfor; ?>
                             </td>
-                            <td style="max-width:200px"><?= nl2br(htmlspecialchars($review->review ?? '-')) ?></td>
+                            <td style="max-width:200px">
+                                <?= nl2br(htmlspecialchars($review->review ?? '-')) ?>
+                                <?php if($review->reply): ?>
+                                    <div class="mt-2 p-2 bg-light rounded" style="font-size:.8rem; border-left:2px solid #4f46e5;">
+                                        <strong>Balasan Anda:</strong> <?= nl2br(htmlspecialchars($review->reply)) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
                             <td><?= \Altum\Date::get($review->datetime, 1) ?></td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault();shopDeleteAjax('review_delete',{id:<?= $review->id ?>},this,'Ulasan berhasil dihapus!')">
-                                    <i class="fas fa-trash fa-sm"></i>
+                                <button type="button" class="btn btn-sm btn-outline-primary mb-1" onclick="openReplyModal(<?= $review->id ?>, '<?= htmlspecialchars(addslashes($review->reply ?? '')) ?>')">
+                                    <i class="fas fa-reply fa-sm"></i> Balas
+                                </button>
+                                <br>
+                                <button type="button" class="btn btn-sm <?= $review->is_reported ? 'btn-warning' : 'btn-outline-warning' ?>" <?= $review->is_reported ? 'disabled' : '' ?> onclick="openReportModal(<?= $review->id ?>)">
+                                    <i class="fas fa-flag fa-sm"></i> <?= $review->is_reported ? 'Dilaporkan' : 'Laporkan' ?>
                                 </button>
                             </td>
                         </tr>
@@ -281,6 +292,89 @@
             <?php else: ?>
             <div class="card bg-light"><div class="card-body text-center text-muted"><i class="fas fa-star fa-2x mb-2 d-block"></i>Belum ada ulasan</div></div>
             <?php endif; ?>
+
+            <!-- Reply Modal -->
+            <div class="modal fade" id="replyModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-reply mr-2 text-primary"></i> Balas Ulasan</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <form id="replyForm" onsubmit="event.preventDefault();submitReply()">
+                            <div class="modal-body">
+                                <input type="hidden" id="reply_review_id" name="id">
+                                <div class="form-group">
+                                    <label>Balasan Anda</label>
+                                    <textarea id="reply_content" class="form-control" rows="4" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan Balasan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Modal -->
+            <div class="modal fade" id="reportModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-flag mr-2 text-warning"></i> Laporkan Ulasan</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <form id="reportForm" onsubmit="event.preventDefault();submitReport()">
+                            <div class="modal-body">
+                                <input type="hidden" id="report_review_id" name="id">
+                                <div class="form-group">
+                                    <label>Alasan Melaporkan</label>
+                                    <textarea id="report_reason" class="form-control" rows="3" required placeholder="Contoh: Spam, kata-kata kasar, dsb."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-warning">Kirim Laporan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+            function openReplyModal(id, currentReply) {
+                document.getElementById('reply_review_id').value = id;
+                document.getElementById('reply_content').value = currentReply || '';
+                $('#replyModal').modal('show');
+            }
+            function submitReply() {
+                var id = document.getElementById('reply_review_id').value;
+                var reply = document.getElementById('reply_content').value;
+                var params = new URLSearchParams({action:'review_reply', id:id, reply:reply, token:'<?= \Altum\Csrf::get() ?>'});
+                fetch('<?= url('shop-ajax') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
+                .then(r=>r.json()).then(res=>{
+                    if(res.success) { location.reload(); }
+                    else { alert('Gagal: ' + (res.message || 'Error')); }
+                });
+            }
+            function openReportModal(id) {
+                document.getElementById('report_review_id').value = id;
+                document.getElementById('report_reason').value = '';
+                $('#reportModal').modal('show');
+            }
+            function submitReport() {
+                var id = document.getElementById('report_review_id').value;
+                var reason = document.getElementById('report_reason').value;
+                var params = new URLSearchParams({action:'seller_report_review', id:id, reason:reason, token:'<?= \Altum\Csrf::get() ?>'});
+                fetch('<?= url('shop-ajax') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
+                .then(r=>r.json()).then(res=>{
+                    if(res.success) { location.reload(); }
+                    else { alert('Gagal: ' + (res.message || 'Error')); }
+                });
+            }
+            </script>
         </div>
 
         <!-- LISTING TAB -->
