@@ -62,25 +62,12 @@ class ShopWithdraw extends Controller {
             redirect('shop');
         }
 
-        /* ── 4. Calculate Fee (Tiered based on Plan) ── */
-        $plan_id = strtolower($this->user->plan_id ?? 'free');
-        $fee_percentage = 0.05; // Default Free: 5%
-        
-        if($plan_id === 'pro') {
-            $fee_percentage = 0.03; // Pro: 3%
-        } elseif($plan_id === 'premium' || $plan_id === 'custom') {
-            $fee_percentage = 0.01; // Premium: 1%
-        }
-        
-        $fee_amount = $input_amount * $fee_percentage;
-        $net_amount = $input_amount - $fee_amount;
-
-        /* ── 5. Proses pencairan — kurangi saldo & buat record withdrawal (status = pending, tunggu approve admin) ── */
+        /* ── 4. Proses pencairan — kurangi saldo & buat record withdrawal (status = pending, tunggu approve admin) ── */
         database()->query("UPDATE `users` SET `withdrawable_funds` = `withdrawable_funds` - {$input_amount} WHERE `user_id` = {$this->user->user_id}");
 
-        $stmt = database()->prepare("INSERT INTO `shop_withdrawals` (`user_id`, `bank_account_id`, `amount`, `fee`, `net_amount`, `status`, `datetime`) VALUES (?, ?, ?, ?, ?, 'pending', ?)");
+        $stmt     = database()->prepare("INSERT INTO `shop_withdrawals` (`user_id`, `bank_account_id`, `amount`, `status`, `datetime`) VALUES (?, ?, ?, 'pending', ?)");
         $datetime = \Altum\Date::$date;
-        $stmt->bind_param('iiddds', $this->user->user_id, $bank_id, $input_amount, $fee_amount, $net_amount, $datetime);
+        $stmt->bind_param('iids', $this->user->user_id, $bank_id, $input_amount, $datetime);
         $stmt->execute();
         $stmt->close();
 

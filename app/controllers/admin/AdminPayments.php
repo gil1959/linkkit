@@ -144,9 +144,7 @@ class AdminPayments extends Controller {
             /* Make sure the code that was potentially used exists */
             $codes_code = db()->where('code', $payment->code)->where('type', 'discount')->getOne('codes');
 
-            $is_shop_order = (strpos($payment->code, 'shop_order_') === 0);
-
-            if($codes_code && !$is_shop_order) {
+            if($codes_code) {
                 /* Check if we should insert the usage of the code or not */
                 if(!db()->where('user_id', $payment->user_id)->where('code_id', $codes_code->code_id)->has('redeemed_codes')) {
 
@@ -164,56 +162,49 @@ class AdminPayments extends Controller {
                 }
             }
 
+            if($user) {
+                /* Give the plan to the user */
+                $current_plan_expiration_date = $payment->plan_id == $user->plan_id ? $user->plan_expiration_date : '';
+                $modifier = match ($payment->frequency) {
+                    'monthly' => '+30 days +12 hours',
+                    'quarterly' => '+3 months +12 hours',
+                    'biannual' => '+6 months +12 hours',
+                    'annual' => '+12 months +12 hours',
+                    'lifetime' => '+100 years +12 hours',
+                };
+                $plan_expiration_date = (new \DateTime($current_plan_expiration_date))->modify($modifier)->format('Y-m-d H:i:s');
+
+                /* Database query */
+                db()->where('user_id', $user->user_id)->update('users', [
+                    'plan_id' => $payment->plan_id,
+                    'plan_settings' => json_encode($plan->settings),
+                    'plan_expiration_date' => $plan_expiration_date,
+                    'plan_expiry_reminder' => 0,
+                    'payment_processor' => 'offline_payment',
+                    'payment_total_amount' => $payment->total_amount,
+                    'payment_currency' => $payment->currency,
+                ]);
+
+                /* Clear the cache */
+                cache()->deleteItemsByTag('user_id=' . $user->user_id);
+
+                /* Send notification to the user */
+                $email_template = get_email_template(
+                    [],
+                    l('global.emails.user_payment.subject'),
+                    [
+                        '{{PAYMENT_ID}}' => $payment->id,
+                        '{{NAME}}' => $user->name,
+                        '{{PLAN_NAME}}' => $plan->name,
+                        '{{PLAN_EXPIRATION_DATE}}' => Date::get($plan_expiration_date, 2),
+                        '{{USER_PLAN_LINK}}' => url('account-plan'),
+                        '{{USER_PAYMENTS_LINK}}' => url('account-payments'),
+                    ],
+                    l('global.emails.user_payment.body')
+                );
+
                 send_mail($user->email, $email_template->subject, $email_template->body, ['anti_phishing_code' => $user->anti_phishing_code, 'language' => $user->language]);
             }
-
-            if($is_shop_order) {
-                $order_id = (int) str_replace('shop_order_', '', $payment->code);
-                $order = db()->where('id', $order_id)->getOne('shop_orders');
-                if($order) {
-                    $datetime = \Altum\Date::$date;
-                    db()->where('id', $order_id)->update('shop_orders', [
-                        'status' => 'paid',
-                        'settle_status' => 'unsettled',
-                        'paid_date' => $datetime
-                    ]);
-                    
-                    database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$order->grand_total} WHERE `id` = {$order->customer_id}");
-                    $seller_revenue = $order->grand_total - $order->service_fee;
-                    database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$payment->user_id}");
-                    
-                    $item = db()->where('id', $order->item_id)->getOne('shop_items');
-                    if($item) {
-                        $fulfilled_content = null;
-                        if($item->type === 'download_link') {
-                            $links = json_decode($item->download_links ?? '[]', true) ?: [];
-                            $fulfilled_content = json_encode($links);
-                        } elseif($item->type === 'random_code') {
-                            $codes = json_decode($item->download_links ?? '[]', true) ?: [];
-                            if(!empty($codes)) {
-                                $code = array_shift($codes);
-                                $remaining = database()->real_escape_string(json_encode(array_values($codes)));
-                                database()->query("UPDATE `shop_items` SET `download_links` = '{$remaining}', `stock` = GREATEST(0, COALESCE(`stock`, 0) - 1) WHERE `id` = {$item->id}");
-                                $fulfilled_content = $code;
-                            } else {
-                                $fulfilled_content = 'OUT_OF_STOCK';
-                            }
-                        } elseif($item->type === 'webhook_event') {
-                            $fulfilled_content = 'webhook_pending';
-                        } elseif($item->type === 'manual') {
-                            $fulfilled_content = 'manual_pending';
-                        } elseif($item->type === 'physical') {
-                            $fulfilled_content = 'physical_pending';
-                        }
-                        
-                        if($fulfilled_content !== null) {
-                            $fc = database()->real_escape_string($fulfilled_content);
-                            database()->query("UPDATE `shop_orders` SET `fulfilled_content` = '{$fc}' WHERE `id` = {$order_id}");
-                        }
-                        database()->query("UPDATE `shop_items` SET `sales` = `sales` + 1 WHERE `id` = {$item->id}");
-                    }
-                }
-            } else if($user) {
 
             /* Send webhook notification if needed */
             if(settings()->webhooks->payment_new) {
@@ -287,12 +278,8 @@ class AdminPayments extends Controller {
 
             /* details about the user who paid */
             $user = db()->where('user_id', $payment->user_id)->getOne('users');
-            $is_shop_order = (strpos($payment->code, 'shop_order_') === 0);
 
-            if($is_shop_order) {
-                $order_id = (int) str_replace('shop_order_', '', $payment->code);
-                db()->where('id', $order_id)->update('shop_orders', ['status' => 'failed']);
-            } else if($user) {
+            if($user) {
                 /* Send notification to the user */
                 $email_template = get_email_template(
                     [],

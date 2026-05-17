@@ -35,24 +35,12 @@ class Store extends Controller {
         }
 
         /* Get shop items */
-        /* Get shop items with rating & total sold */
-        $items_result = database()->query("
-            SELECT i.*, 
-                (SELECT SUM(qty) FROM `shop_orders` WHERE `item_id` = i.id AND `status` = 'paid') as total_sold,
-                (SELECT AVG(rating) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` = 'approved') as avg_rating,
-                (SELECT COUNT(*) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` = 'approved') as total_reviews
-            FROM `shop_items` i 
-            WHERE i.shop_id = {$shop->id} AND i.status = 1 
-            ORDER BY i.datetime DESC
-        ");
+        // We will just fetch all active items for now
+        $items_result = database()->query("SELECT * FROM `shop_items` WHERE `shop_id` = {$shop->id} AND `status` = 1 ORDER BY `datetime` DESC");
         $items = [];
         while($row = $items_result->fetch_object()) {
             $items[] = $row;
         }
-
-        /* Check if shop owner is verified */
-        $owner = database()->query("SELECT `verification_status` FROM `users` WHERE `user_id` = {$shop->user_id}")->fetch_object();
-        $shop_verified = ($owner->verification_status ?? '') === 'verified';
 
         /* Set a custom title */
         Title::set($shop->name);
@@ -61,8 +49,7 @@ class Store extends Controller {
         $data = [
             'shop' => $shop,
             'listings' => $listings,
-            'items' => $items,
-            'shop_verified' => $shop_verified
+            'items' => $items
         ];
 
         /* Main View */

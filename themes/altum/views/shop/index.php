@@ -266,21 +266,11 @@
                                     <i class="fas fa-star fa-sm" style="color:<?= $s<=$review->rating?'#f59e0b':'#d1d5db' ?>"></i>
                                 <?php endfor; ?>
                             </td>
-                            <td style="max-width:200px">
-                                <?= nl2br(htmlspecialchars($review->review ?? '-')) ?>
-                                <?php if($review->reply): ?>
-                                    <div style="background:#f8fafc;padding:8px;border-left:3px solid #4f46e5;margin-top:8px;font-size:0.8rem;color:#475569">
-                                        <strong>Balasan Anda:</strong> <?= nl2br(htmlspecialchars($review->reply)) ?>
-                                    </div>
-                                <?php endif; ?>
-                            </td>
+                            <td style="max-width:200px"><?= nl2br(htmlspecialchars($review->review ?? '-')) ?></td>
                             <td><?= \Altum\Date::get($review->datetime, 1) ?></td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-outline-primary mb-1" onclick="replyReview(<?= $review->id ?>, `<?= htmlspecialchars($review->reply ?? '') ?>`)" title="Balas">
-                                    <i class="fas fa-reply fa-sm"></i> Balas
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-warning mb-1" onclick="reportSellerReview(<?= $review->id ?>)" title="Laporkan">
-                                    <i class="fas fa-flag fa-sm"></i> Laporkan
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault();shopDeleteAjax('review_delete',{id:<?= $review->id ?>},this,'Ulasan berhasil dihapus!')">
+                                    <i class="fas fa-trash fa-sm"></i>
                                 </button>
                             </td>
                         </tr>
@@ -288,32 +278,6 @@
                     </tbody>
                 </table>
             </div>
-            
-            <script>
-            function replyReview(id, currentReply) {
-                var reply = prompt("Balasan Anda:", currentReply);
-                if(reply === null) return;
-                
-                var params = new URLSearchParams({action:'review_reply', id:id, reply:reply, token:'<?= \Altum\Csrf::get() ?>'});
-                fetch('<?= url('shop-ajax') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
-                .then(r=>r.json()).then(res=>{
-                    if(res.success) { alert('Balasan berhasil disimpan!'); location.reload(); }
-                    else { alert('Gagal: ' + (res.message || 'Error')); }
-                });
-            }
-            
-            function reportSellerReview(id) {
-                var reason = prompt("Alasan melaporkan ulasan ini (spam, kata kasar, dll):");
-                if(!reason) return;
-                
-                var params = new URLSearchParams({action:'seller_report_review', id:id, reason:reason, token:'<?= \Altum\Csrf::get() ?>'});
-                fetch('<?= url('shop-ajax') ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
-                .then(r=>r.json()).then(res=>{
-                    if(res.success) { alert('Ulasan berhasil dilaporkan!'); }
-                    else { alert('Gagal: ' + (res.message || 'Error')); }
-                });
-            }
-            </script>
             <?php else: ?>
             <div class="card bg-light"><div class="card-body text-center text-muted"><i class="fas fa-star fa-2x mb-2 d-block"></i>Belum ada ulasan</div></div>
             <?php endif; ?>
