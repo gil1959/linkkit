@@ -1547,6 +1547,27 @@ class AdminSettings extends Controller {
 
         $this->process();
     }
+    public function rajaongkir() {
+        $this->process();
+
+        if(!empty($_POST)) {
+            //ALTUMCODE:DEMO if(DEMO) Alerts::add_error('This command is blocked on the demo.');
+
+            /* :) */
+            $_POST['is_enabled'] = (int) isset($_POST['is_enabled']);
+            $_POST['api_key'] = input_clean($_POST['api_key']);
+            $_POST['couriers'] = isset($_POST['couriers']) && is_array($_POST['couriers']) ? array_map('input_clean', $_POST['couriers']) : [];
+
+            $value = json_encode([
+                'is_enabled' => $_POST['is_enabled'],
+                'api_key'    => $_POST['api_key'],
+                'couriers'   => $_POST['couriers'],
+            ]);
+
+            $this->update_settings('rajaongkir', $value);
+        }
+    }
+
 
     public function health() {
         $this->process();

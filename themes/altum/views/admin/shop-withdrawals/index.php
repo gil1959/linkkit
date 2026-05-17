@@ -46,12 +46,12 @@
                     <td>
                         <?php if($w->status === 'pending'): ?>
                             <span class="badge badge-warning">Pending</span>
-                        <?php elseif($w->status === 'paid'): ?>
-                            <span class="badge badge-success">Paid</span>
-                        <?php elseif($w->status === 'approved'): ?>
-                            <span class="badge badge-success">Approved</span>
-                        <?php else: ?>
+                        <?php elseif($w->status === 'paid' || $w->status === 'approved'): ?>
+                            <span class="badge badge-success">Approved / Paid</span>
+                        <?php elseif($w->status === 'rejected'): ?>
                             <span class="badge badge-danger">Rejected</span>
+                        <?php else: ?>
+                            <span class="badge badge-secondary"><?= ucfirst($w->status) ?></span>
                         <?php endif ?>
                     </td>
                     <td>

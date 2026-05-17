@@ -49,8 +49,43 @@ class Store extends Controller {
             ORDER BY i.datetime DESC
         ");
         $items = [];
+        $item_ids = [];
+        $items_map = [];
         while($row = $items_result->fetch_object()) {
-            $items[] = $row;
+            $row->reviews = [];
+            $row->review_count = 0;
+            $row->rating_total = 0;
+            $row->rating = 0;
+            $items_map[$row->id] = $row;
+            $item_ids[] = $row->id;
+        }
+
+        if(!empty($item_ids)) {
+            $ids_str = implode(',', $item_ids);
+            $reviews_result = database()->query("
+                SELECT r.*, c.full_name AS customer_name, c.email AS customer_email 
+                FROM `shop_reviews` r
+                JOIN `shop_orders` o ON r.order_id = o.id
+                JOIN `shop_customers` c ON o.customer_id = c.id
+                WHERE r.item_id IN ({$ids_str})
+                ORDER BY r.datetime DESC
+            ");
+            if ($reviews_result) {
+                while($r = $reviews_result->fetch_object()) {
+                    if(isset($items_map[$r->item_id])) {
+                        $items_map[$r->item_id]->reviews[] = $r;
+                        $items_map[$r->item_id]->review_count++;
+                        $items_map[$r->item_id]->rating_total += $r->rating;
+                    }
+                }
+            }
+            
+            foreach($items_map as $item) {
+                if($item->review_count > 0) {
+                    $item->rating = round($item->rating_total / $item->review_count, 1);
+                }
+                $items[] = $item;
+            }
         }
 
         /* Check if shop owner is verified */

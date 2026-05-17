@@ -51,6 +51,7 @@
                     <option value="<?= url('admin/settings/discord') ?>" <?= $data->method == 'discord' ? 'selected="selected"' : null ?>>💬 <?= l('admin_settings.discord.tab') ?></option>
                     <option value="<?= url('admin/settings/linkedin') ?>" <?= $data->method == 'linkedin' ? 'selected="selected"' : null ?>>🔗 <?= l('admin_settings.linkedin.tab') ?></option>
                     <option value="<?= url('admin/settings/microsoft') ?>" <?= $data->method == 'microsoft' ? 'selected="selected"' : null ?>>🪟 <?= l('admin_settings.microsoft.tab') ?></option>
+                    <option value="<?= url('admin/settings/rajaongkir') ?>" <?= $data->method == 'rajaongkir' ? 'selected="selected"' : null ?>>📦 RajaOngkir</option>
                     <option value="<?= url('admin/settings/internal_notifications') ?>" <?= $data->method == 'internal_notifications' ? 'selected="selected"' : null ?>>🔔 <?= l('admin_settings.internal_notifications.tab') ?></option>
                     <option value="<?= url('admin/settings/email_notifications') ?>" <?= $data->method == 'email_notifications' ? 'selected="selected"' : null ?>>📧 <?= l('admin_settings.email_notifications.tab') ?></option>
                 </optgroup>
@@ -149,6 +150,7 @@
                             <a class="nav-link <?= $data->method == 'microsoft' ? 'active' : null ?>" href="<?= url('admin/settings/microsoft') ?>"><i class="fab fa-fw fa-sm fa-microsoft mr-2"></i> <?= l('admin_settings.microsoft.tab') ?></a>
                         </div>
                     </div>
+                    <a class="nav-link <?= $data->method == 'rajaongkir' ? 'active' : null ?>" href="<?= url('admin/settings/rajaongkir') ?>"><i class="fas fa-fw fa-sm fa-shipping-fast mr-2"></i> RajaOngkir</a>
                     <a class="nav-link <?= $data->method == 'internal_notifications' ? 'active' : null ?>" href="<?= url('admin/settings/internal_notifications') ?>"><i class="fas fa-fw fa-sm fa-bell mr-2"></i> <?= l('admin_settings.internal_notifications.tab') ?></a>
                     <a class="nav-link <?= $data->method == 'email_notifications' ? 'active' : null ?>" href="<?= url('admin/settings/email_notifications') ?>"><i class="fas fa-fw fa-sm fa-envelope mr-2"></i> <?= l('admin_settings.email_notifications.tab') ?></a>
 

@@ -10,18 +10,59 @@ namespace Altum\Libraries;
 class RajaOngkir {
 
     const BASE_URL = 'https://rajaongkir.komerce.id/api/v1/';
-    const API_KEY  = 'iq3OUPw9c5b6643626a71dfcZyr8hWv6';
 
-    const COURIERS = [
-        'jne'  => 'JNE (Jalur Nugraha Ekakurir)',
-        'tiki' => 'TIKI (Citra Van Titipan Kilat)',
-        'pos'  => 'POS Indonesia',
-    ];
+    public static function is_enabled(): bool {
+        return (bool) (settings()->rajaongkir->is_enabled ?? false);
+    }
+
+    public static function get_api_key(): string {
+        return settings()->rajaongkir->api_key ?? '';
+    }
+
+    public static function get_couriers(): array {
+        $available = [
+            'jne' => 'JNE (Jalur Nugraha Ekakurir)',
+            'tiki' => 'TIKI (Citra Van Titipan Kilat)',
+            'pos' => 'POS Indonesia',
+            'rpx' => 'RPX Holding',
+            'pandu' => 'Pandu Logistics',
+            'wahana' => 'Wahana Prestasi Logistik',
+            'sicepat' => 'SiCepat Express',
+            'jnt' => 'J&T Express',
+            'pahala' => 'Pahala Kencana Express',
+            'sap' => 'SAP Express',
+            'jet' => 'JET Express',
+            'indah' => 'Indah Logistic',
+            'dse' => '21 Express (DSE)',
+            'slis' => 'Solusi Ekspres',
+            'first' => 'First Logistics',
+            'ncs' => 'Nusantara Card Semesta',
+            'star' => 'Star Cargo',
+            'ninja' => 'Ninja Xpress',
+            'lion' => 'Lion Parcel',
+            'idl' => 'IDL Cargo',
+            'rex' => 'REX Express',
+            'ide' => 'ID Express',
+            'sentral' => 'Sentral Cargo',
+            'anteraja' => 'AnterAja',
+            'jxl' => 'J-Express'
+        ];
+        
+        $active_codes = settings()->rajaongkir->couriers ?? ['jne', 'tiki', 'pos'];
+        $filtered = [];
+        foreach($active_codes as $code) {
+            if(isset($available[$code])) {
+                $filtered[$code] = $available[$code];
+            }
+        }
+        return $filtered;
+    }
 
     /* ─────────────────────────────────────────────
      *  GET /destination/province
      * ───────────────────────────────────────────── */
     public static function get_provinces(): array {
+        if (!self::is_enabled()) return [];
         $result = self::curl('GET', 'destination/province');
         if (!$result || !isset($result['data'])) return [];
         
@@ -39,7 +80,7 @@ class RajaOngkir {
      *  GET /destination/city/{id}
      * ───────────────────────────────────────────── */
     public static function get_cities(?int $province_id = null): array {
-        if (!$province_id) return [];
+        if (!self::is_enabled() || !$province_id) return [];
         
         $result = self::curl('GET', "destination/city/{$province_id}");
         if (!$result || !isset($result['data'])) return [];
@@ -69,7 +110,10 @@ class RajaOngkir {
      *  POST /calculate/domestic-cost
      * ───────────────────────────────────────────── */
     public static function get_cost(int $origin, int $destination, int $weight_gram, string $courier = 'jne'): array {
-        if (!array_key_exists($courier, self::COURIERS)) {
+        if (!self::is_enabled()) return [];
+        
+        $couriers = self::get_couriers();
+        if (!array_key_exists($courier, $couriers)) {
             return [];
         }
 
@@ -109,8 +153,10 @@ class RajaOngkir {
      *  Ambil ongkir semua kurir sekaligus
      * ───────────────────────────────────────────── */
     public static function get_all_costs(int $origin, int $destination, int $weight_gram): array {
+        if (!self::is_enabled()) return [];
+        
         $all = [];
-        foreach (array_keys(self::COURIERS) as $courier) {
+        foreach (array_keys(self::get_couriers()) as $courier) {
             $results = self::get_cost($origin, $destination, $weight_gram, $courier);
             if (!empty($results)) {
                 $all[$courier] = $results[0]['costs'] ?? [];
@@ -131,7 +177,7 @@ class RajaOngkir {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 15,
             CURLOPT_HTTPHEADER     => [
-                'key: ' . self::API_KEY,
+                'key: ' . self::get_api_key(),
             ],
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,

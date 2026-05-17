@@ -159,6 +159,12 @@ class StoreCheckout extends Controller {
             $primary_gateway = 'demo';
         }
 
+        $get_qty = isset($_GET['qty']) ? (int) $_GET['qty'] : 1;
+        if($get_qty < 1) $get_qty = 1;
+
+        $get_price = isset($_GET['price']) ? (float) $_GET['price'] : (float)$item->price;
+        if($get_price < (float)$item->price) $get_price = (float)$item->price;
+
         /* ── Handle POST ── */
         if(!empty($_POST)) {
             $email          = input_clean($_POST['email'] ?? '');
@@ -166,7 +172,7 @@ class StoreCheckout extends Controller {
             $phone          = input_clean($_POST['phone'] ?? '');
             $method         = input_clean($_POST['payment_method'] ?? ($payment_channels[0]->code ?? 'QRIS'));
             $voucher_code   = strtoupper(input_clean($_POST['voucher_code'] ?? ''));
-            $qty            = 1;
+            $qty            = $get_qty;
 
             /* Physical shipping inputs */
             $shipping_address = null;
@@ -193,8 +199,8 @@ class StoreCheckout extends Controller {
                 if($shipping_cost <= 0)       Alerts::add_error('Pilih layanan ongkir terlebih dahulu.');
             }
 
-            $service_fee     = $item->price * 0.05;
-            $base_total      = (float)$item->price;
+            $base_total      = $get_price * $qty;
+            $service_fee     = $base_total * 0.05;
             $discount_amount = 0;
             $voucher_id      = null;
 
@@ -304,9 +310,9 @@ class StoreCheckout extends Controller {
                     $tripay_order_items = [
                         [
                             'sku'      => 'ITEM-' . $item->id,
-                            'name'     => $item->name,
+                            'name'     => $item->name . ($qty > 1 ? ' (x' . $qty . ')' : ''),
                             'price'    => (int) max(0, $base_total - $discount_amount),
-                            'quantity' => $qty
+                            'quantity' => 1
                         ]
                     ];
 
@@ -381,6 +387,9 @@ class StoreCheckout extends Controller {
         $data = [
             'shop'             => $shop,
             'item'             => $item,
+            'qty'              => $get_qty,
+            'price'            => $get_price,
+            'base_total'       => $get_price * $get_qty,
             'payment_channels' => $payment_channels,
             'primary_gateway'  => $primary_gateway,
             'is_demo'          => $is_demo,

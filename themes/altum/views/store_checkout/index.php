@@ -166,9 +166,9 @@ input[type=radio].pm-radio{display:none}
                         <label class="form-label">Kurir Ekspedisi <span class="req">*</span></label>
                         <select id="shippingCourier" class="form-control" required disabled onchange="loadShippingCosts()">
                             <option value="">-- Pilih Kurir --</option>
-                            <option value="jne">JNE</option>
-                            <option value="tiki">TIKI</option>
-                            <option value="pos">POS Indonesia</option>
+                            <?php foreach(\Altum\Libraries\RajaOngkir::get_couriers() as $code => $name): ?>
+                                <option value="<?= $code ?>"><?= strtoupper($code) ?> - <?= $name ?></option>
+                            <?php endforeach ?>
                         </select>
                     </div>
 
@@ -280,11 +280,11 @@ input[type=radio].pm-radio{display:none}
 
                 <div class="co-row">
                     <span>Harga produk</span>
-                    <span>Rp <?= number_format($data->item->price,0,',','.') ?></span>
+                    <span>Rp <?= number_format($data->price,0,',','.') ?></span>
                 </div>
                 <div class="co-row">
                     <span>Kuantitas</span>
-                    <span>1</span>
+                    <span><?= number_format($data->qty,0,',','.') ?></span>
                 </div>
                 <div class="co-row">
                     <span>Biaya platform</span>
@@ -330,7 +330,7 @@ input[type=radio].pm-radio{display:none}
 
                         <div class="summary-total">
                             <span>Total Bayar</span>
-                            <span class="co-total-val" id="grandTotalLabel">Rp <?= number_format($data->item->price, 0, ',', '.') ?></span>
+                            <span class="co-total-val" id="grandTotalLabel">Rp <?= number_format($data->base_total, 0, ',', '.') ?></span>
                         </div>
 
                 <p style="text-align:center;font-size:.72rem;color:#94a3b8;margin:14px 0 0">
@@ -401,7 +401,7 @@ if(firstRadio) {
     selectMethod(firstRadio.value, firstRadio.closest('.pm-card').querySelector('.pm-name').textContent);
 }
 
-var BASE_PRICE = <?= (float)$data->item->price ?>;
+var BASE_PRICE = <?= (float)$data->base_total ?>;
 
 function applyVoucher() {
     var code = document.getElementById('voucherInput').value.trim();
@@ -438,7 +438,7 @@ function applyVoucher() {
 /* Shipping Logic */
 <?php if($data->item->type === 'physical'): ?>
 var SHOP_ORIGIN_CITY = <?= (int)($data->shop->origin_city_id ?? 0) ?>;
-var ITEM_WEIGHT      = <?= (int)($data->item->weight ?? 1000) ?>;
+var ITEM_WEIGHT      = <?= (int)($data->item->weight ?? 1000) ?> * <?= (int)$data->qty ?>;
 var ITEM_BASE_PRICE  = BASE_PRICE;
 var CURRENT_DISCOUNT = 0;
 var CURRENT_ONGKIR   = 0;
