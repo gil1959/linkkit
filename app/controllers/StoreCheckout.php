@@ -138,6 +138,11 @@ class StoreCheckout extends Controller {
             if(!$primary_gateway) $primary_gateway = 'paypal';
         }
 
+        if(!empty(settings()->offline_payment->is_enabled)) {
+            $payment_channels[] = (object)['code'=>'offline_payment','name'=>l('pay.custom_plan.offline_payment'),'group'=>'Manual Payment','icon_url'=>'','total_fee'=>(object)['flat'=>0,'percent'=>0],'_gateway'=>'offline_payment'];
+            if(!$primary_gateway) $primary_gateway = 'offline_payment';
+        }
+
         $is_demo = empty($primary_gateway);
         if($is_demo) {
             $base = 'https://tripay.co.id/images/payment/icon/';
@@ -217,6 +222,17 @@ class StoreCheckout extends Controller {
             $grand_total    = max(0, $base_total - $discount_amount) + $shipping_cost;
             $invoice_number = 'INV-SHOP-' . strtoupper(substr(md5(uniqid()), 0, 10));
 
+            $offline_payment_proof_file = null;
+            if($method === 'offline_payment') {
+                $offline_payment_proof_provided = !empty($_FILES['offline_payment_proof']['name']);
+                if(!$offline_payment_proof_provided) {
+                    Alerts::add_error(l('pay.error_message.offline_payment_proof_missing'));
+                } else {
+                    $offline_payment_proof_file = \Altum\Uploads::process_upload('offline_payment_proofs', 'offline_payment_proof', 'offline_payment_proof_remove', settings()->offline_payment->proof_size_limit);
+                    if(Alerts::has_field_errors('offline_payment_proof')) Alerts::add_error(Alerts::output_field_error('offline_payment_proof'));
+                }
+            }
+
             if(!Alerts::has_errors()) {
                 /* Customer */
                 $customer = database()->query("SELECT `id` FROM `shop_customers`
@@ -244,15 +260,15 @@ class StoreCheckout extends Controller {
                     (`shop_id`, `item_id`, `customer_id`, `invoice_number`, `qty`,
                      `total_amount`, `service_fee`, `grand_total`, `discount_amount`, `voucher_id`,
                      `shipping_address`, `shipping_courier`, `shipping_service`, `shipping_cost`,
-                     `payment_processor`, `status`, `datetime`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)");
+                     `payment_processor`, `payment_proof`, `status`, `datetime`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)");
                 $stmt->bind_param(
-                    'iiisiddddisssdss',
+                    'iiisiddddisssdsss',
                     $shop->id, $item->id, $customer_id,
                     $invoice_number, $qty,
                     $base_total, $service_fee, $grand_total, $discount_amount, $voucher_id,
                     $sa_esc, $sc_esc, $ss_esc, $shipping_cost,
-                    $processor, $datetime
+                    $method, $offline_payment_proof_file, $datetime
                 );
                 $stmt->execute();
                 $order_id = $stmt->insert_id;
@@ -263,7 +279,20 @@ class StoreCheckout extends Controller {
                 }
 
                 /* ── Gateway routing ── */
-                if($is_demo || $primary_gateway === 'demo') {
+                if($method === 'offline_payment') {
+                    try {
+                        $pending_email = $this->build_pending_email($invoice_number, $full_name, $item->name, $shop->name, $grand_total, SITE_URL . 'store-checkout-success/' . $invoice_number);
+                        send_mail($email, 'Selesaikan pembayaran manual - ' . $invoice_number, $pending_email);
+                    } catch(\Exception $e) {}
+                    
+                    // Insert to global payments for admin to approve
+                    database()->query("INSERT INTO `payments` (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`, `total_amount`, `currency`, `payment_proof`, `status`, `datetime`) VALUES (" . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '" . database()->real_escape_string($email) . "', '" . database()->real_escape_string($full_name) . "', " . (float)$grand_total . ", '" . settings()->payment->default_currency . "', '" . database()->real_escape_string($offline_payment_proof_file) . "', 'pending', '{$datetime}')");
+                    $payment_table_id = database()->insert_id;
+                    database()->query("UPDATE `payments` SET `code` = 'shop_order_{$order_id}' WHERE `id` = {$payment_table_id}");
+                    
+                    redirect('store-checkout-success/' . $invoice_number);
+                    
+                } elseif($is_demo || $method === 'demo') {
                     database()->query("UPDATE `shop_orders` SET `status` = 'paid', `settle_status` = 'unsettled', `paid_date` = '{$datetime}' WHERE `id` = {$order_id}");
                     database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$grand_total} WHERE `id` = {$customer_id}");
                     $seller_revenue = $grand_total - $service_fee;

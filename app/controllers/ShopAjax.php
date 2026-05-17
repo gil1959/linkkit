@@ -10,12 +10,15 @@ class ShopAjax extends Controller {
         $action = input_clean($_POST['action'] ?? $_GET['action'] ?? '');
 
         /* ── Public endpoints (no auth needed, called from checkout) ── */
-        if(in_array($action, ['ongkir_provinces', 'ongkir_cities', 'ongkir_cost', 'buyer_check_order'])) {
+        if(in_array($action, ['ongkir_provinces', 'ongkir_cities', 'ongkir_cost', 'buyer_check_order', 'item_reviews', 'report_review', 'buyer_edit_review'])) {
             switch($action) {
                 case 'ongkir_provinces':  $this->ongkir_provinces();  break;
                 case 'ongkir_cities':     $this->ongkir_cities();     break;
                 case 'ongkir_cost':       $this->ongkir_cost();       break;
                 case 'buyer_check_order': $this->buyer_check_order(); break;
+                case 'item_reviews':      $this->item_reviews();      break;
+                case 'report_review':     $this->report_review();     break;
+                case 'buyer_edit_review': $this->buyer_edit_review(); break;
             }
             return;
         }
@@ -37,7 +40,8 @@ class ShopAjax extends Controller {
             case 'listing_create':    $this->listing_create($shop);    break;
             case 'listing_update':    $this->listing_update($shop);    break;
             case 'listing_delete':    $this->listing_delete($shop);    break;
-            case 'review_delete':     $this->review_delete($shop);     break;
+            case 'review_reply':      $this->review_reply($shop);      break;
+            case 'seller_report_review': $this->seller_report_review($shop); break;
             case 'update_tracking':   $this->update_tracking($shop);   break;
             default: die(json_encode(['success' => false, 'message' => 'Unknown action']));
         }
@@ -119,7 +123,79 @@ class ShopAjax extends Controller {
             'checkout_url'    => $order->checkout_url
         ];
 
+        $review = database()->query("SELECT `id`, `rating`, `review`, `reply` FROM `shop_reviews` WHERE `order_id` = {$order->id}")->fetch_object();
+        if($review) {
+            $data['review'] = $review;
+        }
+
         die(json_encode(['success' => true, 'data' => $data]));
+    }
+
+    private function item_reviews() {
+        $item_id = (int)($_GET['item_id'] ?? 0);
+        $reviews = [];
+        if($item_id > 0) {
+            $res = database()->query("
+                SELECT r.*, c.full_name as reviewer_name, c.email as reviewer_email 
+                FROM `shop_reviews` r
+                JOIN `shop_orders` o ON r.order_id = o.id
+                JOIN `shop_customers` c ON o.customer_id = c.id
+                WHERE r.item_id = {$item_id} AND r.status != 'hidden'
+                ORDER BY r.datetime DESC
+            ");
+            while($row = $res->fetch_object()) {
+                $is_verified = false;
+                $u = database()->query("SELECT `verification_status` FROM `users` WHERE `email` = '" . database()->real_escape_string($row->reviewer_email) . "'")->fetch_object();
+                if($u && $u->verification_status == 'verified') {
+                    $is_verified = true;
+                }
+                $reviews[] = [
+                    'id' => $row->id,
+                    'name' => $row->reviewer_name,
+                    'rating' => (int)$row->rating,
+                    'review' => $row->review,
+                    'reply' => $row->reply,
+                    'datetime' => date('d M Y', strtotime($row->datetime)),
+                    'is_verified' => $is_verified
+                ];
+            }
+        }
+        die(json_encode(['success' => true, 'data' => $reviews]));
+    }
+
+    private function report_review() {
+        $review_id = (int)($_POST['review_id'] ?? 0);
+        $reason = input_clean($_POST['reason'] ?? '');
+        if(!$review_id || !$reason) die(json_encode(['success' => false, 'message' => 'Review ID or reason missing']));
+
+        database()->query("UPDATE `shop_reviews` SET `is_reported` = 1, `report_reason` = '" . database()->real_escape_string($reason) . "' WHERE `id` = {$review_id}");
+        die(json_encode(['success' => true]));
+    }
+
+    private function buyer_edit_review() {
+        $shop_id = (int)($_POST['shop_id'] ?? 0);
+        $invoice = input_clean($_POST['invoice'] ?? '');
+        $email   = input_clean($_POST['email'] ?? '');
+        $rating  = (int)($_POST['rating'] ?? 5);
+        $review_text = input_clean($_POST['review'] ?? '');
+
+        $order = database()->query("
+            SELECT o.id FROM `shop_orders` o
+            JOIN `shop_customers` c ON o.customer_id = c.id
+            WHERE o.shop_id = {$shop_id} AND o.invoice_number = '" . database()->real_escape_string($invoice) . "' AND c.email = '" . database()->real_escape_string($email) . "'
+        ")->fetch_object();
+
+        if(!$order) die(json_encode(['success' => false, 'message' => 'Invalid order']));
+
+        $review = database()->query("SELECT `id`, `datetime` FROM `shop_reviews` WHERE `order_id` = {$order->id}")->fetch_object();
+        if(!$review) die(json_encode(['success' => false, 'message' => 'Review not found']));
+
+        if(strtotime($review->datetime) < strtotime('-30 days')) {
+            die(json_encode(['success' => false, 'message' => 'Review can no longer be edited (30 days limit)']));
+        }
+
+        database()->query("UPDATE `shop_reviews` SET `rating` = {$rating}, `review` = '" . database()->real_escape_string($review_text) . "', `updated_at` = '" . \Altum\Date::$date . "' WHERE `id` = {$review->id}");
+        die(json_encode(['success' => true]));
     }
 
     /* ─────────────────────────────────────────────
@@ -299,12 +375,26 @@ class ShopAjax extends Controller {
         die(json_encode(['success' => true]));
     }
 
-    private function review_delete($shop) {
+    private function review_reply($shop) {
         $id = (int)($_POST['id'] ?? 0);
+        $reply = input_clean($_POST['reply'] ?? '');
         if(!$id) die(json_encode(['success' => false, 'message' => 'Invalid ID']));
         $r = database()->query("SELECT r.`id` FROM `shop_reviews` r JOIN `shop_items` i ON r.item_id=i.id WHERE r.id={$id} AND i.shop_id={$shop->id}")->fetch_object();
         if(!$r) die(json_encode(['success' => false, 'message' => 'Not found']));
-        database()->query("DELETE FROM `shop_reviews` WHERE `id`={$id}");
+        
+        database()->query("UPDATE `shop_reviews` SET `reply` = " . (empty($reply) ? 'NULL' : "'" . database()->real_escape_string($reply) . "'") . " WHERE `id`={$id}");
+        die(json_encode(['success' => true]));
+    }
+
+    private function seller_report_review($shop) {
+        $id = (int)($_POST['id'] ?? 0);
+        $reason = input_clean($_POST['reason'] ?? '');
+        if(!$id || !$reason) die(json_encode(['success' => false, 'message' => 'Data tidak lengkap']));
+        
+        $r = database()->query("SELECT r.`id` FROM `shop_reviews` r JOIN `shop_items` i ON r.item_id=i.id WHERE r.id={$id} AND i.shop_id={$shop->id}")->fetch_object();
+        if(!$r) die(json_encode(['success' => false, 'message' => 'Not found']));
+        
+        database()->query("UPDATE `shop_reviews` SET `is_reported` = 1, `report_reason` = '" . database()->real_escape_string($reason) . "' WHERE `id`={$id}");
         die(json_encode(['success' => true]));
     }
 }

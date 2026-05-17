@@ -3,6 +3,13 @@
 
 <style>
 *,*::before,*::after{box-sizing:border-box}
+<?php
+function format_sold($n) {
+    if($n >= 1000000) return floor($n/1000000).'jt+';
+    if($n >= 1000) return floor($n/1000).'rb+';
+    return $n;
+}
+?>
 body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 /* ── TOPBAR ── */
 .s-top{background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:10px 20px;gap:14px;position:sticky;top:0;z-index:500;box-shadow:0 1px 6px rgba(0,0,0,.07)}
@@ -50,7 +57,7 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .s-quick-cart{position:absolute;bottom:8px;right:8px;width:34px;height:34px;background:#4f46e5;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.4);transition:.2s;font-size:.85rem}
 .s-quick-cart:hover{background:#3730a3;transform:scale(1.1)}
 .s-card-body{padding:12px;flex:1;display:flex;flex-direction:column}
-.s-card-name{font-weight:700;font-size:.88rem;color:#111827;margin-bottom:4px;line-height:1.3}
+.s-card-name{font-weight:700;font-size:.88rem;color:#111827;margin-bottom:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .s-card-price{font-weight:800;color:#4f46e5;font-size:.9rem}
 .s-card-stock{font-size:.7rem;color:#9ca3af;margin-top:2px}
 /* ── EMPTY ── */
@@ -181,7 +188,12 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
             <div class="s-avatar-icon"><i class="fas fa-shopping-bag"></i></div>
         <?php endif ?>
         <div class="s-info">
-            <h1 class="s-name"><?= htmlspecialchars($data->shop->name) ?></h1>
+            <h1 class="s-name">
+                <?= htmlspecialchars($data->shop->name) ?>
+                <?php if($data->shop_verified): ?>
+                    <i class="fas fa-check-circle text-primary fa-xs ml-1" title="Toko Terverifikasi"></i>
+                <?php endif; ?>
+            </h1>
             <?php if($data->shop->description): ?>
                 <p class="s-desc"><?= nl2br(htmlspecialchars($data->shop->description)) ?></p>
             <?php endif ?>
@@ -233,13 +245,24 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
                         </button>
                     </div>
                     <div class="s-card-body">
-                        <div class="s-card-name"><?= htmlspecialchars($item->name) ?></div>
+                        <div class="s-card-name" title="<?= htmlspecialchars($item->name) ?>"><?= htmlspecialchars($item->name) ?></div>
                         <div class="s-card-price">
                             <?php if(!empty($item->is_flexible_amount)): ?>
                                 <span style="font-size:.7rem;color:#6b7280;font-weight:normal">Mulai dari</span> 
                             <?php endif ?>
                             Rp <?= number_format($item->price,0,',','.') ?>
                         </div>
+                        <div style="font-size: .75rem; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                            <i class="fas fa-star" style="color: #f59e0b;"></i> 
+                            <span style="font-weight: 600; color: #374151;"><?= number_format($item->avg_rating ?? 0, 1) ?></span> 
+                            <span>&middot;</span> 
+                            <span><?= format_sold($item->total_sold ?? 0) ?> terjual</span>
+                        </div>
+                        <?php if($data->shop_verified): ?>
+                        <div style="font-size: .75rem; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                            <i class="fas fa-shield-alt text-success"></i> <?= htmlspecialchars($data->shop->name) ?>
+                        </div>
+                        <?php endif; ?>
                         <div class="s-card-stock">
                             <?php if($item->stock === null): ?>
                                 <i class="fas fa-infinity fa-xs"></i> Unlimited
@@ -418,6 +441,13 @@ function openDetail(id){
     var discountBadge = p.has_discount ? '<span style="background:#f59e0b;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-tag" style="margin-right:4px"></i>Diskon</span>' : '';
     var priceDisplay = p.is_flexible_amount ? '<span style="font-size:0.9rem;color:#6b7280;font-weight:normal">Mulai dari</span> ' + fmtRp(p.price) : fmtRp(p.price);
 
+    var ratingHtml = '<div style="font-size:.8rem;color:#6b7280;display:flex;align-items:center;gap:4px;margin-bottom:12px">'+
+                     '<i class="fas fa-star" style="color:#f59e0b;"></i>'+
+                     '<span style="font-weight:600;color:#374151;">'+(p.avg_rating?parseFloat(p.avg_rating).toFixed(1):'0.0')+'</span>'+
+                     '<span>&middot;</span>'+
+                     '<span>'+(p.total_sold>=1000000?Math.floor(p.total_sold/1000000)+'jt+':(p.total_sold>=1000?Math.floor(p.total_sold/1000)+'rb+':(p.total_sold||0)))+' terjual</span>'+
+                     '</div>';
+
     var btnAddHtml = p.has_variants ? '' : '<button class="btn-add-cart" id="btnAddCart_'+id+'"><i class="fas fa-cart-plus" style="margin-right:4px"></i>Tambah ke Keranjang</button>';
     var btnBuyHtml = p.has_variants 
         ? '<button class="btn-buy-now" id="btnBuyNow_'+id+'"><i class="fas fa-list" style="margin-right:4px"></i>Pilih Varian</button>'
@@ -444,14 +474,53 @@ function openDetail(id){
         imgHtml +
         (flashSaleBadge || discountBadge ? '<div style="margin-bottom:10px">' + flashSaleBadge + discountBadge + '</div>' : '') +
         '<p class="s-modal-name">'+escHtml(p.name)+'</p>'+
-        '<p class="s-modal-price">'+priceDisplay+'</p>'+
+        '<p class="s-modal-price" style="margin-bottom:4px">'+priceDisplay+'</p>'+
+        ratingHtml +
         '<p class="s-modal-stock">'+escHtml(stockHtml)+'</p>'+
         (p.description ? '<div class="s-modal-desc">'+p.description+'</div>' : '')+
         inputsHtml +
         '<div class="s-modal-actions">'+
             btnAddHtml +
             btnBuyHtml +
-        '</div>';
+        '</div>' + 
+        '<div id="modalReviewsContainer" style="margin-top:24px;border-top:1px solid #f3f4f6;padding-top:16px"><div style="text-align:center;color:#94a3b8;font-size:0.85rem">Memuat ulasan...</div></div>';
+        
+    /* Fetch reviews */
+    fetch('<?= SITE_URL . 'shop-ajax?action=item_reviews&item_id=' ?>' + id)
+    .then(r => r.json())
+    .then(res => {
+        var rContainer = document.getElementById('modalReviewsContainer');
+        if(!res.success || !res.data || res.data.length === 0) {
+            rContainer.innerHTML = '<div style="font-weight:700;margin-bottom:12px;font-size:1.1rem">Ulasan Pembeli</div><div style="font-size:0.85rem;color:#94a3b8">Belum ada ulasan untuk produk ini.</div>';
+            return;
+        }
+        var totalRating = 0;
+        var rHtml = res.data.map(function(r) {
+            totalRating += r.rating;
+            var stars = '';
+            for(var i=1; i<=5; i++) {
+                stars += '<i class="fas fa-star" style="color:' + (i <= r.rating ? '#f59e0b' : '#e5e7eb') + ';font-size:0.75rem"></i> ';
+            }
+            var verifyBadge = r.is_verified ? '<span style="background:#d1fae5;color:#059669;padding:2px 6px;border-radius:12px;font-size:0.65rem;font-weight:700;margin-left:6px" title="Verifikasi KTP"><i class="fas fa-check-circle"></i> Verified Purchase</span>' : '';
+            var replyHtml = r.reply ? '<div style="background:#f8fafc;padding:10px;border-radius:8px;margin-top:10px;font-size:0.8rem;border-left:3px solid #4f46e5"><strong style="display:block;margin-bottom:4px;color:#1e293b">Balasan Penjual:</strong><span style="color:#475569">' + escHtml(r.reply) + '</span></div>' : '';
+            var reportBtn = '<button onclick="reportReview(' + r.id + ')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.7rem;margin-top:8px;padding:0"><i class="fas fa-flag"></i> Laporkan</button>';
+            
+            return '<div style="padding:16px 0;border-bottom:1px solid #f3f4f6">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">' +
+                    '<div><strong style="font-size:0.9rem;color:#1e293b">' + escHtml(r.name) + '</strong>' + verifyBadge + '</div>' +
+                    '<div style="font-size:0.75rem;color:#94a3b8">' + r.datetime + '</div>' +
+                '</div>' +
+                '<div style="margin-bottom:8px">' + stars + '</div>' +
+                '<div style="font-size:0.85rem;color:#374151;line-height:1.5">' + escHtml(r.review) + '</div>' +
+                replyHtml +
+                reportBtn +
+            '</div>';
+        }).join('');
+        
+        var avg = (totalRating / res.data.length).toFixed(1);
+        rContainer.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="font-weight:800;font-size:1.2rem;color:#1e293b">Ulasan Pembeli</div><div style="background:#fef3c7;color:#d97706;padding:4px 10px;border-radius:12px;font-weight:700;font-size:0.85rem"><i class="fas fa-star mr-1"></i> ' + avg + ' / 5.0</div></div>' + rHtml;
+    });
+
     /* attach listeners setelah render */
     if(document.getElementById('btnAddCart_'+id)) {
         document.getElementById('btnAddCart_'+id).onclick = function(){
@@ -477,6 +546,18 @@ function openDetail(id){
     };
     document.getElementById('detailOverlay').classList.add('show');
 }
+
+function reportReview(id) {
+    var reason = prompt("Alasan melaporkan ulasan ini (spam, kata kasar, dll):");
+    if(!reason) return;
+    var params = new URLSearchParams({action:'report_review', review_id:id, reason:reason, token:'<?= \Altum\Csrf::get() ?>'});
+    fetch('<?= SITE_URL . 'shop-ajax' ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
+    .then(r=>r.json()).then(res=>{
+        if(res.success) alert('Ulasan berhasil dilaporkan.');
+        else alert('Gagal melaporkan ulasan.');
+    });
+}
+
 function closeDetail(){
     document.getElementById('detailOverlay').classList.remove('show');
 }
@@ -677,6 +758,21 @@ function checkOrder() {
                 payBtn = '<div style="padding:12px;background:#fff"><a href="'+o.checkout_url+'" target="_blank" style="display:block;text-align:center;background:#4f46e5;color:#fff;border-radius:8px;padding:8px;text-decoration:none;font-weight:600;font-size:.85rem"><i class="fas fa-credit-card mr-1"></i> Bayar Sekarang</a></div>';
             }
 
+            var reviewHtml = '';
+            if(o.status === 'paid') {
+                if(o.review) {
+                    var starsHtml = '';
+                    for(var i=1;i<=5;i++) starsHtml += '<i class="fas fa-star" style="color:'+(i<=o.review.rating?'#f59e0b':'#d1d5db')+'"></i> ';
+                    var rText = o.review.review || 'Tidak ada teks';
+                    var replyText = o.review.reply ? '<div style="background:#f8fafc;padding:10px;border-radius:8px;margin-top:10px;font-size:0.8rem;border-left:3px solid #4f46e5"><strong style="display:block;margin-bottom:4px;color:#1e293b">Balasan Penjual:</strong><span style="color:#475569">' + escHtml(o.review.reply) + '</span></div>' : '';
+                    reviewHtml = '<div style="padding:16px;background:#fff;border-top:1px solid #e2e8f0"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700;font-size:0.9rem">Ulasan Kamu</div><button onclick="editMyReview()" style="background:none;border:none;color:#4f46e5;font-size:0.8rem;font-weight:600;cursor:pointer"><i class="fas fa-edit"></i> Edit</button></div><div style="font-size:1.1rem;margin-bottom:6px">'+starsHtml+'</div><div style="font-size:0.85rem;color:#475569" id="myReviewText">'+escHtml(rText)+'</div>'+replyText+'</div>';
+                    
+                    window.currentReview = { invoice: o.invoice_number, rating: o.review.rating, review: o.review.review };
+                } else {
+                    reviewHtml = '<div style="padding:16px;background:#fff;border-top:1px solid #e2e8f0;text-align:center"><div style="font-size:0.85rem;color:#64748b;margin-bottom:10px">Kamu belum memberikan ulasan</div><a href="'+STORE_URL+'success/'+o.invoice_number+'" style="display:inline-block;background:#fef3c7;color:#d97706;padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.8rem"><i class="fas fa-star mr-1"></i> Beri Ulasan</a></div>';
+                }
+            }
+
             res.innerHTML = 
                 '<div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">' +
                     '<div style="font-family:monospace;font-weight:700;color:#1e293b">' + o.invoice_number + '</div>' +
@@ -696,7 +792,7 @@ function checkOrder() {
                         '<strong style="color:#4f46e5">Rp ' + Number(o.grand_total).toLocaleString('id-ID') + '</strong>' +
                     '</div>' +
                 '</div>' +
-                shipHtml + payBtn;
+                shipHtml + payBtn + reviewHtml;
 
             res.style.display = 'block';
         }
@@ -705,6 +801,30 @@ function checkOrder() {
         btn.innerHTML = '<i class="fas fa-search mr-1"></i> Cek Pesanan';
         btn.disabled = false;
         msg.innerHTML = '<span style="color:#ef4444">Terjadi kesalahan sistem.</span>';
+    });
+}
+
+function editMyReview() {
+    var c = window.currentReview;
+    if(!c) return;
+    var newRating = prompt("Rating baru (1-5):", c.rating);
+    if(newRating === null) return;
+    newRating = parseInt(newRating);
+    if(newRating < 1 || newRating > 5 || isNaN(newRating)) { alert("Rating tidak valid"); return; }
+    var newReview = prompt("Isi ulasan baru:", c.review);
+    if(newReview === null) return;
+    
+    var email = document.getElementById('chk_email').value;
+    var params = new URLSearchParams({action:'buyer_edit_review', shop_id:'<?= $data->shop->id ?>', invoice:c.invoice, email:email, rating:newRating, review:newReview, token:'<?= \Altum\Csrf::get() ?>'});
+    
+    fetch('<?= SITE_URL . 'shop-ajax' ?>', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params})
+    .then(r=>r.json()).then(res=>{
+        if(res.success) {
+            alert('Ulasan berhasil diperbarui!');
+            checkOrder();
+        } else {
+            alert('Gagal mengedit: ' + (res.message || 'Error'));
+        }
     });
 }
 

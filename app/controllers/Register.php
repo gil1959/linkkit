@@ -160,7 +160,7 @@ class Register extends Controller {
 
                 /* Define some needed variables */
                 $active 	                = (int) !settings()->users->email_confirmation;
-                $email_code                 = md5(uniqid('', true) . random_bytes(16));
+                $email_code                 = (string) mt_rand(100000, 999999);
 
                 /* Determine what plan is set by default */
                 $plan_id                    = 'free';
@@ -285,19 +285,20 @@ class Register extends Controller {
                         [
                             '{{NAME}}' => str_replace('.', '. ', $_POST['name']),
                         ],
-                        l('global.emails.user_activation.subject'),
+                        l('global.emails.user_activation.subject') . ' - OTP',
                         [
-                            '{{ACTIVATION_LINK}}' => url('activate-user?email=' . md5($_POST['email']) . '&email_activation_code=' . $email_code . '&type=user_activation' . '&redirect=' . $redirect),
+                            '{{ACTIVATION_LINK}}' => url('verify-email?email=' . urlencode($_POST['email'])),
                             '{{NAME}}' => str_replace('.', '. ', $_POST['name']),
                         ],
-                        l('global.emails.user_activation.body')
+                        // We will inject the OTP code into the body if it doesn't have a placeholder for it
+                        str_replace('{{ACTIVATION_LINK}}', 'Kode OTP Anda: <b>' . $email_code . '</b><br><br>{{ACTIVATION_LINK}}', l('global.emails.user_activation.body'))
                     );
 
                     send_mail($_POST['email'], $email_template->subject, $email_template->body);
 
                     /* Redirect to email verify */
                     session_set('sent_activation_email', $_POST['email']);
-                    redirect('sent-activation?email=' . $_POST['email']);
+                    redirect('verify-email?email=' . urlencode($_POST['email']));
                 }
 
             }
