@@ -161,7 +161,7 @@
                                     <label class="custom-control-label" for="has_discount"></label>
                                 </div>
                             </div>
-                            <div class="card-footer border-0" id="discount_price_wrapper" style="display:none; background:#f9fafb; border-top:1px solid #e5e7eb!important; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
+                            <div class="card-footer border-0 bg-light" id="discount_price_wrapper" style="display:none; border-top:1px solid var(--gray-200)!important; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
                                 <div class="form-group mb-0">
                                     <label for="discount_price">Harga Diskon (Rp)</label>
                                     <div class="input-group">

@@ -102,7 +102,7 @@ class ShopItemCreate extends Controller {
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
                 ");
                 $stmt->bind_param(
-                    'iissssssssdiidiiidiiis',
+                    'iissssssssdiiiiididiiis',
                     $shop->id,
                     $_POST['listing_id'],
                     $_POST['type'],

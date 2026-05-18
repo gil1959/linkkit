@@ -111,7 +111,7 @@ class ShopItemUpdate extends Controller {
                     WHERE `id` = ? AND `shop_id` = ?
                 ");
                 $stmt->bind_param(
-                    'issssssssdiidiiidiiiiii',
+                    'issssssssdiiiiididiiiiii',
                     $_POST['listing_id'],
                     $_POST['type'],
                     $download_links,
