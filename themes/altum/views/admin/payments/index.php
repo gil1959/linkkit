@@ -232,8 +232,10 @@
                         <a href="<?= url('admin/plan-update/' . $row->plan_id) ?>" class="badge badge-light">
                             <?= $data->plans[$row->plan_id]->name ?>
                         </a>
+                    <?php elseif($row->processor === 'offline_payment' && strpos($row->code ?? '', 'shop_order_') === 0): ?>
+                        <span class="badge badge-light">Pesanan Toko</span>
                     <?php else: ?>
-                        <span class="badge badge-light"><?= $row->plan->name ?? l('global.unknown') ?></span>
+                        <span class="badge badge-light"><?= isset($row->plan->name) ? $row->plan->name : l('global.unknown') ?></span>
                     <?php endif ?>
                 </td>
 

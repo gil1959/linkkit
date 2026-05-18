@@ -47,6 +47,9 @@ class StoreCheckoutSuccess extends Controller {
                     $filename = 'proof_' . $order->id . '_' . time() . '.' . $ext;
                     if(move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
                         database()->query("UPDATE `shop_orders` SET `proof_image` = '{$filename}', `status` = 'proof_uploaded' WHERE `id` = {$order->id}");
+                        /* Update juga di tabel payments global agar admin bisa melihat buktinya */
+                        database()->query("UPDATE `payments` SET `payment_proof` = '{$filename}', `status` = 'pending' WHERE `code` = 'shop_order_{$order->id}'");
+                        
                         $order->proof_image = $filename;
                         $order->status = 'proof_uploaded';
                         Alerts::add_success('Bukti pembayaran berhasil diunggah. Admin akan memverifikasi dalam 1x24 jam.');
