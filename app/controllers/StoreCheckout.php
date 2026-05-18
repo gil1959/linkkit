@@ -97,6 +97,11 @@ class StoreCheckout extends Controller {
         $shop = database()->query("SELECT * FROM `shops` WHERE `id` = {$item->shop_id} AND `is_active` = 1")->fetch_object() ?? null;
         if(!$shop) redirect();
 
+        /* ── Ensure payments.plan_id allows NULL for shop orders ── */
+        try {
+            database()->query("ALTER TABLE `payments` MODIFY `plan_id` INT NULL DEFAULT NULL");
+        } catch(\Exception $e) {}
+
         /* ── Collect payment channels ── */
         $payment_channels = [];
         $primary_gateway  = null;
@@ -292,9 +297,12 @@ class StoreCheckout extends Controller {
                         send_mail($email, 'Selesaikan pembayaran manual - ' . $invoice_number, $pending_email);
                     } catch(\Exception $e) {}
                     
-                    // Insert to global payments for admin to approve (with code in one query)
+                    // Insert to global payments for admin to approve
                     $payment_code = 'shop_order_' . $order_id;
-                    database()->query("INSERT INTO `payments` (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`, `total_amount`, `currency`, `payment_proof`, `code`, `status`, `datetime`) VALUES (" . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '" . database()->real_escape_string($email) . "', '" . database()->real_escape_string($full_name) . "', " . (float)$grand_total . ", '" . settings()->payment->default_currency . "', '" . database()->real_escape_string($offline_payment_proof_file) . "', '" . database()->real_escape_string($payment_code) . "', 'pending', '{$datetime}')");
+                    $ins_result = database()->query("INSERT INTO `payments` (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`, `total_amount`, `currency`, `payment_proof`, `code`, `status`, `datetime`) VALUES (" . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '" . database()->real_escape_string($email) . "', '" . database()->real_escape_string($full_name) . "', " . (float)$grand_total . ", '" . settings()->payment->default_currency . "', '" . database()->real_escape_string($offline_payment_proof_file) . "', '" . database()->real_escape_string($payment_code) . "', 'pending', '{$datetime}')");
+                    if(!$ins_result) {
+                        error_log('[SHOP_OFFLINE_PAYMENT] INSERT payments FAILED. Error: ' . database()->error . ' | code=' . $payment_code . ' | user_id=' . $shop->user_id);
+                    }
                     
                     redirect('store-checkout-success/' . $invoice_number);
                     
