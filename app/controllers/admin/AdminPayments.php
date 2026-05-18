@@ -164,6 +164,24 @@ class AdminPayments extends Controller {
                 }
             }
 
+            if(!$is_shop_order && $user && $plan) {
+                /* Send the email */
+                $email_template = get_email_template(
+                    [
+                        '{{NAME}}' => str_replace(' ', '+', $user->name),
+                        '{{PLAN_NAME}}' => $plan->name,
+                    ],
+                    l('global.emails.user_payment.subject', $user->language),
+                    [
+                        '{{NAME}}' => str_replace(' ', '+', $user->name),
+                        '{{PLAN_NAME}}' => $plan->name,
+                        '{{TOTAL_AMOUNT}}' => $payment->total_amount,
+                        '{{CURRENCY}}' => $payment->currency,
+                        '{{PROCESSOR}}' => $payment->processor,
+                        '{{INVOICE_URL}}' => url('invoice/' . $payment->id)
+                    ],
+                    l('global.emails.user_payment.body', $user->language)
+                );
                 send_mail($user->email, $email_template->subject, $email_template->body, ['anti_phishing_code' => $user->anti_phishing_code, 'language' => $user->language]);
             }
 
@@ -213,7 +231,7 @@ class AdminPayments extends Controller {
                         database()->query("UPDATE `shop_items` SET `sales` = `sales` + 1 WHERE `id` = {$item->id}");
                     }
                 }
-            } else if($user) {
+            }
 
             /* Send webhook notification if needed */
             if(settings()->webhooks->payment_new) {

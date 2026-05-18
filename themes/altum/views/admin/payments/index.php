@@ -205,7 +205,18 @@
             <tr>
                 <td class="text-nowrap">
                     <div class="d-flex align-items-center">
-                        <?php if($row->user_name || $row->user_email): ?>
+                        <?php if(strpos($row->code ?? '', 'shop_order_') === 0): ?>
+                            <div class="user-avatar rounded-circle mr-3" style="width:40px;height:40px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#475569">
+                                <?= mb_substr($row->name ?? '?', 0, 1) ?>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="font-weight-bold">
+                                    <?= htmlspecialchars($row->name) ?>
+                                    <span class="badge badge-success ml-1" style="font-size:0.6rem">Pembeli</span>
+                                </div>
+                                <span class="text-muted small"><?= htmlspecialchars($row->email) ?></span>
+                            </div>
+                        <?php elseif($row->user_name || $row->user_email): ?>
                             <a href="<?= url('admin/user-view/' . $row->user_id) ?>">
                                 <img src="<?= get_user_avatar($row->user_avatar, $row->user_email) ?>" referrerpolicy="no-referrer" loading="lazy" class="user-avatar rounded-circle mr-3" alt="" />
                             </a>
