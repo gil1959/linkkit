@@ -235,7 +235,7 @@ class StoreCheckout extends Controller {
                 if(!$offline_payment_proof_provided) {
                     Alerts::add_error(l('pay.error_message.offline_payment_proof_missing'));
                 } else {
-                    $offline_payment_proof_file = \Altum\Uploads::process_upload('offline_payment_proofs', 'offline_payment_proof', 'offline_payment_proof_remove', settings()->offline_payment->proof_size_limit);
+                    $offline_payment_proof_file = \Altum\Uploads::process_upload(null, 'offline_payment_proofs', 'offline_payment_proof', 'offline_payment_proof_remove', settings()->offline_payment->proof_size_limit);
                     if(Alerts::has_field_errors('offline_payment_proof')) Alerts::add_error(Alerts::output_field_error('offline_payment_proof'));
                 }
             }
