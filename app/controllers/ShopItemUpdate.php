@@ -55,6 +55,7 @@ class ShopItemUpdate extends Controller {
             $_POST['has_variants']        = isset($_POST['has_variants']) ? 1 : 0;
             $_POST['qty_per_transaction'] = (isset($_POST['qty_per_transaction']) && (int)$_POST['qty_per_transaction'] > 0) ? (int) $_POST['qty_per_transaction'] : null;
             $_POST['has_discount']        = isset($_POST['has_discount']) ? 1 : 0;
+            $_POST['discount_price']      = isset($_POST['discount_price']) && $_POST['discount_price'] !== '' ? abs((float) $_POST['discount_price']) : null;
             $_POST['is_flash_sale']       = isset($_POST['is_flash_sale']) ? 1 : 0;
 
             /* Physical product fields */
@@ -70,6 +71,10 @@ class ShopItemUpdate extends Controller {
 
             if(empty($_POST['name'])) {
                 Alerts::add_error('Product name is required.');
+            }
+
+            if($_POST['has_discount'] && $_POST['discount_price'] !== null && $_POST['discount_price'] >= $_POST['price']) {
+                Alerts::add_error('Harga diskon harus lebih rendah dari harga normal.');
             }
 
             /* Handle image upload */
@@ -96,6 +101,7 @@ class ShopItemUpdate extends Controller {
                         `stock` = ?,
                         `qty_per_transaction` = ?,
                         `has_discount` = ?,
+                        `discount_price` = ?,
                         `is_flash_sale` = ?,
                         `weight` = ?,
                         `length` = ?,
@@ -105,7 +111,7 @@ class ShopItemUpdate extends Controller {
                     WHERE `id` = ? AND `shop_id` = ?
                 ");
                 $stmt->bind_param(
-                    'issssssssdiiiiiiidiiiii',
+                    'issssssssdiidiiidiiiiii',
                     $_POST['listing_id'],
                     $_POST['type'],
                     $download_links,
@@ -121,6 +127,7 @@ class ShopItemUpdate extends Controller {
                     $_POST['stock'],
                     $_POST['qty_per_transaction'],
                     $_POST['has_discount'],
+                    $_POST['discount_price'],
                     $_POST['is_flash_sale'],
                     $weight,
                     $length,

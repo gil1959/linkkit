@@ -162,8 +162,9 @@ class StoreCheckout extends Controller {
         $get_qty = isset($_GET['qty']) ? (int) $_GET['qty'] : 1;
         if($get_qty < 1) $get_qty = 1;
 
-        $get_price = isset($_GET['price']) ? (float) $_GET['price'] : (float)$item->price;
-        if($get_price < (float)$item->price) $get_price = (float)$item->price;
+        $base_item_price = (!empty($item->has_discount) && !empty($item->discount_price)) ? (float)$item->discount_price : (float)$item->price;
+        $get_price = isset($_GET['price']) ? (float) $_GET['price'] : $base_item_price;
+        if($get_price < $base_item_price) $get_price = $base_item_price;
 
         /* ── Handle POST ── */
         if(!empty($_POST)) {

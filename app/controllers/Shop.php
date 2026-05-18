@@ -18,6 +18,10 @@ class Shop extends Controller {
         \Altum\Authentication::guard();
 
         /* Check if user already has a shop */
+        try {
+            database()->query("ALTER TABLE `shop_items` ADD `discount_price` FLOAT NULL DEFAULT NULL AFTER `has_discount`");
+        } catch(\Exception $e) {}
+
         $shop = database()->query("SELECT * FROM `shops` WHERE `user_id` = {$this->user->user_id}")->fetch_object() ?? null;
 
         if(!$shop) {
@@ -65,8 +69,10 @@ class Shop extends Controller {
             
             // Get basic shop stats
             $total_income = database()->query("SELECT SUM(`grand_total` - `service_fee`) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
+            $all_time_revenue = database()->query("SELECT SUM(`grand_total`) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
             $total_transactions = database()->query("SELECT COUNT(*) AS `total` FROM `shop_orders` WHERE `shop_id` = {$shop->id} AND `status` = 'paid'")->fetch_object()->total ?? 0;
             $total_pending_withdrawals = database()->query("SELECT SUM(`amount`) AS `total` FROM `shop_withdrawals` WHERE `user_id` = {$this->user->user_id} AND `status` = 'pending'")->fetch_object()->total ?? 0;
+            $withdrawal_amount = database()->query("SELECT SUM(`amount`) AS `total` FROM `shop_withdrawals` WHERE `user_id` = {$this->user->user_id} AND `status` IN ('paid', 'approved')")->fetch_object()->total ?? 0;
 
             // Product View & Conversion
             $total_product_views = 0;
@@ -105,6 +111,8 @@ class Shop extends Controller {
             $chart_labels = json_encode(array_values($date_labels));
             $chart_views = json_encode(array_values($views_data));
             $chart_clicks = json_encode(array_values($clicks_data));
+            $total_chart_views = array_sum($views_data);
+            $total_chart_clicks = array_sum($clicks_data);
 
             /* Fresh balance & verification status langsung dari DB (bukan dari session) */
             $fresh_user_data = database()->query("SELECT `withdrawable_funds`, `pending_funds`, `verification_status` FROM `users` WHERE `user_id` = {$this->user->user_id}")->fetch_object();
@@ -176,8 +184,10 @@ class Shop extends Controller {
             $data = [
                 'shop'                     => $shop,
                 'total_income'             => $total_income,
+                'all_time_revenue'         => $all_time_revenue,
                 'total_transactions'       => $total_transactions,
                 'total_pending_withdrawals'=> $total_pending_withdrawals,
+                'withdrawal_amount'        => $withdrawal_amount,
                 'withdrawable_funds'       => $withdrawable_funds,
                 'pending_funds'            => $pending_funds,
                 'verification_status'      => $verification_status,
@@ -186,6 +196,8 @@ class Shop extends Controller {
                 'chart_labels'             => $chart_labels,
                 'chart_views'              => $chart_views,
                 'chart_clicks'             => $chart_clicks,
+                'total_chart_views'        => $total_chart_views,
+                'total_chart_clicks'       => $total_chart_clicks,
                 'items'                    => $items,
                 'orders'                   => $orders,
                 'vouchers'                 => $vouchers,

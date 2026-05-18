@@ -161,6 +161,16 @@
                                     <label class="custom-control-label" for="has_discount"></label>
                                 </div>
                             </div>
+                            <div class="card-footer border-0" id="discount_price_wrapper" style="display:none; background:#f9fafb; border-top:1px solid #e5e7eb!important; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
+                                <div class="form-group mb-0">
+                                    <label for="discount_price">Harga Diskon (Rp)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
+                                        <input type="number" id="discount_price" name="discount_price" class="form-control" step="1" placeholder="Misal: 100000" value="<?= htmlspecialchars($data->item->discount_price ?? '') ?>" />
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">Harga diskon harus lebih rendah dari harga normal.</small>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Flash Sale -->
@@ -437,4 +447,14 @@ document.querySelector('form').addEventListener('submit', function() {
     if(html === '<p><br></p>') html = '';
     document.getElementById('description').value = html;
 });
+
+// Toggle discount price wrapper
+function toggleDiscountPrice() {
+    var isChecked = document.getElementById('has_discount').checked;
+    document.getElementById('discount_price_wrapper').style.display = isChecked ? 'block' : 'none';
+    var dpInput = document.getElementById('discount_price');
+    if(dpInput) dpInput.required = isChecked;
+}
+document.getElementById('has_discount').addEventListener('change', toggleDiscountPrice);
+toggleDiscountPrice();
 </script>

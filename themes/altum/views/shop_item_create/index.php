@@ -156,8 +156,18 @@
                                     <small class="text-muted">Offer price discounts to attract more buyers.</small>
                                 </div>
                                 <div class="custom-control custom-switch ml-3">
-                                    <input type="checkbox" class="custom-control-input" id="has_discount" name="has_discount" value="1">
+                                    <input type="checkbox" class="custom-control-input" id="has_discount" name="has_discount" value="1" <?= isset($data->draft['has_discount']) && $data->draft['has_discount'] ? 'checked' : '' ?>>
                                     <label class="custom-control-label" for="has_discount"></label>
+                                </div>
+                            </div>
+                            <div class="card-footer border-0" id="discount_price_wrapper" style="display:none; background:#f9fafb; border-top:1px solid #e5e7eb!important; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
+                                <div class="form-group mb-0">
+                                    <label for="discount_price">Harga Diskon (Rp)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
+                                        <input type="number" id="discount_price" name="discount_price" class="form-control" step="1" placeholder="Misal: 100000" value="<?= htmlspecialchars($data->draft['discount_price'] ?? '') ?>" />
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">Harga diskon harus lebih rendah dari harga normal.</small>
                                 </div>
                             </div>
                         </div>
@@ -434,4 +444,14 @@
     });
     // Init on load (handles draft restore)
     toggleProductTypeFields(typeSelect.value);
+
+    // Toggle discount price wrapper
+    function toggleDiscountPrice() {
+        var isChecked = document.getElementById('has_discount').checked;
+        document.getElementById('discount_price_wrapper').style.display = isChecked ? 'block' : 'none';
+        var dpInput = document.getElementById('discount_price');
+        if(dpInput) dpInput.required = isChecked;
+    }
+    document.getElementById('has_discount').addEventListener('change', toggleDiscountPrice);
+    toggleDiscountPrice();
 </script>

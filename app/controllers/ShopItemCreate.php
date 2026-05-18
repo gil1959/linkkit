@@ -57,6 +57,7 @@ class ShopItemCreate extends Controller {
             $_POST['has_variants']        = isset($_POST['has_variants']) ? 1 : 0;
             $_POST['qty_per_transaction'] = (isset($_POST['qty_per_transaction']) && (int)$_POST['qty_per_transaction'] > 0) ? (int) $_POST['qty_per_transaction'] : null;
             $_POST['has_discount']        = isset($_POST['has_discount']) ? 1 : 0;
+            $_POST['discount_price']      = isset($_POST['discount_price']) && $_POST['discount_price'] !== '' ? abs((float) $_POST['discount_price']) : null;
             $_POST['is_flash_sale']       = isset($_POST['is_flash_sale']) ? 1 : 0;
 
             /* Physical product fields */
@@ -83,6 +84,10 @@ class ShopItemCreate extends Controller {
                 Alerts::add_error('Product name is required.');
             }
 
+            if($_POST['has_discount'] && $_POST['discount_price'] !== null && $_POST['discount_price'] >= $_POST['price']) {
+                Alerts::add_error('Harga diskon harus lebih rendah dari harga normal.');
+            }
+
             /* Handle image upload */
             $image = \Altum\Uploads::process_upload(null, 'shop_items', 'image', 'image_remove', 5);
             $image2 = \Altum\Uploads::process_upload(null, 'shop_items', 'image2', 'image2_remove', 5);
@@ -93,11 +98,11 @@ class ShopItemCreate extends Controller {
                 $datetime = \Altum\Date::$date;
                 $stmt = database()->prepare("
                     INSERT INTO `shop_items`
-                    (`shop_id`, `listing_id`, `type`, `download_links`, `name`, `description`, `image`, `image2`, `image3`, `image4`, `price`, `is_flexible_amount`, `has_variants`, `stock`, `qty_per_transaction`, `has_discount`, `is_flash_sale`, `weight`, `length`, `width`, `height`, `status`, `datetime`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                    (`shop_id`, `listing_id`, `type`, `download_links`, `name`, `description`, `image`, `image2`, `image3`, `image4`, `price`, `is_flexible_amount`, `has_variants`, `stock`, `qty_per_transaction`, `has_discount`, `discount_price`, `is_flash_sale`, `weight`, `length`, `width`, `height`, `status`, `datetime`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
                 ");
                 $stmt->bind_param(
-                    'iissssssssdiiiiiidiiis',
+                    'iissssssssdiidiiidiiis',
                     $shop->id,
                     $_POST['listing_id'],
                     $_POST['type'],
@@ -114,6 +119,7 @@ class ShopItemCreate extends Controller {
                     $_POST['stock'],
                     $_POST['qty_per_transaction'],
                     $_POST['has_discount'],
+                    $_POST['discount_price'],
                     $_POST['is_flash_sale'],
                     $weight,
                     $length,

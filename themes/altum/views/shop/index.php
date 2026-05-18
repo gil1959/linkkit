@@ -98,11 +98,11 @@
                     <div class="row">
                         <div class="col-12 col-md-6 mb-3 mb-md-0">
                             <div class="text-muted mb-1">All Time Revenue</div>
-                            <div class="h3 mb-0">Rp 0</div>
+                            <div class="h3 mb-0">Rp <?= number_format($data->all_time_revenue, 0, ',', '.') ?></div>
                         </div>
                         <div class="col-12 col-md-6 border-md-left">
                             <div class="text-muted mb-1">Withdrawal Amount</div>
-                            <div class="h3 mb-0">Rp 0</div>
+                            <div class="h3 mb-0">Rp <?= number_format($data->withdrawal_amount, 0, ',', '.') ?></div>
                         </div>
                     </div>
                 </div>
@@ -130,7 +130,17 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0 text-muted">Total Views & Clicks</h6>
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0 text-muted mr-3">Total Views & Clicks</h6>
+                            <div class="d-flex align-items-center mr-3">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b; margin-right: 5px;"></div>
+                                <span class="text-muted small">Views <strong class="text-dark ml-1"><?= number_format($data->total_chart_views) ?></strong></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin-right: 5px;"></div>
+                                <span class="text-muted small">Clicks <strong class="text-dark ml-1"><?= number_format($data->total_chart_clicks) ?></strong></span>
+                            </div>
+                        </div>
                         <div class="text-muted small"><i class="fas fa-calendar-alt"></i> Last 30 Days</div>
                     </div>
                     <div class="chart-container" style="position: relative; height:300px; width:100%;">
@@ -199,7 +209,7 @@
                                                     <i class="fas fa-fw fa-eye fa-sm text-info mr-2"></i> Detail
                                                 </a>
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item text-danger" href="#" onclick="return confirm('Hapus item ini?') && (window.location='<?= url('shop-item-delete/' . $item->id . '?token=' . \Altum\Csrf::get()) ?>')">
+                                                <a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#item_delete_modal_<?= $item->id ?>">
                                                     <i class="fas fa-fw fa-trash fa-sm mr-2"></i> Hapus
                                                 </a>
                                             </div>
@@ -227,6 +237,31 @@
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Tutup</button>
                                                         <a href="<?= url('shop-item-create?edit=' . $item->id) ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit fa-sm mr-1"></i> Edit</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="item_delete_modal_<?= $item->id ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Hapus Produk</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="text-muted">Apakah Anda yakin ingin menghapus produk <strong><?= htmlspecialchars($item->name) ?></strong>? Tindakan ini tidak dapat dibatalkan.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Batal</button>
+                                                        <form action="<?= url('shop-item-delete') ?>" method="post">
+                                                            <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>" />
+                                                            <input type="hidden" name="item_id" value="<?= $item->id ?>" />
+                                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-fw fa-trash mr-1"></i> Hapus Produk</button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>

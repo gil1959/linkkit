@@ -250,7 +250,14 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
                             <?php if(!empty($item->is_flexible_amount)): ?>
                                 <span style="font-size:.7rem;color:#6b7280;font-weight:normal">Mulai dari</span> 
                             <?php endif ?>
-                            Rp <?= number_format($item->price,0,',','.') ?>
+                            <?php if(!empty($item->has_discount) && !empty($item->discount_price)): ?>
+                                <div style="display:flex;flex-direction:column;gap:2px;">
+                                    <span style="font-size:0.75rem; color:#9ca3af; text-decoration:line-through;">Rp <?= number_format($item->price,0,',','.') ?></span>
+                                    <span style="color:#ef4444; font-weight:700;">Rp <?= number_format($item->discount_price,0,',','.') ?></span>
+                                </div>
+                            <?php else: ?>
+                                Rp <?= number_format($item->price,0,',','.') ?>
+                            <?php endif ?>
                         </div>
                         <div style="font-size: .75rem; color: #6b7280; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
                             <i class="fas fa-star" style="color: #f59e0b;"></i> 
@@ -359,6 +366,7 @@ var PRODUCTS = <?= json_encode(array_map(function($i){
         'is_flexible_amount'  => !empty($i->is_flexible_amount),
         'has_variants'        => !empty($i->has_variants),
         'has_discount'        => !empty($i->has_discount),
+        'discount_price'      => !empty($i->discount_price) ? (float)$i->discount_price : null,
         'is_flash_sale'       => !empty($i->is_flash_sale),
         'listing_id'          => $i->listing_id ?? null,
         'qty_per_transaction' => $i->qty_per_transaction ?? 0,
@@ -438,8 +446,15 @@ function openDetail(id){
         : (p.stock > 0 ? p.stock+' tersedia' : 'Habis');
         
     var flashSaleBadge = p.is_flash_sale ? '<span style="background:#ef4444;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-bolt" style="margin-right:4px"></i>Flash Sale</span>' : '';
-    var discountBadge = p.has_discount ? '<span style="background:#f59e0b;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-tag" style="margin-right:4px"></i>Diskon</span>' : '';
-    var priceDisplay = p.is_flexible_amount ? '<span style="font-size:0.9rem;color:#6b7280;font-weight:normal">Mulai dari</span> ' + fmtRp(p.price) : fmtRp(p.price);
+    var discountBadge = (p.has_discount && p.discount_price) ? '<span style="background:#f59e0b;color:#fff;font-size:.7rem;padding:3px 8px;border-radius:12px;font-weight:bold;margin-right:6px"><i class="fas fa-tag" style="margin-right:4px"></i>Diskon</span>' : '';
+    
+    var finalPrice = (p.has_discount && p.discount_price) ? p.discount_price : p.price;
+    var priceDisplay = '';
+    if(p.has_discount && p.discount_price) {
+        priceDisplay = '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:1.1rem;color:#ef4444;font-weight:700">' + fmtRp(p.discount_price) + '</span><span style="font-size:0.85rem;color:#9ca3af;text-decoration:line-through">' + fmtRp(p.price) + '</span></div>';
+    } else {
+        priceDisplay = p.is_flexible_amount ? '<span style="font-size:0.9rem;color:#6b7280;font-weight:normal">Mulai dari</span> ' + fmtRp(p.price) : fmtRp(p.price);
+    }
 
     var ratingHtml = '<div style="font-size:.8rem;color:#6b7280;display:flex;align-items:center;gap:4px;margin-bottom:12px">'+
                      '<i class="fas fa-star" style="color:#f59e0b;"></i>'+
@@ -464,7 +479,7 @@ function openDetail(id){
         
         var priceInput = '';
         if (p.is_flexible_amount) {
-            priceInput = '<div style="flex:2"><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:6px">Harga Anda (Min: '+fmtRp(p.price)+')</label><input type="number" id="s_price_'+id+'" value="'+p.price+'" min="'+p.price+'" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;outline:none" onfocus="this.style.borderColor=\'#6366f1\'" onblur="this.style.borderColor=\'#cbd5e1\'"></div>';
+            priceInput = '<div style="flex:2"><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:6px">Harga Anda (Min: '+fmtRp(finalPrice)+')</label><input type="number" id="s_price_'+id+'" value="'+finalPrice+'" min="'+finalPrice+'" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;outline:none" onfocus="this.style.borderColor=\'#6366f1\'" onblur="this.style.borderColor=\'#cbd5e1\'"></div>';
         }
         
         inputsHtml = '<div style="display:flex;gap:12px;margin-bottom:18px">' + qtyInput + priceInput + '</div>';
@@ -525,14 +540,14 @@ function openDetail(id){
     if(document.getElementById('btnAddCart_'+id)) {
         document.getElementById('btnAddCart_'+id).onclick = function(){
             var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
-            var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || p.price : p.price;
+            var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || finalPrice : finalPrice;
             
             if(q > maxQty) {
                 alert('Maksimal pembelian ' + maxQty + ' item per transaksi.');
                 return;
             }
-            if(pr < p.price) {
-                alert('Harga minimal adalah ' + fmtRp(p.price));
+            if(pr < finalPrice) {
+                alert('Harga minimal adalah ' + fmtRp(finalPrice));
                 return;
             }
             

@@ -280,7 +280,14 @@ input[type=radio].pm-radio{display:none}
 
                 <div class="co-row">
                     <span>Harga produk</span>
-                    <span>Rp <?= number_format($data->price,0,',','.') ?></span>
+                    <?php if(!empty($data->item->has_discount) && !empty($data->item->discount_price) && $data->price == $data->item->discount_price): ?>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                            <span style="font-size:0.75rem; color:#9ca3af; text-decoration:line-through;">Rp <?= number_format($data->item->price,0,',','.') ?></span>
+                            <span>Rp <?= number_format($data->price,0,',','.') ?></span>
+                        </div>
+                    <?php else: ?>
+                        <span>Rp <?= number_format($data->price,0,',','.') ?></span>
+                    <?php endif ?>
                 </div>
                 <div class="co-row">
                     <span>Kuantitas</span>
