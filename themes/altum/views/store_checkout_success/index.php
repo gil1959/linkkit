@@ -14,8 +14,9 @@ if($data->item->type === 'random_code' && $fulfilled && $fulfilled !== 'OUT_OF_S
     $random_code = $fulfilled;
 }
 
-$is_paid    = in_array($data->order->status, ['paid']);
-$is_pending = in_array($data->order->status, ['pending']);
+$is_paid        = in_array($data->order->status, ['paid']);
+$is_pending     = in_array($data->order->status, ['pending']);
+$is_offline_payment = ($data->order->payment_processor === 'offline_payment');
 ?>
 
 <style>
@@ -108,9 +109,14 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
             <div class="status-sub">Produk kamu sudah siap. Cek detail pengiriman di bawah.</div>
         <?php else: ?>
             <div class="status-icon pending"><i class="fas fa-clock" style="color:#d97706"></i></div>
-            <div class="status-title" style="color:#d97706">Menunggu Pembayaran</div>
-            <div class="status-sub">Selesaikan pembayaran kamu. Link pembayaran juga sudah dikirim ke email kamu.</div>
-            <?php if(!empty($data->order->checkout_url)): ?>
+            <?php if($is_offline_payment): ?>
+                <div class="status-title" style="color:#d97706">Menunggu Verifikasi</div>
+                <div class="status-sub">Bukti pembayaran kamu sudah diterima. Admin akan memverifikasi dalam 1x24 jam.</div>
+            <?php else: ?>
+                <div class="status-title" style="color:#d97706">Menunggu Pembayaran</div>
+                <div class="status-sub">Selesaikan pembayaran kamu. Link pembayaran juga sudah dikirim ke email kamu.</div>
+            <?php endif ?>
+            <?php if(!empty($data->order->checkout_url) && !$is_offline_payment): ?>
             <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;max-width:320px;margin-left:auto;margin-right:auto">
                 <a href="<?= htmlspecialchars($data->order->checkout_url) ?>"
                    style="display:flex;align-items:center;justify-content:center;gap:8px;background:#4f46e5;color:#fff;padding:14px 24px;border-radius:14px;text-decoration:none;font-weight:700;font-size:.95rem;box-shadow:0 4px 12px rgba(79,70,229,.3);transition:.2s"
@@ -211,7 +217,7 @@ body{background:#f0f2f8;font-family:'Inter',sans-serif;color:#1e293b;margin:0;mi
             <div class="summary-row"><span>Tanggal Pesan</span><span><?= date('d M Y H:i', strtotime($data->order->datetime)) ?></span></div>
             <div class="summary-row"><span>Status</span>
                 <span style="font-weight:700;color:<?= $is_paid ? '#059669' : '#d97706' ?>">
-                    <?= $is_paid ? 'Lunas' : 'Menunggu Bayar' ?>
+                    <?= $is_paid ? 'Lunas' : ($is_offline_payment ? 'Menunggu Verifikasi' : 'Menunggu Bayar') ?>
                 </span>
             </div>
             

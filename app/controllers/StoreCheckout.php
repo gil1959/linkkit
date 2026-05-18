@@ -292,10 +292,9 @@ class StoreCheckout extends Controller {
                         send_mail($email, 'Selesaikan pembayaran manual - ' . $invoice_number, $pending_email);
                     } catch(\Exception $e) {}
                     
-                    // Insert to global payments for admin to approve
-                    database()->query("INSERT INTO `payments` (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`, `total_amount`, `currency`, `payment_proof`, `status`, `datetime`) VALUES (" . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '" . database()->real_escape_string($email) . "', '" . database()->real_escape_string($full_name) . "', " . (float)$grand_total . ", '" . settings()->payment->default_currency . "', '" . database()->real_escape_string($offline_payment_proof_file) . "', 'pending', '{$datetime}')");
-                    $payment_table_id = database()->insert_id;
-                    database()->query("UPDATE `payments` SET `code` = 'shop_order_{$order_id}' WHERE `id` = {$payment_table_id}");
+                    // Insert to global payments for admin to approve (with code in one query)
+                    $payment_code = 'shop_order_' . $order_id;
+                    database()->query("INSERT INTO `payments` (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`, `total_amount`, `currency`, `payment_proof`, `code`, `status`, `datetime`) VALUES (" . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '" . database()->real_escape_string($email) . "', '" . database()->real_escape_string($full_name) . "', " . (float)$grand_total . ", '" . settings()->payment->default_currency . "', '" . database()->real_escape_string($offline_payment_proof_file) . "', '" . database()->real_escape_string($payment_code) . "', 'pending', '{$datetime}')");
                     
                     redirect('store-checkout-success/' . $invoice_number);
                     
@@ -394,6 +393,7 @@ class StoreCheckout extends Controller {
             'payment_channels' => $payment_channels,
             'primary_gateway'  => $primary_gateway,
             'is_demo'          => $is_demo,
+            'payment_method'   => $method ?? null,
         ];
 
         $view = new \Altum\View('store_checkout/index', (array) $this);
