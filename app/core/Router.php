@@ -181,6 +181,13 @@ class Router {
                 ]
             ],
 
+            'shop-item-delete' => [
+                'controller' => 'ShopItemDelete',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                ]
+            ],
+
             'store' => [
                 'controller' => 'Store',
                 'settings' => [
