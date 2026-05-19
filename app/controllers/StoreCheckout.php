@@ -164,11 +164,12 @@ class StoreCheckout extends Controller {
             $primary_gateway = 'demo';
         }
 
-        $get_qty = isset($_GET['qty']) ? (int) $_GET['qty'] : 1;
+        /* Read qty/price from GET, or fallback to POST hidden inputs */
+        $get_qty = isset($_GET['qty']) ? (int) $_GET['qty'] : (isset($_POST['_qty']) ? (int) $_POST['_qty'] : 1);
         if($get_qty < 1) $get_qty = 1;
 
         $base_item_price = (!empty($item->has_discount) && !empty($item->discount_price)) ? (float)$item->discount_price : (float)$item->price;
-        $get_price = isset($_GET['price']) ? (float) $_GET['price'] : $base_item_price;
+        $get_price = isset($_GET['price']) ? (float) $_GET['price'] : (isset($_POST['_price']) ? (float) $_POST['_price'] : $base_item_price);
         if($get_price < $base_item_price) $get_price = $base_item_price;
 
         /* ── Handle POST ── */

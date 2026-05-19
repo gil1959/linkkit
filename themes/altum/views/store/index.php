@@ -567,7 +567,12 @@ function openDetail(id){
         };
     }
     document.getElementById('btnBuyNow_'+id).onclick = function(){
-        window.location = STORE_URL + id;
+        var q  = document.getElementById('s_qty_'+id)   ? parseInt(document.getElementById('s_qty_'+id).value)   || 1 : 1;
+        var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || finalPrice : null;
+        if(q > maxQty) { alert('Maksimal pembelian ' + maxQty + ' item per transaksi.'); return; }
+        var url = STORE_URL + id + '?qty=' + q;
+        if(pr && pr !== finalPrice) url += '&price=' + pr;
+        window.location = url;
     };
     document.getElementById('detailOverlay').classList.add('show');
     
@@ -741,7 +746,17 @@ function toggleOrders(){
 }
 function doCheckout(){
     if(cart.length === 0) return;
-    window.location = STORE_URL + cart[0].id;
+    if(cart.length === 1) {
+        /* single item - gunakan page checkout biasa dengan qty */
+        var c = cart[0];
+        var url = STORE_URL + c.id + '?qty=' + c.qty;
+        if(c.price) url += '&price=' + c.price;
+        window.location = url;
+    } else {
+        /* multi-item - encode semua item ke URL checkout keranjang */
+        var cartData = cart.map(function(c){ return c.id + ':' + c.qty + ':' + c.price; }).join(',');
+        window.location = SITE_URL + 'store-cart-checkout?shop=<?= $data->shop->url ?>&items=' + encodeURIComponent(cartData);
+    }
 }
 
 /* ── Check Order ── */
