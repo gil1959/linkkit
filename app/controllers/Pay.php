@@ -1944,18 +1944,7 @@ class Pay extends Controller {
                         'duration' => 1,
                         'unit' => 'days'
                     ],
-                    'enabled_payments' => [
-                        'credit_card',
-                        'bca_va',
-                        'bni_va',
-                        'bri_va',
-                        'permata_va',
-                        'echannel',
-                        'gopay',
-                        'shopeepay',
-                        'qris',
-                        'akulaku',
-                    ],
+                    /* enabled_payments tidak dikirim → Midtrans pakai semua metode dari dashboard */
                     'item_details' => [[
                         'price' => $formatted_price,
                         'quantity' => 1,

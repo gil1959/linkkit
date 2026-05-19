@@ -191,10 +191,7 @@ class StoreCartCheckout extends Controller {
                             'gross_amount' => (int) ceil($grand_total),
                         ],
                         'expiry' => ['duration' => 1, 'unit' => 'days'],
-                        'enabled_payments' => [
-                            'credit_card', 'bca_va', 'bni_va', 'bri_va',
-                            'permata_va', 'echannel', 'gopay', 'shopeepay', 'qris', 'akulaku',
-                        ],
+                        /* enabled_payments tidak dikirim → Midtrans pakai semua metode dari dashboard */
                         'item_details'     => $midtrans_item_details,
                         'customer_details' => [
                             'first_name' => $full_name,
