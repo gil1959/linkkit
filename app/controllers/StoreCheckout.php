@@ -314,7 +314,7 @@ class StoreCheckout extends Controller {
                     $this->fulfill_order($order_id, $item, $customer_id);
                     redirect('store-checkout-success/' . $invoice_number);
 
-                } elseif($primary_gateway === 'tripay') {
+                } elseif($primary_gateway === 'tripay' && $method !== 'MIDTRANS') {
                     $tripay_order_items = [
                         [
                             'sku'      => 'ITEM-' . $item->id,
