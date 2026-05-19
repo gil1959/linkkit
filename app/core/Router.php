@@ -214,6 +214,15 @@ class Router {
                 ]
             ],
 
+            'store-cart-checkout' => [
+                'controller' => 'StoreCartCheckout',
+                'settings' => [
+                    'wrapper' => 'store_wrapper',
+                    'no_authentication_check' => true,
+                    'has_view' => true,
+                ]
+            ],
+
             'webhook-tripay-shop' => [
                 'controller' => 'WebhookTripayShop',
                 'settings' => [

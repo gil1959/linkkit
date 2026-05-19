@@ -111,33 +111,50 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .btn-share-modal{background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:11px 16px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center}
 .btn-share-modal:hover{background:#e5e7eb}
 /* ── CART POPUP ── */
-.cart-panel{position:fixed;right:-420px;top:0;bottom:0;width:380px;max-width:95vw;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:900;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.cart-panel{position:fixed;right:-420px;top:0;bottom:0;width:400px;max-width:95vw;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:900;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
 .cart-panel.open{right:0}
-.cart-panel-head{padding:20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
-.cart-panel-head h3{margin:0;font-size:1rem;font-weight:700}
+.cart-panel-head{padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px}
+.cart-panel-head h3{margin:0;font-size:1rem;font-weight:700;flex:1}
 .cart-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#9ca3af}
 .cart-close:hover{color:#111}
-.cart-items{flex:1;overflow-y:auto;padding:16px}
-.cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6}
+.cart-select-all-row{padding:8px 16px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px;font-size:.8rem;color:#374151;background:#f9fafb}
+.cart-items{flex:1;overflow-y:auto;padding:8px 0}
+.cart-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f3f4f6;transition:background .15s}
 .cart-item:last-child{border-bottom:none}
-.cart-item-img{width:52px;height:52px;border-radius:8px;object-fit:cover;background:#f3f4f6;flex-shrink:0}
-.cart-item-info{flex:1}
-.cart-item-name{font-weight:600;font-size:.85rem;margin-bottom:2px}
-.cart-item-price{font-size:.8rem;color:#4f46e5;font-weight:700}
-.cart-item-remove{background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:6px 8px;border-radius:6px;line-height:1;transition:background .15s}
+.cart-item:hover{background:#f9fafb}
+.cart-cb{width:16px;height:16px;accent-color:#4f46e5;cursor:pointer;flex-shrink:0}
+.cart-item-img{width:48px;height:48px;border-radius:8px;object-fit:cover;background:#f3f4f6;flex-shrink:0}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-weight:600;font-size:.82rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-item-price{font-size:.78rem;color:#4f46e5;font-weight:700}
+.cart-qty-ctrl{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.cart-qty-btn{width:24px;height:24px;border:1.5px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:.15s;color:#374151}
+.cart-qty-btn:hover{background:#eef2ff;border-color:#a5b4fc;color:#4f46e5}
+.cart-qty-val{font-size:.82rem;font-weight:700;min-width:28px;text-align:center;color:#1e293b}
+.cart-item-remove{background:none;border:none;color:#ef4444;cursor:pointer;font-size:.9rem;padding:4px 6px;border-radius:6px;line-height:1;transition:background .15s;flex-shrink:0}
 .cart-item-remove:hover{background:#fef2f2}
-
 .cart-empty-msg{text-align:center;padding:40px 16px;color:#9ca3af}
 .cart-empty-msg i{font-size:2rem;display:block;margin-bottom:8px}
-.cart-footer{padding:16px;border-top:1px solid #f3f4f6;display:flex;flex-direction:column;gap:8px}
-.cart-total{display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;margin-bottom:4px}
-.btn-checkout{background:#4f46e5;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:.9rem;cursor:pointer;width:100%;transition:.2s}
-.btn-checkout:hover{background:#3730a3}
+.cart-footer{padding:14px 16px;border-top:1px solid #f3f4f6;display:flex;flex-direction:column;gap:8px}
+.cart-total{display:flex;justify-content:space-between;font-weight:700;font-size:.88rem;margin-bottom:2px}
+.cart-total span:last-child{color:#4f46e5}
+.cart-selected-info{font-size:.75rem;color:#6b7280;text-align:center}
+.btn-checkout{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:.88rem;cursor:pointer;width:100%;transition:.2s}
+.btn-checkout:hover{background:linear-gradient(135deg,#3730a3,#4f46e5)}
 .cart-footer-row{display:flex;gap:8px}
-.btn-clear{flex:1;background:#fef2f2;color:#ef4444;border:none;border-radius:10px;padding:10px;font-weight:600;font-size:.82rem;cursor:pointer;transition:.2s}
+.btn-clear{flex:1;background:#fef2f2;color:#ef4444;border:none;border-radius:10px;padding:9px;font-weight:600;font-size:.78rem;cursor:pointer;transition:.2s}
 .btn-clear:hover{background:#fee2e2}
-.btn-continue{flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:10px;font-weight:600;font-size:.82rem;cursor:pointer;transition:.2s}
+.btn-continue{flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:9px;font-weight:600;font-size:.78rem;cursor:pointer;transition:.2s}
 .btn-continue:hover{background:#e5e7eb}
+/* ── Popup modal ── */
+.co-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1100;align-items:center;justify-content:center}
+.co-popup.show{display:flex}
+.co-popup-box{background:#fff;border-radius:16px;padding:28px 24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:popIn .2s ease}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.co-popup-icon{font-size:2.5rem;margin-bottom:12px}
+.co-popup-title{font-weight:800;font-size:1.05rem;color:#1e293b;margin-bottom:6px}
+.co-popup-desc{font-size:.85rem;color:#6b7280;margin-bottom:20px}
+.co-popup-btn{background:#4f46e5;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-weight:700;font-size:.88rem;cursor:pointer}
 /* ── FOOTER ── */
 .s-footer{text-align:center;padding:20px;font-size:.75rem;color:#d1d5db;border-top:1px solid #f3f4f6;margin-top:20px}
 .s-footer a{color:#9ca3af;text-decoration:none}
@@ -314,19 +331,36 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
         <h3><i class="fas fa-shopping-cart mr-2" style="color:#4f46e5"></i>Keranjang Belanja</h3>
         <button class="cart-close" onclick="toggleCart()"><i class="fas fa-times"></i></button>
     </div>
+    <!-- Select All row -->
+    <div class="cart-select-all-row" id="cartSelectAllRow" style="display:none">
+        <input type="checkbox" id="cbSelectAll" class="cart-cb" onchange="toggleSelectAll(this.checked)">
+        <label for="cbSelectAll" style="cursor:pointer;margin:0">Pilih Semua</label>
+        <span id="cartSelectedCount" style="margin-left:auto;color:#4f46e5;font-weight:600"></span>
+    </div>
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-footer" id="cartFooter" style="display:none">
         <div class="cart-total">
-            <span>Total</span>
-            <span id="cartTotal" style="color:#4f46e5">Rp 0</span>
+            <span>Total (dipilih)</span>
+            <span id="cartTotal">Rp 0</span>
         </div>
+        <div class="cart-selected-info" id="cartSelectedInfo"></div>
         <button class="btn-checkout" onclick="doCheckout()">
-            <i class="fas fa-bolt mr-1"></i>Checkout
+            <i class="fas fa-bolt mr-1"></i>Checkout Sekarang
         </button>
         <div class="cart-footer-row">
             <button class="btn-clear" onclick="clearCart()"><i class="fas fa-trash mr-1"></i>Hapus Semua</button>
             <button class="btn-continue" onclick="toggleCart()"><i class="fas fa-arrow-left mr-1"></i>Lanjut Belanja</button>
         </div>
+    </div>
+</div>
+
+<!-- POPUP: tidak ada produk dipilih -->
+<div class="co-popup" id="popupNoSelect" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="co-popup-box">
+        <div class="co-popup-icon">🛒</div>
+        <div class="co-popup-title">Belum ada produk dipilih</div>
+        <div class="co-popup-desc">Centang produk yang ingin kamu beli terlebih dahulu.</div>
+        <button class="co-popup-btn" onclick="document.getElementById('popupNoSelect').classList.remove('show')">Oke, Mengerti</button>
     </div>
 </div>
 
@@ -655,18 +689,18 @@ function goToSlide(idx) {
 }
 
 /* ── cart functions ── */
-function addCart(id, qty = 1, price = null){
-    id = Number(id);
+function addCart(id, qty, price){
+    qty = qty || 1;
+    id  = Number(id);
     var p = findProduct(id);
     if(!p) return;
-    
-    var finalPrice = price !== null ? price : Number(p.price);
-    
-    var exist = cart.find(function(c){ return c.id === id && c.price === finalPrice; });
-    if(exist){ 
-        exist.qty += qty; 
-    } else { 
-        cart.push({id:id, name:p.name, price:finalPrice, image:p.image, qty:qty}); 
+    /* price dikumpulkan dari JS tapi TIDAK dikirim ke server — server ambil dari DB */
+    var displayPrice = price != null ? Number(price) : ((p.has_discount && p.discount_price) ? p.discount_price : p.price);
+    var exist = cart.find(function(c){ return c.id === id; });
+    if(exist){
+        exist.qty += qty;
+    } else {
+        cart.push({id:id, name:p.name, price:displayPrice, image:p.image, qty:qty, checked:true});
     }
     saveCart();
     updateCartUI();
@@ -680,45 +714,82 @@ function clearCart(){
     saveCart();
     updateCartUI();
 }
+function changeQty(id, delta){
+    var item = cart.find(function(c){ return c.id === id; });
+    if(!item) return;
+    item.qty = Math.max(1, item.qty + delta);
+    saveCart();
+    updateCartUI();
+}
+function toggleSelectAll(checked){
+    cart.forEach(function(c){ c.checked = checked; });
+    saveCart();
+    updateCartUI();
+}
+function updateSelected(){
+    /* sync checked state dari checkbox ke cart array */
+    document.querySelectorAll('.cart-cb-item').forEach(function(cb){
+        var id = Number(cb.getAttribute('data-id'));
+        var item = cart.find(function(c){ return c.id === id; });
+        if(item) item.checked = cb.checked;
+    });
+    saveCart();
+    /* update total display */
+    var selected = cart.filter(function(c){ return c.checked; });
+    var selTotal  = selected.reduce(function(s,c){ return s + c.price * c.qty; }, 0);
+    document.getElementById('cartTotal').textContent = fmtRp(selTotal);
+    document.getElementById('cartSelectedInfo').textContent = selected.length + ' dari ' + cart.length + ' produk dipilih';
+    document.getElementById('cartSelectedCount').textContent = selected.length + '/' + cart.length;
+    /* select all checkbox state */
+    var cbAll = document.getElementById('cbSelectAll');
+    if(cbAll) cbAll.checked = cart.length > 0 && cart.every(function(c){ return c.checked; });
+}
 
 /* ── render cart ── */
 function updateCartUI(){
-    var total = cart.reduce(function(s,c){ return s + c.price * c.qty; }, 0);
     var count = cart.reduce(function(s,c){ return s + c.qty; }, 0);
-
     /* badge */
     var badge = document.getElementById('cartBadge');
     badge.style.display = count > 0 ? 'flex' : 'none';
-    badge.textContent = count;
+    badge.textContent = cart.length;
 
-    var el = document.getElementById('cartItems');
-    var footer = document.getElementById('cartFooter');
+    var el      = document.getElementById('cartItems');
+    var footer  = document.getElementById('cartFooter');
+    var selRow  = document.getElementById('cartSelectAllRow');
 
     if(cart.length === 0){
         el.innerHTML = '<div class="cart-empty-msg"><i class="fas fa-shopping-cart"></i><p>Keranjang kosong</p></div>';
         footer.style.display = 'none';
+        selRow.style.display = 'none';
         return;
     }
 
     footer.style.display = '';
-    document.getElementById('cartTotal').textContent = fmtRp(total);
+    selRow.style.display = '';
 
     /* render items */
     el.innerHTML = cart.map(function(c){
         var imgHtml = c.image
             ? '<img class="cart-item-img" src="'+c.image+'" alt="">'
             : '<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#7c3aed"><i class="fas fa-box"></i></div>';
-        return '<div class="cart-item" data-item-id="'+c.id+'">'+
-            imgHtml+
-            '<div class="cart-item-info">'+
-                '<div class="cart-item-name">'+escHtml(c.name)+'</div>'+
-                '<div class="cart-item-price">'+fmtRp(c.price)+' &times; '+c.qty+'</div>'+
-            '</div>'+
-            '<button class="cart-item-remove" type="button" title="Hapus item">🗑</button>'+
+        var isChecked = c.checked !== false;
+        return '<div class="cart-item" data-item-id="'+c.id+'">' +
+            '<input type="checkbox" class="cart-cb cart-cb-item" data-id="'+c.id+'" '+(isChecked?'checked':'')+' onchange="updateSelected()">' +
+            imgHtml +
+            '<div class="cart-item-info">' +
+                '<div class="cart-item-name" title="'+escHtml(c.name)+'">'+escHtml(c.name)+'</div>' +
+                '<div class="cart-item-price">'+fmtRp(c.price)+' / pcs</div>' +
+            '</div>' +
+            '<div class="cart-qty-ctrl">' +
+                '<button class="cart-qty-btn" onclick="changeQty('+c.id+',-1)" type="button">−</button>' +
+                '<span class="cart-qty-val">'+c.qty+'</span>' +
+                '<button class="cart-qty-btn" onclick="changeQty('+c.id+',1)" type="button">+</button>' +
+            '</div>' +
+            '<button class="cart-item-remove" type="button" title="Hapus">🗑</button>' +
         '</div>';
     }).join('');
 
-    /* ── attach click listener langsung ke setiap tombol hapus setelah render ── */
+    /* attach remove buttons */
     el.querySelectorAll('.cart-item-remove').forEach(function(btn){
         btn.addEventListener('click', function(e){
             e.stopPropagation();
@@ -728,6 +799,8 @@ function updateCartUI(){
             updateCartUI();
         });
     });
+
+    updateSelected();
 }
 
 function toggleCart(){
@@ -743,12 +816,33 @@ function toggleOrders(){
     document.getElementById('cartPanel').classList.remove('open');
 }
 function doCheckout(){
-    if(cart.length === 0) return;
-    /* Selalu checkout item pertama dari keranjang dengan qty-nya */
-    /* URL di-render PHP agar tidak bergantung pada SITE_URL di JS */
-    var c = cart[0];
-    var baseUrl = '<?= SITE_URL ?>store-checkout/' + c.id;
-    window.location.href = baseUrl + '?qty=' + c.qty;
+    /* Ambil item yang dicentang */
+    var selected = cart.filter(function(c){ return c.checked !== false; });
+    if(selected.length === 0){
+        document.getElementById('popupNoSelect').classList.add('show');
+        return;
+    }
+    if(selected.length === 1){
+        /* single item → checkout biasa dengan qty */
+        var c = selected[0];
+        window.location.href = '<?= SITE_URL ?>store-checkout/' + c.id + '?qty=' + c.qty;
+        return;
+    }
+    /* multi-item → POST tersembunyi ke StoreCartCheckout, harga dari DB */
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= SITE_URL ?>store-cart-checkout';
+    form.style.display = 'none';
+    function addField(n, v){ var i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;form.appendChild(i); }
+    addField('token', '<?= \Altum\Csrf::get() ?>');
+    addField('shop_url', '<?= $data->shop->url ?>');
+    selected.forEach(function(c, i){
+        addField('items['+i+'][id]',  c.id);
+        addField('items['+i+'][qty]', c.qty);
+        /* TIDAK kirim price → server ambil dari DB */
+    });
+    document.body.appendChild(form);
+    form.submit();
 }
 
 /* ── Check Order ── */
