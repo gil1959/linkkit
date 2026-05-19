@@ -569,7 +569,8 @@ function openDetail(id){
     document.getElementById('btnBuyNow_'+id).onclick = function(){
         var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
         if(q > maxQty) { alert('Maksimal pembelian ' + maxQty + ' item per transaksi.'); return; }
-        window.location = STORE_URL + id + '?qty=' + q;
+        /* Gunakan PHP URL agar tidak bergantung pada SITE_URL JS */
+        window.location.href = '<?= SITE_URL ?>store-checkout/' + id + '?qty=' + q;
     };
     document.getElementById('detailOverlay').classList.add('show');
     
@@ -743,36 +744,11 @@ function toggleOrders(){
 }
 function doCheckout(){
     if(cart.length === 0) return;
-    if(cart.length === 1) {
-        /* single item - gunakan page checkout biasa dengan qty */
-        var c = cart[0];
-        window.location = STORE_URL + c.id + '?qty=' + c.qty;
-    } else {
-        /* multi-item - POST tersembunyi, harga di-validasi server (tidak taruh price di URL) */
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '<?= SITE_URL ?>store-cart-checkout';
-        form.style.display = 'none';
-
-        function addField(name, val) {
-            var inp = document.createElement('input');
-            inp.type = 'hidden';
-            inp.name = name;
-            inp.value = val;
-            form.appendChild(inp);
-        }
-
-        addField('token', '<?= \Altum\Csrf::get() ?>');
-        addField('shop_url', '<?= $data->shop->url ?>');
-        cart.forEach(function(c, i) {
-            addField('items[' + i + '][id]',  c.id);
-            addField('items[' + i + '][qty]', c.qty);
-            /* TIDAK kirim price - server ambil dari DB */
-        });
-
-        document.body.appendChild(form);
-        form.submit();
-    }
+    /* Selalu checkout item pertama dari keranjang dengan qty-nya */
+    /* URL di-render PHP agar tidak bergantung pada SITE_URL di JS */
+    var c = cart[0];
+    var baseUrl = '<?= SITE_URL ?>store-checkout/' + c.id;
+    window.location.href = baseUrl + '?qty=' + c.qty;
 }
 
 /* ── Check Order ── */
