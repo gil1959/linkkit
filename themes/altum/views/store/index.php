@@ -567,12 +567,9 @@ function openDetail(id){
         };
     }
     document.getElementById('btnBuyNow_'+id).onclick = function(){
-        var q  = document.getElementById('s_qty_'+id)   ? parseInt(document.getElementById('s_qty_'+id).value)   || 1 : 1;
-        var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || finalPrice : null;
+        var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
         if(q > maxQty) { alert('Maksimal pembelian ' + maxQty + ' item per transaksi.'); return; }
-        var url = STORE_URL + id + '?qty=' + q;
-        if(pr && pr !== finalPrice) url += '&price=' + pr;
-        window.location = url;
+        window.location = STORE_URL + id + '?qty=' + q;
     };
     document.getElementById('detailOverlay').classList.add('show');
     
@@ -749,13 +746,32 @@ function doCheckout(){
     if(cart.length === 1) {
         /* single item - gunakan page checkout biasa dengan qty */
         var c = cart[0];
-        var url = STORE_URL + c.id + '?qty=' + c.qty;
-        if(c.price) url += '&price=' + c.price;
-        window.location = url;
+        window.location = STORE_URL + c.id + '?qty=' + c.qty;
     } else {
-        /* multi-item - encode semua item ke URL checkout keranjang */
-        var cartData = cart.map(function(c){ return c.id + ':' + c.qty + ':' + c.price; }).join(',');
-        window.location = SITE_URL + 'store-cart-checkout?shop=<?= $data->shop->url ?>&items=' + encodeURIComponent(cartData);
+        /* multi-item - POST tersembunyi, harga di-validasi server (tidak taruh price di URL) */
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?= SITE_URL ?>store-cart-checkout';
+        form.style.display = 'none';
+
+        function addField(name, val) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = name;
+            inp.value = val;
+            form.appendChild(inp);
+        }
+
+        addField('token', '<?= \Altum\Csrf::get() ?>');
+        addField('shop_url', '<?= $data->shop->url ?>');
+        cart.forEach(function(c, i) {
+            addField('items[' + i + '][id]',  c.id);
+            addField('items[' + i + '][qty]', c.qty);
+            /* TIDAK kirim price - server ambil dari DB */
+        });
+
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 
