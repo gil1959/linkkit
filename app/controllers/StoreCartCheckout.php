@@ -160,7 +160,7 @@ class StoreCartCheckout extends Controller {
                          `payment_processor`, `status`, `datetime`)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'pending', ?)");
                     $stmt->bind_param(
-                        'iiisiddss',
+                        'iiisidddss',
                         $shop->id, $item->id, $customer_id,
                         $invoice_number, $qty,
                         $subtotal, $service_fee, $subtotal,

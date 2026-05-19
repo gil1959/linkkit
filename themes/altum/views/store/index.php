@@ -392,6 +392,8 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 <!-- EMBED PRODUCT DATA -->
 <script>
 var STORE_URL = '<?= SITE_URL ?>store-checkout/';
+var CART_CHECKOUT_URL = '<?= SITE_URL ?>store-cart-checkout';
+var SITE_URL = '<?= SITE_URL ?>';
 var PRODUCTS = <?= json_encode(array_map(function($i){
     return [
         'id'                  => $i->id,
@@ -603,8 +605,7 @@ function openDetail(id){
     document.getElementById('btnBuyNow_'+id).onclick = function(){
         var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
         if(q > maxQty) { alert('Maksimal pembelian ' + maxQty + ' item per transaksi.'); return; }
-        /* Gunakan PHP URL agar tidak bergantung pada SITE_URL JS */
-        window.location.href = '<?= SITE_URL ?>store-checkout/' + id + '?qty=' + q;
+        window.location.href = STORE_URL + id + '?qty=' + q;
     };
     document.getElementById('detailOverlay').classList.add('show');
     
@@ -825,13 +826,13 @@ function doCheckout(){
     if(selected.length === 1){
         /* single item → checkout biasa dengan qty */
         var c = selected[0];
-        window.location.href = '<?= SITE_URL ?>store-checkout/' + c.id + '?qty=' + c.qty;
+        window.location.href = STORE_URL + c.id + '?qty=' + c.qty;
         return;
     }
     /* multi-item → POST tersembunyi ke StoreCartCheckout, harga dari DB */
     var form = document.createElement('form');
     form.method = 'POST';
-    form.action = '<?= SITE_URL ?>store-cart-checkout';
+    form.action = CART_CHECKOUT_URL;
     form.style.display = 'none';
     function addField(n, v){ var i=document.createElement('input');i.type='hidden';i.name=n;i.value=v;form.appendChild(i); }
     addField('token', '<?= \Altum\Csrf::get() ?>');
