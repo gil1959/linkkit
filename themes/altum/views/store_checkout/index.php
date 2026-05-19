@@ -103,7 +103,7 @@ input[type=radio].pm-radio{display:none}
         </div>
         <?php endif ?>
 
-        <form action="?qty=<?= (int)$data->qty ?>" method="post" id="checkoutForm" enctype="multipart/form-data">
+        <form action="<?= SITE_URL ?>store-checkout/<?= (int)$data->item->id ?>?qty=<?= (int)$data->qty ?>" method="post" id="checkoutForm" enctype="multipart/form-data">
             <input type="hidden" name="token" value="<?= \Altum\Csrf::get() ?>">
             <input type="hidden" name="payment_method" id="selectedMethod" value="QRIS">
             <input type="hidden" name="_qty" value="<?= (int)$data->qty ?>">
