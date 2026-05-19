@@ -4,9 +4,9 @@
  * Implements \Altum\Plugin\ImageOptimizer::optimize() as required by the main app.
  */
 
-defined('ALTUMCODE') || die();
-
 namespace Altum\Plugin;
+
+defined('ALTUMCODE') || die();
 
 class ImageOptimizer {
 
