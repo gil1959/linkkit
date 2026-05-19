@@ -1155,8 +1155,25 @@ class AdminSettings extends Controller {
                 redirect('admin/settings/push_notifications');
             }
 
+            /* Initialize settings object if null */
+            if(!settings()->push_notifications) {
+                settings()->push_notifications = (object) [
+                    'is_enabled' => false,
+                    'guests_is_enabled' => false,
+                    'ask_to_subscribe_is_enabled' => false,
+                    'ask_to_subscribe_delay' => 3,
+                    'ask_to_subscribe_delay_minimum_pageviews_count' => 1,
+                    'icon' => '',
+                    'public_key' => '',
+                    'private_key' => '',
+                    'notifications_per_cron' => 50,
+                    'notifications_per_cron_batch' => 10,
+                    'notifications_per_cron_batch_concurrently' => 1,
+                ];
+            }
+
             /* Uploads processing */
-            settings()->push_notifications->icon = \Altum\Uploads::process_upload(settings()->push_notifications->icon, 'push_notifications_icon', 'icon', 'icon' . '_remove', null);
+            settings()->push_notifications->icon = \Altum\Uploads::process_upload(settings()->push_notifications->icon ?? '', 'push_notifications_icon', 'icon', 'icon' . '_remove', null);
 
             $value = json_encode([
                 'is_enabled' => isset($_POST['is_enabled']),
@@ -1165,8 +1182,8 @@ class AdminSettings extends Controller {
                 'ask_to_subscribe_delay' => (int) $_POST['ask_to_subscribe_delay'],
                 'ask_to_subscribe_delay_minimum_pageviews_count' => (int) $_POST['ask_to_subscribe_delay_minimum_pageviews_count'],
                 'icon' => settings()->push_notifications->icon ?? '',
-                'public_key' => settings()->push_notifications->public_key,
-                'private_key' => settings()->push_notifications->private_key,
+                'public_key' => settings()->push_notifications->public_key ?? '',
+                'private_key' => settings()->push_notifications->private_key ?? '',
                 'notifications_per_cron' => (int) $_POST['notifications_per_cron'],
                 'notifications_per_cron_batch' => (int) $_POST['notifications_per_cron_batch'],
                 'notifications_per_cron_batch_concurrently' => (int) $_POST['notifications_per_cron_batch_concurrently'],
