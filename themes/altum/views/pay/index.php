@@ -348,7 +348,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                     <?php
                     $enabled_payment_processors = 0;
                     foreach($data->payment_processors as $key => $value) {
-                        if(settings()->{$key}->is_enabled && in_array(currency(), settings()->{$key}->currencies ?? []))  {
+                        if(settings()->{$key}->is_enabled && (empty(settings()->{$key}->currencies) || in_array(currency(), settings()->{$key}->currencies)))  {
                             $enabled_payment_processors += 1;
                         }
                     }
@@ -374,7 +374,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                         <div>
                             <div class="row d-flex align-items-stretch mx-n2">
                                 <?php foreach($data->payment_processors as $key => $value): ?>
-                                    <?php if(settings()->{$key}->is_enabled && in_array(currency(), settings()->{$key}->currencies ?? [])): ?>
+                                    <?php if(settings()->{$key}->is_enabled && (empty(settings()->{$key}->currencies) || in_array(currency(), settings()->{$key}->currencies))): ?>
                                         <?php if($key === 'tripay' && !empty($data->tripay_channels)): ?>
                                             <?php foreach($data->tripay_channels as $channel): ?>
                                                 <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">

@@ -153,4 +153,43 @@ class AdminIndex extends Controller {
 
     }
 
+    public function get_notifications_ajax() {
+
+        session_write_close();
+
+        if($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            throw_404();
+        }
+
+        /* Only if admin notifications are enabled */
+        if(!settings()->internal_notifications->admins_is_enabled) {
+            Response::json('', 'success', ['internal_notifications' => [], 'has_unread' => false]);
+            return;
+        }
+
+        $internal_notifications = db()->where('for_who', 'admin')->orderBy('internal_notification_id', 'DESC')->get('internal_notifications', 10);
+
+        $has_unread = false;
+        foreach($internal_notifications as $notification) {
+            if(!$notification->is_read) {
+                $has_unread = true;
+                break;
+            }
+        }
+
+        /* Mark all as read */
+        if($has_unread) {
+            db()->where('for_who', 'admin')->where('is_read', 0)->update('internal_notifications', [
+                'is_read'       => 1,
+                'read_datetime' => get_date(),
+            ]);
+        }
+
+        Response::json('', 'success', [
+            'internal_notifications' => $internal_notifications,
+            'has_unread'             => $has_unread,
+        ]);
+
+    }
+
 }

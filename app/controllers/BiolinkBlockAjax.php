@@ -4206,11 +4206,17 @@ class BiolinkBlockAjax extends Controller {
             $_POST['item_location_url'][$key] = get_url($_POST['item_location_url'][$key]);
             $this->check_location_url($_POST['item_location_url'][$key], true);
 
-            $image = $this->handle_file_upload(null, 'item_image_' . $key, 'image_remove', ['jpg', 'jpeg', 'png', 'svg', 'ico', 'gif'], 'block_images/', settings()->links->image_size_limit);
+            $image_url = !empty($_POST['item_image_url'][$key]) ? get_url($_POST['item_image_url'][$key]) : null;
+            $image = null;
 
-            $items[md5($image)] = [
+            if(!$image_url) {
+                $image = $this->handle_file_upload(null, 'item_image_' . $key, 'image_remove', ['jpg', 'jpeg', 'png', 'svg', 'ico', 'gif'], 'block_images/', settings()->links->image_size_limit);
+            }
+
+            $items[md5($image . $image_url)] = [
                 'image_alt' => input_clean($value, 100),
                 'location_url' => $_POST['item_location_url'][$key],
+                'image_url' => $image_url,
                 'image' => $image,
             ];
         }
@@ -4300,11 +4306,17 @@ class BiolinkBlockAjax extends Controller {
             $_POST['item_location_url'][$key] = get_url($_POST['item_location_url'][$key]);
             $this->check_location_url($_POST['item_location_url'][$key], true);
 
-            $image = $this->handle_file_upload($biolink_block->settings->items->{$key}->image ?? null, 'item_image_' . $key, 'image_remove', ['jpg', 'jpeg', 'png', 'svg', 'ico', 'gif'], 'block_images/', settings()->links->image_size_limit);
+            $image_url = !empty($_POST['item_image_url'][$key]) ? get_url($_POST['item_image_url'][$key]) : null;
+            $image = null;
 
-            $items[md5($image)] = [
+            if(!$image_url) {
+                $image = $this->handle_file_upload($biolink_block->settings->items->{$key}->image ?? null, 'item_image_' . $key, 'image_remove', ['jpg', 'jpeg', 'png', 'svg', 'ico', 'gif'], 'block_images/', settings()->links->image_size_limit);
+            }
+
+            $items[md5($image . $image_url)] = [
                 'image_alt' => input_clean($value, 100),
                 'location_url' => $_POST['item_location_url'][$key],
+                'image_url' => $image_url,
                 'image' => $image,
             ];
         }

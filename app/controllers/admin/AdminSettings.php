@@ -1409,6 +1409,7 @@ class AdminSettings extends Controller {
             $_POST['provider'] = isset($_POST['provider']) && in_array($_POST['provider'], ['local', 'resmushit', 'imagerypro']) ? $_POST['provider'] : 'local';
             $_POST['imagerypro_api_key'] = input_clean($_POST['imagerypro_api_key']);
             $_POST['quality'] = isset($_POST['quality']) && $_POST['quality'] >= 50 && $_POST['quality'] <= 100 ? (int) $_POST['quality'] : 75;
+            $_POST['max_dimension'] = isset($_POST['max_dimension']) && $_POST['max_dimension'] >= 0 ? (int) $_POST['max_dimension'] : 2048;
 
             $value = [
                 'is_enabled' => isset($_POST['is_enabled']),
@@ -1416,6 +1417,7 @@ class AdminSettings extends Controller {
                 'provider' => $_POST['provider'],
                 'imagerypro_api_key' => $_POST['imagerypro_api_key'],
                 'quality' => $_POST['quality'],
+                'max_dimension' => $_POST['max_dimension'],
             ];
 
             $this->update_settings('image_optimizer', json_encode($value));

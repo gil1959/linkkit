@@ -1906,8 +1906,8 @@ class Pay extends Controller {
         /* Apply taxes to base price */
         $price_with_taxes = $this->calculate_price_with_taxes($price);
 
-        /* Format price as integer (Midtrans requirement) */
-        $formatted_price = in_array(currency(), get_zero_decimal_currencies_array()) ? number_format($price_with_taxes, 0, '.', '') : number_format($price_with_taxes, 2, '.', '');
+        /* Format price as integer (Midtrans requires gross_amount as integer, especially for IDR) */
+        $formatted_price = (int) ceil($price_with_taxes);
 
         /* Prepare redirect query parameters */
         $trial_skip_parameter = isset($_GET['trial_skip']) ? '&trial_skip=true' : '';
@@ -1922,7 +1922,10 @@ class Pay extends Controller {
                 $midtrans_payment_id = md5($this->user->user_id . $this->plan_id . $_POST['payment_type'] . $_POST['payment_frequency'] . $this->user->email . get_date());
 
                 /* Build Midtrans API URL */
-                $midtrans_api_url = 'https://api' . (settings()->midtrans->mode == 'sandbox' ? 'sandbox' : '') . '.midtrans.com/v1/payment-links';
+                /* Correct endpoints: sandbox = https://app.sandbox.midtrans.com, production = https://app.midtrans.com */
+                $midtrans_api_url = (settings()->midtrans->mode == 'sandbox')
+                    ? 'https://app.sandbox.midtrans.com/v1/payment-links'
+                    : 'https://app.midtrans.com/v1/payment-links';
 
                 /* Prepare API headers */
                 $midtrans_headers = [

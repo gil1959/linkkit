@@ -273,6 +273,28 @@ input[type=radio].pm-radio{display:none}
                     <div>
                         <div class="order-name"><?= htmlspecialchars($data->item->name) ?></div>
                         <span class="order-type"><?= ucwords(str_replace('_',' ', $data->item->type)) ?></span>
+                        <div class="mt-2 d-flex align-items-center" style="gap:8px;flex-wrap:wrap;">
+                            <button id="share_copy_btn" type="button" class="btn btn-sm btn-outline-secondary" title="Salin link" style="border-radius:8px;padding:4px 10px;font-size:12px;" onclick="
+                                let url = window.location.href;
+                                if (navigator.share) {
+                                    navigator.share({title: <?= json_encode($data->item->name) ?>, url: url});
+                                } else {
+                                    navigator.clipboard.writeText(url).then(function() {
+                                        let btn = document.getElementById('share_copy_btn');
+                                        btn.innerHTML = '<i class=\'fas fa-check mr-1\'></i>Tersalin!';
+                                        setTimeout(function() { btn.innerHTML = '<i class=\'fas fa-link mr-1\'></i>Salin Link'; }, 2000);
+                                    });
+                                }
+                            ">
+                                <i class="fas fa-link mr-1"></i>Salin Link
+                            </button>
+                            <a href="https://wa.me/?text=<?= urlencode($data->item->name . ' - ' . (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background:#25D366;color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;text-decoration:none;">
+                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                            </a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background:#1877F2;color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;text-decoration:none;">
+                                <i class="fab fa-facebook mr-1"></i>Facebook
+                            </a>
+                        </div>
                     </div>
                 </div>
 

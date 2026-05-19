@@ -42,7 +42,7 @@
     <div class="mb-4 p-3 bg-gray-50 rounded">
         <div class="form-group">
             <div class="d-flex justify-content-between">
-                <label for="<?= 'item_image_' . $key . '_' . $row->biolink_block_id ?>"><i class="fas fa-fw fa-image fa-sm text-muted mr-1"></i> <?= l('global.image') ?></label>
+                <label for="<?= 'item_image_' . $key . '_' . $row->biolink_block_id ?>"><i class="fas fa-fw fa-image fa-sm text-muted mr-1"></i> <?= l('global.image') ?> (Upload)</label>
 
                 <div>
                     <span class="custom-row-side-controller-grab drag" data-toggle="tooltip" title="<?= l('global.drag_and_drop') ?>">
@@ -50,8 +50,14 @@
                     </span>
                 </div>
             </div>
-            <input id="" type="file" name="item_image_" accept="<?= \Altum\Uploads::array_to_list_format($data->biolink_blocks['image_slider']['whitelisted_image_extensions']) ?>" class="form-control-file altum-file-input" required="required" data-crop data-aspect-ratio="1" />
+            <input id="" type="file" name="item_image_" accept="<?= \Altum\Uploads::array_to_list_format($data->biolink_blocks['image_slider']['whitelisted_image_extensions']) ?>" class="form-control-file altum-file-input" data-crop data-aspect-ratio="1" />
             <small class="form-text text-muted"><?= sprintf(l('global.accessibility.whitelisted_file_extensions'), \Altum\Uploads::array_to_list_format($data->biolink_blocks['image_slider']['whitelisted_image_extensions'])) . ' ' . sprintf(l('global.accessibility.file_size_limit'), settings()->links->image_size_limit) ?></small>
+        </div>
+
+        <div class="form-group">
+            <label for=""><i class="fas fa-fw fa-link fa-sm text-muted mr-1"></i> <?= l('global.image') ?> (URL Eksternal)</label>
+            <input id="" type="url" class="form-control" name="item_image_url[]" maxlength="2048" placeholder="https://..." />
+            <small class="form-text text-muted">Gunakan URL eksternal jika tidak mengunggah gambar.</small>
         </div>
 
         <div class="form-group">
@@ -95,6 +101,7 @@ $('#create_biolink_image_slider').on('shown.bs.modal', event => {
         if(count >= 25) return;
 
         clone.querySelector(`input[name="item_image_"`).setAttribute('name', `item_image_${count}`);
+        clone.querySelector(`input[name="item_image_url[]"`).setAttribute('name', `item_image_url[${count}]`);
         clone.querySelector(`input[name="item_image_alt[]"`).setAttribute('name', `item_image_alt[${count}]`);
         clone.querySelector(`input[name="item_location_url[]"`).setAttribute('name', `item_location_url[${count}]`);
 

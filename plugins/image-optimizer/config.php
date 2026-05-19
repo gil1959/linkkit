@@ -9,7 +9,7 @@ return (object) [
     'url' => 'https://altumco.de/image-optimizer-plugin',
     'author' => 'AltumCode',
     'author_url' => 'https://altumcode.com/',
-    'status' => 'inexistent',
+    'status' => 'uninstalled',
     'actions'=> true,
     'settings_url' => url('admin/settings/image_optimizer'),
     'avatar_style' => 'background: #e0eafc; background: -webkit-linear-gradient(to right, #e0eafc, #cfdef3); background: linear-gradient(to right, #e0eafc, #cfdef3);',

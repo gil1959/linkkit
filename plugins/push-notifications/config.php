@@ -9,7 +9,7 @@ return (object) [
     'url' => 'https://altumco.de/push-notifications-plugin',
     'author' => 'AltumCode',
     'author_url' => 'https://altumcode.com/',
-    'status' => 'inexistent',
+    'status' => 'uninstalled',
     'actions'=> true,
     'settings_url' => url('admin/settings/push-notifications'),
     'avatar_style' => 'background: #ad5389; background: -webkit-linear-gradient(to right, #3c1053, #ad5389); background: linear-gradient(to right, #3c1053, #ad5389);',

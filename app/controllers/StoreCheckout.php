@@ -133,7 +133,7 @@ class StoreCheckout extends Controller {
             }
         }
 
-        if(!empty(settings()->midtrans->is_enabled) && $primary_gateway !== 'tripay') {
+        if(!empty(settings()->midtrans->is_enabled)) {
             $payment_channels[] = (object)['code'=>'MIDTRANS','name'=>'Midtrans (Semua Metode)','group'=>'Online Payment','icon_url'=>'https://api.midtrans.com/v2/assets/svg/brand/midtrans.svg','total_fee'=>(object)['flat'=>0,'percent'=>0],'_gateway'=>'midtrans'];
             if(!$primary_gateway) $primary_gateway = 'midtrans';
         }
@@ -382,6 +382,77 @@ class StoreCheckout extends Controller {
                         exit;
                     } else {
                         Alerts::add_error('Tripay Error: ' . ($response_obj->message ?? 'Unknown error'));
+                    }
+
+                } elseif($method === 'MIDTRANS') {
+                    /* Midtrans Payment Link for shop orders */
+                    $midtrans_api_url = (settings()->midtrans->mode == 'sandbox')
+                        ? 'https://app.sandbox.midtrans.com/v1/payment-links'
+                        : 'https://app.midtrans.com/v1/payment-links';
+
+                    $midtrans_custom_field = 'shop_order_' . $order_id;
+                    $midtrans_payload = [
+                        'transaction_details' => [
+                            'order_id'    => $invoice_number,
+                            'gross_amount' => (int) ceil($grand_total),
+                        ],
+                        'expiry' => [
+                            'duration' => 1,
+                            'unit'     => 'days',
+                        ],
+                        'item_details' => [[
+                            'price'    => (int) ceil($grand_total),
+                            'quantity' => 1,
+                            'name'     => substr($item->name, 0, 50) . ($qty > 1 ? ' x' . $qty : ''),
+                        ]],
+                        'customer_details' => [
+                            'first_name' => $full_name,
+                            'email'      => $email,
+                            'phone'      => $phone ?: '-',
+                        ],
+                        'callbacks' => [
+                            'finish' => SITE_URL . 'store-checkout-success/' . $invoice_number,
+                        ],
+                        'custom_field1' => $midtrans_custom_field,
+                    ];
+
+                    $midtrans_ch = curl_init($midtrans_api_url);
+                    curl_setopt_array($midtrans_ch, [
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST           => true,
+                        CURLOPT_POSTFIELDS     => json_encode($midtrans_payload),
+                        CURLOPT_HTTPHEADER     => [
+                            'Content-Type: application/json',
+                            'Accept: application/json',
+                            'Authorization: Basic ' . base64_encode(settings()->midtrans->server_key . ':'),
+                            'X-Override-Notification: ' . SITE_URL . 'webhook-midtrans-shop',
+                        ],
+                        CURLOPT_TIMEOUT        => 30,
+                    ]);
+                    $midtrans_raw_response = curl_exec($midtrans_ch);
+                    $midtrans_http_code    = curl_getinfo($midtrans_ch, CURLINFO_HTTP_CODE);
+                    curl_close($midtrans_ch);
+
+                    $midtrans_response_obj = json_decode($midtrans_raw_response);
+
+                    if($midtrans_http_code < 400 && isset($midtrans_response_obj->payment_url)) {
+                        $midtrans_payment_url = $midtrans_response_obj->payment_url;
+                        $co_url_esc = database()->real_escape_string($midtrans_payment_url);
+                        database()->query("UPDATE `shop_orders` SET
+                            `payment_id`   = '" . database()->real_escape_string($invoice_number) . "',
+                            `checkout_url` = '{$co_url_esc}'
+                            WHERE `id` = {$order_id}");
+
+                        try {
+                            $pending_email = $this->build_pending_email($invoice_number, $full_name, $item->name, $shop->name, $grand_total, $midtrans_payment_url);
+                            send_mail($email, 'Selesaikan pembayaran - ' . $invoice_number, $pending_email);
+                        } catch(\Exception $e) {}
+
+                        header('Location: ' . $midtrans_payment_url);
+                        exit;
+                    } else {
+                        $midtrans_error = $midtrans_response_obj->error_messages[0] ?? ($midtrans_response_obj->message ?? 'Midtrans error. Coba lagi.');
+                        Alerts::add_error('Midtrans: ' . $midtrans_error);
                     }
 
                 } else {

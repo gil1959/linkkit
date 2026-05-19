@@ -94,7 +94,7 @@
                 <div class="mb-4 p-3 bg-gray-50 rounded">
                     <div class="form-group">
                         <div class="d-flex justify-content-between">
-                            <label for="<?= 'item_image_' . $key . '_' . $row->biolink_block_id ?>"><i class="fas fa-fw fa-image fa-sm text-muted mr-1"></i> <?= l('global.image') ?></label>
+                            <label for="<?= 'item_image_' . $key . '_' . $row->biolink_block_id ?>"><i class="fas fa-fw fa-image fa-sm text-muted mr-1"></i> <?= l('global.image') ?> (Upload)</label>
 
                             <div>
                                 <span class="custom-row-side-controller-grab drag" data-toggle="tooltip" title="<?= l('global.drag_and_drop') ?>">
@@ -112,6 +112,12 @@
                             'input_data' => 'data-crop data-aspect-ratio="1"'
                         ]) ?>
                         <small class="form-text text-muted"><?= sprintf(l('global.accessibility.whitelisted_file_extensions'), \Altum\Uploads::array_to_list_format($data->biolink_blocks['image_slider']['whitelisted_image_extensions'])) . ' ' . sprintf(l('global.accessibility.file_size_limit'), settings()->links->image_size_limit) ?></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="<?= 'item_image_url_' . $key . '_' . $row->biolink_block_id ?>"><i class="fas fa-fw fa-link fa-sm text-muted mr-1"></i> <?= l('global.image') ?> (URL Eksternal)</label>
+                        <input id="<?= 'item_image_url_' . $key . '_' . $row->biolink_block_id ?>" type="url" class="form-control" name="item_image_url[<?= $key ?>]" value="<?= $item->image_url ?? '' ?>" maxlength="2048" placeholder="https://..." />
+                        <small class="form-text text-muted">Gunakan URL eksternal jika tidak mengunggah gambar.</small>
                     </div>
 
                     <div class="form-group">

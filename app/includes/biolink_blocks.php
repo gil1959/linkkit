@@ -69,6 +69,15 @@ $default_blocks = [
         'whitelisted_image_extensions' => ['jpg', 'jpeg', 'png', 'svg', 'gif', 'webp', 'avif'],
         'category' => 'standard',
     ],
+    'image_slider' => [
+        'type' => 'default',
+        'icon' => 'fas fa-fw fa-images',
+        'color' => '#7C3AED',
+        'has_statistics' => false,
+        'themable' => true,
+        'display_dynamic_name' => 'name',
+        'category' => 'standard',
+    ],
     'socials' => [
         'type' => 'default',
         'icon' => 'fas fa-fw fa-users',

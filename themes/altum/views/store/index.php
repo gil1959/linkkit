@@ -56,6 +56,8 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .s-type-badge{position:absolute;top:8px;right:8px;background:rgba(79,70,229,.85);color:#fff;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:2}
 .s-quick-cart{position:absolute;bottom:8px;right:8px;width:34px;height:34px;background:#4f46e5;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.4);transition:.2s;font-size:.85rem}
 .s-quick-cart:hover{background:#3730a3;transform:scale(1.1)}
+.s-quick-share{position:absolute;bottom:8px;right:50px;width:34px;height:34px;background:#fff;color:#4f46e5;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:.2s;font-size:.85rem}
+.s-quick-share:hover{background:#f3f4f6;transform:scale(1.1)}
 .s-card-body{padding:12px;flex:1;display:flex;flex-direction:column}
 .s-card-name{font-weight:700;font-size:.88rem;color:#111827;margin-bottom:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .s-card-price{font-weight:800;color:#4f46e5;font-size:.9rem}
@@ -106,6 +108,8 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 .btn-add-cart:hover{background:#dde4ff}
 .btn-buy-now{flex:1;background:#4f46e5;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s}
 .btn-buy-now:hover{background:#3730a3}
+.btn-share-modal{background:#f3f4f6;color:#374151;border:none;border-radius:10px;padding:11px 16px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center}
+.btn-share-modal:hover{background:#e5e7eb}
 /* ── CART POPUP ── */
 .cart-panel{position:fixed;right:-420px;top:0;bottom:0;width:380px;max-width:95vw;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:900;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
 .cart-panel.open{right:0}
@@ -240,6 +244,9 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
                             <div class="s-no-img"><i class="fas fa-box"></i></div>
                         <?php endif ?>
                         <span class="s-type-badge"><?= $item->type === 'physical' ? 'Produk Fisik' : ucwords(str_replace('_',' ',$item->type)) ?></span>
+                        <button class="s-quick-share" onclick="event.stopPropagation(); shareProduct(<?= $item->id ?>)" title="Bagikan Produk">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
                         <button class="s-quick-cart" onclick="event.stopPropagation(); <?= !empty($item->has_variants) || !empty($item->is_flexible_amount) ? 'openDetail('.$item->id.')' : 'quickAddCart('.$item->id.')' ?>" title="<?= !empty($item->has_variants) ? 'Pilih Varian' : 'Tambah ke keranjang' ?>">
                             <i class="<?= !empty($item->has_variants) || !empty($item->is_flexible_amount) ? 'fas fa-list' : 'fas fa-cart-plus' ?>"></i>
                         </button>
@@ -485,6 +492,8 @@ function openDetail(id){
         inputsHtml = '<div style="display:flex;gap:12px;margin-bottom:18px">' + qtyInput + priceInput + '</div>';
     }
 
+    var btnShareHtml = '<button class="btn-share-modal" id="btnShareModal_'+id+'" onclick="shareProduct('+id+')" title="Bagikan Produk"><i class="fas fa-share-alt"></i></button>';
+
     document.getElementById('modalContent').innerHTML =
         imgHtml +
         (flashSaleBadge || discountBadge ? '<div style="margin-bottom:10px">' + flashSaleBadge + discountBadge + '</div>' : '') +
@@ -495,6 +504,7 @@ function openDetail(id){
         (p.description ? '<div class="s-modal-desc">'+p.description+'</div>' : '')+
         inputsHtml +
         '<div class="s-modal-actions">'+
+            btnShareHtml +
             btnAddHtml +
             btnBuyHtml +
         '</div>' + 
@@ -586,6 +596,32 @@ function reportReview(id) {
 
 function closeDetail(){
     document.getElementById('detailOverlay').classList.remove('show');
+}
+
+function shareProduct(id) {
+    var p = findProduct(id);
+    if(!p) return;
+    
+    var shareUrl = STORE_URL + p.id;
+    var shareData = {
+        title: p.name,
+        text: 'Lihat produk ini: ' + p.name,
+        url: shareUrl
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData)
+            .catch(function(err) { console.log('Share failed:', err); });
+    } else {
+        // Fallback
+        var tempInput = document.createElement('input');
+        document.body.appendChild(tempInput);
+        tempInput.value = shareUrl;
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        alert('Tautan produk disalin ke clipboard!');
+    }
 }
 
 function changeSlide(dir) {
