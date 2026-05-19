@@ -274,18 +274,7 @@ input[type=radio].pm-radio{display:none}
                         <div class="order-name"><?= htmlspecialchars($data->item->name) ?></div>
                         <span class="order-type"><?= ucwords(str_replace('_',' ', $data->item->type)) ?></span>
                         <div class="mt-2 d-flex align-items-center" style="gap:8px;flex-wrap:wrap;">
-                            <button id="share_copy_btn" type="button" class="btn btn-sm btn-outline-secondary" title="Salin link" style="border-radius:8px;padding:4px 10px;font-size:12px;" onclick="
-                                let url = window.location.href;
-                                if (navigator.share) {
-                                    navigator.share({title: <?= json_encode($data->item->name) ?>, url: url});
-                                } else {
-                                    navigator.clipboard.writeText(url).then(function() {
-                                        let btn = document.getElementById('share_copy_btn');
-                                        btn.innerHTML = '<i class=\'fas fa-check mr-1\'></i>Tersalin!';
-                                        setTimeout(function() { btn.innerHTML = '<i class=\'fas fa-link mr-1\'></i>Salin Link'; }, 2000);
-                                    });
-                                }
-                            ">
+                            <button id="share_copy_btn" type="button" class="btn btn-sm btn-outline-secondary" title="Salin link" style="border-radius:8px;padding:4px 10px;font-size:12px;" onclick="coShareProduct()">
                                 <i class="fas fa-link mr-1"></i>Salin Link
                             </button>
                             <a href="https://wa.me/?text=<?= urlencode($data->item->name . ' - ' . (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background:#25D366;color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;text-decoration:none;">
@@ -295,6 +284,29 @@ input[type=radio].pm-radio{display:none}
                                 <i class="fab fa-facebook mr-1"></i>Facebook
                             </a>
                         </div>
+                        <script>
+                        function coShareProduct() {
+                            var url = window.location.href;
+                            var btn = document.getElementById('share_copy_btn');
+                            if (navigator.share) {
+                                navigator.share({title: <?= json_encode($data->item->name) ?>, url: url});
+                            } else {
+                                navigator.clipboard.writeText(url).then(function() {
+                                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Tersalin!';
+                                    setTimeout(function() { btn.innerHTML = '<i class="fas fa-link mr-1"></i>Salin Link'; }, 2000);
+                                }).catch(function() {
+                                    var ta = document.createElement('textarea');
+                                    ta.value = url;
+                                    document.body.appendChild(ta);
+                                    ta.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(ta);
+                                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Tersalin!';
+                                    setTimeout(function() { btn.innerHTML = '<i class="fas fa-link mr-1"></i>Salin Link'; }, 2000);
+                                });
+                            }
+                        }
+                        </script>
                     </div>
                 </div>
 

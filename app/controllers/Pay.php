@@ -1944,6 +1944,20 @@ class Pay extends Controller {
                         'duration' => 1,
                         'unit' => 'days'
                     ],
+                    'enabled_payments' => [
+                        'credit_card',
+                        'bank_transfer',
+                        'bca_va',
+                        'bni_va',
+                        'bri_va',
+                        'permata_va',
+                        'other_va',
+                        'echannel',
+                        'gopay',
+                        'shopeepay',
+                        'qris',
+                        'akulaku',
+                    ],
                     'item_details' => [[
                         'price' => $formatted_price,
                         'quantity' => 1,
