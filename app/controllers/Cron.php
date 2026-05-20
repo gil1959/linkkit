@@ -348,7 +348,9 @@ class Cron extends Controller {
 
         /* Go through each result */
         while($user = $result->fetch_object()) {
-            $user->plan_settings = json_decode($user->plan_settings);
+            $full_user = (new User())->get_user_by_user_id($user->user_id);
+            if(!$full_user) continue;
+            $user->plan_settings = $full_user->plan_settings;
 
             /* Skip if retention is infinite */
             if($user->plan_settings->track_links_retention == -1) continue;
@@ -427,7 +429,8 @@ class Cron extends Controller {
 
         /* Go through each result */
         while($row = $result->fetch_object()) {
-            $row->plan_settings = json_decode($row->plan_settings);
+            $full_user = (new User())->get_user_by_user_id($row->user_id);
+            $row->plan_settings = $full_user ? $full_user->plan_settings : json_decode($row->plan_settings);
             $row->email_reports = json_decode($row->email_reports);
 
             /* Make sure the plan still lets the user get email reports */

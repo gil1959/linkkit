@@ -55,8 +55,7 @@ class QrCodeGenerator extends Controller {
             die();
         }
 
-        $this->user = $user;
-        $user->plan_settings = json_decode($user->plan_settings);
+        $this->user = (new \Altum\Models\User())->get_user_by_user_id($user->user_id);
 
         $available_qr_codes = require APP_PATH . 'includes/enabled_qr_codes.php';
 

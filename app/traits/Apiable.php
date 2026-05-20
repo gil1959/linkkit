@@ -58,7 +58,20 @@ trait Apiable {
             $this->response_error(l('api.error_message.no_access'), 401);
         }
 
-        $this->user->plan_settings = json_decode($this->user->plan_settings ?? '');
+        if($this->user->plan_id == 'free') {
+            $this->user->plan_settings = settings()->plan_free->settings ?? (is_string($this->user->plan_settings) ? json_decode($this->user->plan_settings) : $this->user->plan_settings);
+        } else if($this->user->plan_id == 'custom') {
+            if(is_string($this->user->plan_settings)) {
+                $this->user->plan_settings = json_decode($this->user->plan_settings);
+            }
+        } else {
+            $plan = (new \Altum\Models\Plan())->get_plan_by_id($this->user->plan_id);
+            if($plan && isset($plan->settings)) {
+                $this->user->plan_settings = $plan->settings;
+            } else if(is_string($this->user->plan_settings)) {
+                $this->user->plan_settings = json_decode($this->user->plan_settings);
+            }
+        }
         $this->user->billing = json_decode($this->user->billing ?? '');
         $this->user->preferences = json_decode($this->user->preferences ?? '');
 

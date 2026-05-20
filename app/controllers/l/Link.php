@@ -850,7 +850,7 @@ class Link extends Controller {
 					if($continent_code == $value->key) {
 						$this->redirect_to(
 							$value->value . $append_query,
-							$this->link_user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
+							$this->user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
 							$this->user->plan_settings->app_linking_is_enabled && $this->link->settings->app_linking_is_enabled && $this->link->settings->app_linking->app ? $this->link->settings->app_linking : false,
 						);
 					}
@@ -891,7 +891,7 @@ class Link extends Controller {
 					if($city_name == $value->key) {
 						$this->redirect_to(
 							$value->value . $append_query,
-							$this->link_user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
+							$this->user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
 							$this->user->plan_settings->app_linking_is_enabled && $this->link->settings->app_linking_is_enabled && $this->link->settings->app_linking->app ? $this->link->settings->app_linking : false,
 						);
 					}
@@ -939,7 +939,7 @@ class Link extends Controller {
 					if($browser_name == $value->key) {
 						$this->redirect_to(
 							$value->value . $append_query,
-							$this->link_user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
+							$this->user->plan_settings->cloaking_is_enabled && $this->link->settings->cloaking_is_enabled ? $this->link->settings : false,
 							$this->user->plan_settings->app_linking_is_enabled && $this->link->settings->app_linking_is_enabled && $this->link->settings->app_linking->app ? $this->link->settings->app_linking : false,
 						);
 					}

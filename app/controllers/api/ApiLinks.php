@@ -498,6 +498,12 @@ class ApiLinks extends Controller {
 			$data = [];
 
 			foreach($location_urls as $location_url) {
+				/* Do not allow more than X at once */
+				if($this->user->plan_settings->links_bulk_limit != -1 && $i > $this->user->plan_settings->links_bulk_limit) {
+					break;
+				}
+				$i++;
+
 				$url = $this->generate_random_url();
 
 				/* App linking processing per each URL */

@@ -277,11 +277,10 @@ class Payments extends Model {
     public function affiliate_payment_check($payment_id, $payment_total, $payment_currency, $user) {
         if(\Altum\Plugin::is_active('affiliate') && settings()->affiliate->is_enabled && $user->referred_by) {
             if((settings()->affiliate->commission_type == 'once' && !$user->referred_by_has_converted) || settings()->affiliate->commission_type == 'forever') {
-                $referral_user = db()->where('user_id', $user->referred_by)->getOne('users', ['user_id', 'email', 'status', 'plan_settings']);
+                $referral_user = (new User())->get_user_by_user_id($user->referred_by);
 
                 /* Make sure the referral user is active and existing */
                 if($referral_user && $referral_user->status == 1) {
-                    $referral_user->plan_settings = json_decode($referral_user->plan_settings);
 
                     $amount = number_format($payment_total * (float) $referral_user->plan_settings->affiliate_commission_percentage / 100, 2, '.', '');
 

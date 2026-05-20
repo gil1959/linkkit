@@ -37,7 +37,13 @@ class Affiliate {
         }
 
         /* Get the owner user of the referral key */
-        if(!$user = db()->where('referral_key', $referral_key)->getOne('users', ['user_id', 'plan_settings', 'status', 'referral_key'])) {
+        if(!$user = db()->where('referral_key', $referral_key)->getOne('users', ['user_id'])) {
+            return;
+        }
+
+        $user = (new \Altum\Models\User())->get_user_by_user_id($user->user_id);
+
+        if(!$user) {
             return;
         }
 
@@ -45,9 +51,6 @@ class Affiliate {
         if($user->status != 1) {
             return;
         }
-
-        /* Make sure the user has access to the affiliate program */
-        $user->plan_settings = json_decode($user->plan_settings);
         if(!$user->plan_settings->affiliate_commission_percentage) {
             return;
         }

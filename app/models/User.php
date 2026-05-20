@@ -60,6 +60,23 @@ class User extends Model {
 
         }
 
+        if($data) {
+            if($data->plan_id == 'free') {
+                $data->plan_settings = settings()->plan_free->settings ?? (is_string($data->plan_settings) ? json_decode($data->plan_settings) : $data->plan_settings);
+            } else if($data->plan_id == 'custom') {
+                if(is_string($data->plan_settings)) {
+                    $data->plan_settings = json_decode($data->plan_settings);
+                }
+            } else {
+                $plan = (new Plan())->get_plan_by_id($data->plan_id);
+                if($plan && isset($plan->settings)) {
+                    $data->plan_settings = $plan->settings;
+                } else if(is_string($data->plan_settings)) {
+                    $data->plan_settings = json_decode($data->plan_settings);
+                }
+            }
+        }
+
         return $data;
     }
 

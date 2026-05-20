@@ -3183,6 +3183,28 @@ Hard rules:
             }
         }
 
+        elseif($link->type == 'event') {
+            if(!settings()->links->events_is_enabled) {
+                Response::json(l('global.error_message.basic'), 'error');
+            }
+
+            $user_total_events = database()->query("SELECT COUNT(*) AS `total` FROM `links` WHERE `user_id` = {$this->user->user_id} AND `type` = 'event'")->fetch_object()->total;
+            if($this->user->plan_settings->events_limit != -1 && $user_total_events >= $this->user->plan_settings->events_limit) {
+                Alerts::add_error(l('global.info_message.plan_feature_limit') . (settings()->payment->is_enabled ? ' <a href="' . url('plan') . '" class="font-weight-bold text-reset">' . l('global.info_message.plan_upgrade') . '.</a>' : null));
+            }
+        }
+
+        elseif($link->type == 'static') {
+            if(!settings()->links->static_is_enabled) {
+                Response::json(l('global.error_message.basic'), 'error');
+            }
+
+            $user_total_static = database()->query("SELECT COUNT(*) AS `total` FROM `links` WHERE `user_id` = {$this->user->user_id} AND `type` = 'static'")->fetch_object()->total;
+            if($this->user->plan_settings->static_limit != -1 && $user_total_static >= $this->user->plan_settings->static_limit) {
+                Alerts::add_error(l('global.info_message.plan_feature_limit') . (settings()->payment->is_enabled ? ' <a href="' . url('plan') . '" class="font-weight-bold text-reset">' . l('global.info_message.plan_upgrade') . '.</a>' : null));
+            }
+        }
+
         if(!Alerts::has_field_errors() && !Alerts::has_errors()) {
 
             /* Duplicate the link */
@@ -3204,6 +3226,42 @@ Hard rules:
 
             if($link->type == 'file') {
                 $link->settings->file = \Altum\Uploads::copy_uploaded_file($link->settings->file, \Altum\Uploads::get_path('files'), \Altum\Uploads::get_path('files'), 'json_error');
+            }
+
+            if($link->type == 'static') {
+                $link->additional = json_decode($link->additional ?? '');
+                if(!$link->additional) {
+                    $link->additional = new \stdClass();
+                }
+                $static_folder = $link->settings->static_folder ?? $link->additional->static_folder ?? null;
+
+                if ($static_folder) {
+                    $static_folder_name = md5(uniqid('', true) . random_bytes(16));
+                    $src_folder = \Altum\Uploads::get_full_path('static') . $static_folder;
+                    $dst_folder = \Altum\Uploads::get_full_path('static') . $static_folder_name;
+
+                    $copy_dir = function($src, $dst) use (&$copy_dir) {
+                        if (is_dir($src)) {
+                            @mkdir($dst, 0755, true);
+                            $files = scandir($src);
+                            foreach ($files as $file) {
+                                if ($file != '.' && $file != '..') {
+                                    $copy_dir("$src/$file", "$dst/$file");
+                                }
+                            }
+                        } else if (file_exists($src)) {
+                            copy($src, $dst);
+                        }
+                    };
+
+                    $copy_dir($src_folder, $dst_folder);
+
+                    if (isset($link->settings) && is_object($link->settings)) {
+                        $link->settings->static_folder = $static_folder_name;
+                    }
+                    $link->additional->static_folder = $static_folder_name;
+                }
+                $link->additional = json_encode($link->additional);
             }
 
             /* Generate random url if not specified */

@@ -63,6 +63,7 @@ if(settings()->links->static_is_enabled) {
 
     if(settings()->links->static_ai_is_enabled) {
         $features[] = 'ai_static_prompts_per_month_limit';
+        $features[] = 'ai_static_prompts_characters_limit';
     }
 }
 
