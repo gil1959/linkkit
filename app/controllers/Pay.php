@@ -199,6 +199,12 @@ class Pay extends Controller {
                     $_POST['payment_processor'] = 'tripay';
                 }
 
+                /* Intercept Midtrans sub-channels from payment_processor */
+                if(strpos($_POST['payment_processor'], 'midtrans_') === 0) {
+                    $_POST['midtrans_channel'] = substr($_POST['payment_processor'], 9);
+                    $_POST['payment_processor'] = 'midtrans';
+                }
+
                 /* Make sure the chosen option comply */
                 if(!in_array($_POST['payment_frequency'], ['monthly', 'quarterly', 'biannual', 'annual', 'lifetime'])) {
                     redirect('pay/' . $this->plan_id . '?' . (isset($_GET['trial_skip']) ? '&trial_skip=true' : null) . (isset($_GET['code']) ? '&code=' . $_GET['code'] : null));
@@ -348,6 +354,7 @@ class Pay extends Controller {
             'payment_processors'=> $payment_processors,
             'payment_extra_data'=> $this->payment_extra_data,
             'tripay_channels'   => settings()->tripay->is_enabled ? Tripay::get_channels() : [],
+            'midtrans_channels' => settings()->midtrans->is_enabled ? \Altum\Helpers\MidtransDetector::get_active_methods() : [],
             'total_users'       => \Altum\Cache::cache_function_result('total_users', [], function() {
                 return db()->getValue('users', 'count(*)');
             })
@@ -1944,7 +1951,7 @@ class Pay extends Controller {
                         'duration' => 1,
                         'unit' => 'days'
                     ],
-                    /* enabled_payments tidak dikirim → Midtrans pakai semua metode dari dashboard */
+                    'enabled_payments' => isset($_POST['midtrans_channel']) ? [$_POST['midtrans_channel']] : [],
                     'item_details' => [[
                         'price' => $formatted_price,
                         'quantity' => 1,

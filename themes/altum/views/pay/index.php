@@ -374,7 +374,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                         <div>
                             <div class="row d-flex align-items-stretch mx-n2">
                                 <?php foreach($data->payment_processors as $key => $value): ?>
-                                    <?php if(settings()->{$key}->is_enabled && (empty(settings()->{$key}->currencies) || in_array(currency(), settings()->{$key}->currencies))): ?>
+                                    <?php if(settings()->{$key}->is_enabled && (empty(settings()->{$key}->currencies) || in_array(currency(), settings()->{$key}->currencies)) && ($key !== 'midtrans' || !empty($data->midtrans_channels))): ?>
                                         <?php if($key === 'tripay' && !empty($data->tripay_channels)): ?>
                                             <?php foreach($data->tripay_channels as $channel): ?>
                                                 <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">
@@ -391,6 +391,45 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                                                                 </span>
                                                             </div>
                                                             <div class="card-title mb-0"><?= $channel->name ?></div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            <?php endforeach ?>
+                                        <?php elseif($key === 'midtrans' && !empty($data->midtrans_channels)): ?>
+                                            <?php
+                                            $midtrans_mapping = [
+                                                'bca_va' => ['name' => 'BCA Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bca.svg'],
+                                                'echannel' => ['name' => 'Mandiri Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/mandiri.svg'],
+                                                'bni_va' => ['name' => 'BNI Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bni.svg'],
+                                                'bri_va' => ['name' => 'BRI Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bri.svg'],
+                                                'cimb_va' => ['name' => 'CIMB Niaga Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/cimb.svg'],
+                                                'permata_va' => ['name' => 'Permata Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/permata.svg'],
+                                                'danamon_va' => ['name' => 'Danamon Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/danamon.svg'],
+                                                'other_va' => ['name' => 'Other Bank Virtual Account', 'icon' => ''],
+                                                'qris' => ['name' => 'QRIS (Semua E-Wallet)', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/qris.svg'],
+                                                'gopay' => ['name' => 'GoPay', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/gopay.svg'],
+                                                'shopeepay' => ['name' => 'ShopeePay', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/shopeepay.svg'],
+                                                'credit_card' => ['name' => 'Credit Card', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/visa.svg'],
+                                                'alfamart' => ['name' => 'Alfamart', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/alfamart.svg'],
+                                                'indomaret' => ['name' => 'Indomaret', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/indomaret.svg']
+                                            ];
+                                            ?>
+                                            <?php foreach($data->midtrans_channels as $code): ?>
+                                                <?php $map = $midtrans_mapping[$code] ?? ['name' => strtoupper($code), 'icon' => '']; ?>
+                                                <label class="<?= $enabled_payment_processors <= 4 ? 'col-12' : 'col-6' ?> p-2 custom-radio-box m-0">
+                                                    <input type="radio" name="payment_processor" value="midtrans_<?= $code ?>" class="custom-control-input" required="required">
+                                                    <div class="card">
+                                                        <div class="card-body d-flex <?= $enabled_payment_processors <= 4 ? null : 'flex-column justify-content-between' ?> align-items-center">
+                                                            <div class="<?= $enabled_payment_processors <= 4 ? 'mr-3' : 'mb-3' ?>">
+                                                                <span class="custom-radio-box-main-icon">
+                                                                    <?php if (!empty($map['icon'])): ?>
+                                                                        <img src="<?= $map['icon'] ?>" alt="<?= $map['name'] ?>" style="max-height:36px; max-width:80px; object-fit:contain;" />
+                                                                    <?php else: ?>
+                                                                        <i class="fas fa-grip-vertical fa-fw" style="--brand-color: #002855;--brand-color-dark: #6f9fd1; color: var(--brand-color)" data-custom-colors></i>
+                                                                    <?php endif ?>
+                                                                </span>
+                                                            </div>
+                                                            <div class="card-title mb-0"><?= $map['name'] ?></div>
                                                         </div>
                                                     </div>
                                                 </label>

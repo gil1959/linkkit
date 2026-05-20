@@ -88,15 +88,38 @@ class StoreCartCheckout extends Controller {
         }
 
         if (!empty(settings()->midtrans->is_enabled)) {
-            $payment_channels[] = (object)[
-                'code'      => 'MIDTRANS',
-                'name'      => 'Midtrans (Semua Metode)',
-                'group'     => 'Online Payment',
-                'icon_url'  => 'https://api.midtrans.com/v2/assets/svg/brand/midtrans.svg',
-                'total_fee' => (object)['flat' => 0, 'percent' => 0],
-                '_gateway'  => 'midtrans',
-            ];
-            if (!$primary_gateway) $primary_gateway = 'midtrans';
+            $midtrans_active = \Altum\Helpers\MidtransDetector::get_active_methods();
+            if (!empty($midtrans_active)) {
+                $midtrans_mapping = [
+                    'bca_va' => ['name' => 'BCA Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bca.svg'],
+                    'echannel' => ['name' => 'Mandiri Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/mandiri.svg'],
+                    'bni_va' => ['name' => 'BNI Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bni.svg'],
+                    'bri_va' => ['name' => 'BRI Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/bri.svg'],
+                    'cimb_va' => ['name' => 'CIMB Niaga Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/cimb.svg'],
+                    'permata_va' => ['name' => 'Permata Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/permata.svg'],
+                    'danamon_va' => ['name' => 'Danamon Virtual Account', 'group' => 'Virtual Account', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/danamon.svg'],
+                    'other_va' => ['name' => 'Other Bank Virtual Account', 'group' => 'Virtual Account', 'icon' => ''],
+                    'qris' => ['name' => 'QRIS (Semua E-Wallet)', 'group' => 'QRIS', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/qris.svg'],
+                    'gopay' => ['name' => 'GoPay', 'group' => 'E-Wallet', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/gopay.svg'],
+                    'shopeepay' => ['name' => 'ShopeePay', 'group' => 'E-Wallet', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/shopeepay.svg'],
+                    'credit_card' => ['name' => 'Credit Card', 'group' => 'Online Payment', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/visa.svg'],
+                    'alfamart' => ['name' => 'Alfamart', 'group' => 'Gerai', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/alfamart.svg'],
+                    'indomaret' => ['name' => 'Indomaret', 'group' => 'Gerai', 'icon' => 'https://api.midtrans.com/v2/assets/svg/brand/indomaret.svg']
+                ];
+
+                foreach ($midtrans_active as $code) {
+                    $map = $midtrans_mapping[$code] ?? ['name' => strtoupper($code), 'group' => 'Online Payment', 'icon' => ''];
+                    $payment_channels[] = (object)[
+                        'code'      => $code,
+                        'name'      => $map['name'],
+                        'group'     => $map['group'],
+                        'icon_url'  => $map['icon'],
+                        'total_fee' => (object)['flat' => 0, 'percent' => 0],
+                        '_gateway'  => 'midtrans',
+                    ];
+                }
+                if (!$primary_gateway) $primary_gateway = 'midtrans';
+            }
         }
 
         if (!empty(settings()->offline_payment->is_enabled)) {
@@ -174,7 +197,7 @@ class StoreCartCheckout extends Controller {
                 /* ── Gateway routing ── */
                 $items_label = implode(', ', array_map(fn($ci) => $ci['item']->name . ' x' . $ci['qty'], $cart_items));
 
-                if ($method === 'MIDTRANS') {
+                if (in_array($method, ['bca_va', 'echannel', 'bni_va', 'bri_va', 'cimb_va', 'permata_va', 'danamon_va', 'other_va', 'qris', 'gopay', 'shopeepay', 'credit_card', 'alfamart', 'indomaret'])) {
                     $midtrans_api_url = (settings()->midtrans->mode == 'sandbox')
                         ? 'https://app.sandbox.midtrans.com/v1/payment-links'
                         : 'https://app.midtrans.com/v1/payment-links';
@@ -191,7 +214,7 @@ class StoreCartCheckout extends Controller {
                             'gross_amount' => (int) ceil($grand_total),
                         ],
                         'expiry' => ['duration' => 1, 'unit' => 'days'],
-                        /* enabled_payments tidak dikirim → Midtrans pakai semua metode dari dashboard */
+                        'enabled_payments' => [$method],
                         'item_details'     => $midtrans_item_details,
                         'customer_details' => [
                             'first_name' => $full_name,
@@ -230,7 +253,7 @@ class StoreCartCheckout extends Controller {
                         Alerts::add_error('Midtrans: ' . $err);
                     }
 
-                } elseif ($primary_gateway === 'tripay' && $method !== 'MIDTRANS') {
+                } elseif ($primary_gateway === 'tripay' && !in_array($method, ['bca_va', 'echannel', 'bni_va', 'bri_va', 'cimb_va', 'permata_va', 'danamon_va', 'other_va', 'qris', 'gopay', 'shopeepay', 'credit_card', 'alfamart', 'indomaret'])) {
                     $tripay_items = array_map(fn($ci) => [
                         'sku'      => 'ITEM-' . $ci['item']->id,
                         'name'     => $ci['item']->name . ' (x' . $ci['qty'] . ')',

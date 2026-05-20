@@ -430,6 +430,9 @@ class AdminSettings extends Controller {
                 'currencies' => $_POST['currencies'] ?? [],
             ]);
 
+            // Bersihkan cache deteksi metode pembayaran agar langsung dideteksi ulang
+            \Altum\Helpers\MidtransDetector::clear_cache();
+
             $this->update_settings('midtrans', $value);
         }
     }
