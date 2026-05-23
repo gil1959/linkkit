@@ -275,7 +275,7 @@ class Payments extends Model {
     }
 
     public function affiliate_payment_check($payment_id, $payment_total, $payment_currency, $user) {
-        if(\Altum\Plugin::is_active('affiliate') && settings()->affiliate->is_enabled && $user->referred_by) {
+        if(settings()->affiliate->is_enabled && $user->referred_by) {
             if((settings()->affiliate->commission_type == 'once' && !$user->referred_by_has_converted) || settings()->affiliate->commission_type == 'forever') {
                 $referral_user = (new User())->get_user_by_user_id($user->referred_by);
 

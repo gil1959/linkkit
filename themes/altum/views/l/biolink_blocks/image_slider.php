@@ -13,7 +13,7 @@ if(!\Altum\Event::exists_content_type_key('head', 'splide')) {
     <div class="splide" id="splide_<?= $data->link->biolink_block_id ?>">
         <div class="splide__track" style="border-radius: inherit;">
             <ul class="splide__list">
-                <?php foreach($data->link->settings->items as $item): ?>
+                <?php foreach(($data->link->settings->items ?? []) as $item): ?>
                     <?php $image_src = !empty($item->image_url) ? $item->image_url : \Altum\Uploads::get_full_url('block_images') . $item->image; ?>
                     <li class="splide__slide">
                         <?php if($item->location_url): ?>

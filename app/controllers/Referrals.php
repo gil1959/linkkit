@@ -24,7 +24,7 @@ class Referrals extends Controller {
 
     public function index() {
 
-        if(!\Altum\Plugin::is_active('affiliate') || (\Altum\Plugin::is_active('affiliate') && !settings()->affiliate->is_enabled)) {
+        if(!settings()->affiliate->is_enabled) {
             throw_404();
         }
 

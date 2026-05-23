@@ -24,7 +24,7 @@ class AdminAffiliatesWithdrawals extends Controller {
 
     public function index() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended']) || !\Altum\Plugin::is_active('affiliate')) {
+        if(!settings()->affiliate->is_enabled) {
             redirect('admin');
         }
 
@@ -80,7 +80,7 @@ class AdminAffiliatesWithdrawals extends Controller {
 
     public function delete() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended']) || !\Altum\Plugin::is_active('affiliate')) {
+        if(!settings()->affiliate->is_enabled) {
             redirect('admin');
         }
 
@@ -107,7 +107,7 @@ class AdminAffiliatesWithdrawals extends Controller {
 
     public function approve() {
 
-        if(!in_array(settings()->license->type, ['Extended License', 'extended']) || !\Altum\Plugin::is_active('affiliate')) {
+        if(!settings()->affiliate->is_enabled) {
             redirect('admin');
         }
 

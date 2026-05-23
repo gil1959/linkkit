@@ -413,6 +413,9 @@ var PRODUCTS = <?= json_encode(array_map(function($i){
         'is_flash_sale'       => !empty($i->is_flash_sale),
         'listing_id'          => $i->listing_id ?? null,
         'qty_per_transaction' => $i->qty_per_transaction ?? 0,
+        'avg_rating'          => $i->avg_rating ? round((float) $i->avg_rating, 1) : null,
+        'total_sold'          => $i->total_sold ? (int) $i->total_sold : 0,
+        'total_reviews'       => $i->total_reviews ? (int) $i->total_reviews : 0,
     ];
 }, $data->items)) ?>;
 
@@ -501,7 +504,9 @@ function openDetail(id){
 
     var ratingHtml = '<div style="font-size:.8rem;color:#6b7280;display:flex;align-items:center;gap:4px;margin-bottom:12px">'+
                      '<i class="fas fa-star" style="color:#f59e0b;"></i>'+
-                     '<span style="font-weight:600;color:#374151;">'+(p.avg_rating?parseFloat(p.avg_rating).toFixed(1):'0.0')+'</span>'+
+                     '<span style="font-weight:600;color:#374151;">'+(p.avg_rating ? parseFloat(p.avg_rating).toFixed(1) : '0.0')+'</span>'+
+                     '<span>&middot;</span>'+
+                     '<span>'+(p.total_reviews || 0)+' ulasan</span>'+
                      '<span>&middot;</span>'+
                      '<span>'+(p.total_sold>=1000000?Math.floor(p.total_sold/1000000)+'jt+':(p.total_sold>=1000?Math.floor(p.total_sold/1000)+'rb+':(p.total_sold||0)))+' terjual</span>'+
                      '</div>';

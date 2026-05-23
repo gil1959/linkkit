@@ -22,7 +22,7 @@ defined('ALTUMCODE') || die();
 class Affiliate {
 
     public static function initiate() {
-		if(!\Altum\Plugin::is_active('affiliate') || (\Altum\Plugin::is_active('affiliate') && !settings()->affiliate->is_enabled)) {
+		if(!settings()->affiliate->is_enabled) {
 			return;
 		}
 

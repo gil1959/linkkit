@@ -76,6 +76,7 @@ $default_blocks = [
         'has_statistics' => false,
         'themable' => true,
         'display_dynamic_name' => 'name',
+        'whitelisted_image_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'],
         'category' => 'standard',
     ],
     'socials' => [
