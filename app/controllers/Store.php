@@ -42,8 +42,8 @@ class Store extends Controller {
         $items_result = database()->query("
             SELECT i.*, 
                 (SELECT SUM(qty) FROM `shop_orders` WHERE `item_id` = i.id AND `status` = 'paid') as total_sold,
-                (SELECT AVG(rating) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` = 'approved') as avg_rating,
-                (SELECT COUNT(*) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` = 'approved') as total_reviews
+                (SELECT AVG(rating) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` != 'hidden') as avg_rating,
+                (SELECT COUNT(*) FROM `shop_reviews` WHERE `item_id` = i.id AND `status` != 'hidden') as total_reviews
             FROM `shop_items` i 
             WHERE i.shop_id = {$shop->id} AND i.status = 1 
             ORDER BY i.datetime DESC
