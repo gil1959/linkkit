@@ -1072,6 +1072,17 @@ class Router {
                 ]
             ],
 
+            'webhook-midtrans-shop' => [
+                'controller' => 'WebhookMidtransShop',
+                'settings' => [
+                    'no_authentication_check' => true,
+                    'has_view' => false,
+                    'no_browser_language_detection' => true,
+                    'allow_indexing' => false,
+					'allow_sessions' => false,
+                ]
+            ],
+
             'webhook-tripay' => [
                 'controller' => 'WebhookTripay',
                 'settings' => [

@@ -195,52 +195,74 @@ class AdminPayments extends Controller {
                         'settle_status' => 'unsettled',
                         'paid_date' => $datetime
                     ]);
-                    
+
+                    $shop_for_order = db()->where('id', $order->shop_id)->getOne('shops');
+                    $customer_for_order = db()->where('id', $order->customer_id)->getOne('shop_customers');
+
                     database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$order->grand_total} WHERE `id` = {$order->customer_id}");
                     $seller_revenue = $order->grand_total - $order->service_fee;
-                    database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$payment->user_id}");
-                    
+                    database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$order->shop_id}");
+
                     $item = db()->where('id', $order->item_id)->getOne('shop_items');
+                    $shop_fulfilled_content = null;
                     if($item) {
-                        $fulfilled_content = null;
                         if($item->type === 'download_link') {
                             $links = json_decode($item->download_links ?? '[]', true) ?: [];
-                            $fulfilled_content = json_encode($links);
+                            $shop_fulfilled_content = json_encode($links);
                         } elseif($item->type === 'random_code') {
                             $codes = json_decode($item->download_links ?? '[]', true) ?: [];
                             if(!empty($codes)) {
-                                $code = array_shift($codes);
+                                $shop_code = array_shift($codes);
                                 $remaining = database()->real_escape_string(json_encode(array_values($codes)));
                                 database()->query("UPDATE `shop_items` SET `download_links` = '{$remaining}', `stock` = GREATEST(0, COALESCE(`stock`, 0) - 1) WHERE `id` = {$item->id}");
-                                $fulfilled_content = $code;
+                                $shop_fulfilled_content = $shop_code;
                             } else {
-                                $fulfilled_content = 'OUT_OF_STOCK';
+                                $shop_fulfilled_content = 'OUT_OF_STOCK';
                             }
                         } elseif($item->type === 'webhook_event') {
-                            $fulfilled_content = 'webhook_pending';
+                            $shop_fulfilled_content = 'webhook_pending';
                         } elseif($item->type === 'manual') {
-                            $fulfilled_content = 'manual_pending';
+                            $shop_fulfilled_content = 'manual_pending';
                         } elseif($item->type === 'physical') {
-                            $fulfilled_content = 'physical_pending';
+                            $shop_fulfilled_content = 'physical_pending';
                         }
-                        
-                        if($fulfilled_content !== null) {
-                            $fc = database()->real_escape_string($fulfilled_content);
+
+                        if($shop_fulfilled_content !== null) {
+                            $fc = database()->real_escape_string($shop_fulfilled_content);
                             database()->query("UPDATE `shop_orders` SET `fulfilled_content` = '{$fc}' WHERE `id` = {$order_id}");
                         }
                         database()->query("UPDATE `shop_items` SET `sales` = `sales` + 1 WHERE `id` = {$item->id}");
+
+                        /* Kirim email konfirmasi ke pembeli */
+                        if($customer_for_order && $shop_for_order) {
+                            try {
+                                $dl_html = '';
+                                if($item->type === 'download_link' && $shop_fulfilled_content) {
+                                    $links = json_decode($shop_fulfilled_content, true) ?: [];
+                                    $dl_html = '<p><strong>Link Download:</strong></p><ul>';
+                                    foreach($links as $link) { $dl_html .= '<li><a href="' . htmlspecialchars($link) . '">' . htmlspecialchars($link) . '</a></li>'; }
+                                    $dl_html .= '</ul>';
+                                } elseif($item->type === 'random_code' && $shop_fulfilled_content && $shop_fulfilled_content !== 'OUT_OF_STOCK') {
+                                    $dl_html = '<p><strong>Kode produk kamu:</strong></p><div style="background:#1e1b4b;color:#a5b4fc;padding:16px;border-radius:8px;font-size:1.4rem;font-family:monospace;text-align:center">' . htmlspecialchars($shop_fulfilled_content) . '</div>';
+                                } else {
+                                    $dl_html = '<p>Penjual akan segera menghubungi kamu terkait pesanan ini.</p>';
+                                }
+                                $buyer_email_html = '<!DOCTYPE html><html><body style="font-family:Inter,sans-serif;background:#f8fafc;padding:20px"><div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden"><div style="background:linear-gradient(135deg,#4f46e5,#6366f1);padding:24px;text-align:center"><h1 style="color:#fff;font-size:1.3rem;margin:0">Pembayaran Diverifikasi!</h1></div><div style="padding:28px"><p>Halo <strong>' . htmlspecialchars($customer_for_order->full_name) . '</strong>,</p><p>Pembayaran offline kamu untuk <strong>' . htmlspecialchars($item->name) . '</strong> di toko <strong>' . htmlspecialchars($shop_for_order->name) . '</strong> telah diverifikasi.</p>' . $dl_html . '<hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0"><p style="font-size:.8rem;color:#94a3b8">Invoice: ' . htmlspecialchars($order->invoice_number) . '<br>Total: Rp ' . number_format($order->grand_total, 0, ',', '.') . '</p><a href="' . SITE_URL . 'store-checkout-success/' . htmlspecialchars($order->invoice_number) . '" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Lihat Detail Pesanan</a></div></div></body></html>';
+                                send_mail($customer_for_order->email, 'Pembayaran Dikonfirmasi - ' . $order->invoice_number, $buyer_email_html);
+                            } catch(\Exception $e) { /* silent */ }
+                        }
                     }
                 }
             }
 
-            /* Send webhook notification if needed */
-            if(settings()->webhooks->payment_new) {
+            /* Send webhook notification if needed (plan payments only) */
+            if(!$is_shop_order && settings()->webhooks->payment_new && $user && $plan) {
                 fire_and_forget('post', settings()->webhooks->payment_new, [
                     'user_id' => $user->user_id,
                     'email' => $user->email,
                     'name' => $user->name,
-                    'plan_id' => $plan->plan_id,
-                    'plan_expiration_date' => $plan_expiration_date,
+                    'plan_id' => $plan->plan_id ?? null,
+                    'plan_expiration_date' => null,
                     'payment_id' => $payment_id,
                     'payment_processor' => $payment->processor,
                     'payment_type' => $payment->type,
