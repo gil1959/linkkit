@@ -246,7 +246,14 @@ class StoreCartCheckout extends Controller {
                     $resp = json_decode($raw);
 
                     if ($http_code < 400 && isset($resp->payment_url)) {
-                        header('Location: ' . $resp->payment_url);
+                        $midtrans_payment_url = $resp->payment_url;
+                        $co_url_esc = database()->real_escape_string($midtrans_payment_url);
+                        /* Simpan checkout_url + payment_id ke semua orders dalam invoice ini */
+                        database()->query("UPDATE `shop_orders` SET
+                            `checkout_url` = '{$co_url_esc}',
+                            `payment_id`   = '" . database()->real_escape_string($invoice_number) . "'
+                            WHERE `invoice_number` = '" . database()->real_escape_string($invoice_number) . "'");
+                        header('Location: ' . $midtrans_payment_url);
                         exit;
                     } else {
                         $err = $resp->error_messages[0] ?? ($resp->message ?? 'Midtrans error.');
@@ -295,6 +302,13 @@ class StoreCartCheckout extends Controller {
 
                     if (isset($response_obj->success) && $response_obj->success) {
                         $checkout_url = $response_obj->data->checkout_url ?? '';
+                        $tripay_ref   = $response_obj->data->reference ?? '';
+                        $co_url_esc   = database()->real_escape_string($checkout_url);
+                        /* Simpan checkout_url + payment_id ke semua orders dalam invoice ini */
+                        database()->query("UPDATE `shop_orders` SET
+                            `checkout_url` = '{$co_url_esc}',
+                            `payment_id`   = '" . database()->real_escape_string($tripay_ref) . "'
+                            WHERE `invoice_number` = '" . database()->real_escape_string($invoice_number) . "'");
                         header('Location: ' . $checkout_url);
                         exit;
                     } else {
@@ -302,6 +316,24 @@ class StoreCartCheckout extends Controller {
                     }
 
                 } elseif ($is_demo || $method === 'demo') {
+                    redirect('store-checkout-success/' . $invoice_number);
+
+                } elseif ($method === 'offline_payment') {
+                    /* Offline payment untuk cart — insert satu record payment per order */
+                    $datetime_now = \Altum\Date::$date;
+                    foreach ($order_ids as $oid) {
+                        $payment_code = 'shop_order_' . $oid;
+                        database()->query("INSERT INTO `payments`
+                            (`user_id`, `plan_id`, `processor`, `type`, `frequency`, `email`, `name`,
+                             `total_amount`, `currency`, `code`, `status`, `datetime`)
+                            VALUES ("
+                            . (int)$shop->user_id . ", NULL, 'offline_payment', 'one_time', 'lifetime', '"
+                            . database()->real_escape_string($email) . "', '"
+                            . database()->real_escape_string($full_name) . "', "
+                            . 0 . ", '"
+                            . settings()->payment->default_currency . "', '"
+                            . database()->real_escape_string($payment_code) . "', 'pending', '{$datetime_now}')");
+                    }
                     redirect('store-checkout-success/' . $invoice_number);
 
                 } else {
