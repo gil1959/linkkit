@@ -153,7 +153,7 @@ class StoreCartCheckout extends Controller {
 
             if (!Alerts::has_errors()) {
                 $datetime       = \Altum\Date::$date;
-                $invoice_number = 'INV-CART-' . strtoupper(substr(md5(uniqid()), 0, 10));
+                $invoice_number = 'INV-SHOP-' . strtoupper(substr(md5(uniqid()), 0, 10));
                 $order_ids      = [];
 
                 /* ── Insert order per item ── */
