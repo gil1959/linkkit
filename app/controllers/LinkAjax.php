@@ -2595,38 +2595,35 @@ Hard rules:
 
                         /* normalize relative path and deny zip slip patterns */
                         $relative_path = ltrim(preg_replace('#/+#', '/', $entry_info['name']), '/');
-                        if(preg_match('#(^|/)\.\.(?:/|$)#', $relative_path)) {
-                            $zip->close();
-                            Response::json(l('global.error_message.basic'), 'error');
+                        
+                        /* whitelist file extensions for extracted files */
+                        $entry_extension = mb_strtolower(pathinfo($entry_name, PATHINFO_EXTENSION));
+                        if(!$is_directory && !in_array($entry_extension, \Altum\Uploads::$uploads['static']['inside_zip_whitelisted_file_extensions'])) {
+                            continue;
                         }
 
                         $target_path = $base_folder . '/' . $relative_path;
+
+                        /* Prevent zip slip attack using string-based normalization */
+                        $normalized_target = str_replace(['\\', '/./'], ['/', '/'], $target_path);
+                        while (str_contains($normalized_target, '/../')) {
+                            $normalized_target = preg_replace('#[^/]+/\.\./\.\./|[^/]+/\.\./|^\.\./|/\.$#', '/', $normalized_target);
+                        }
+                        if (strpos($normalized_target, $real_base_folder) !== 0) {
+                            continue; /* Skip silently */
+                        }
 
                         if($is_directory) {
                             if(!is_dir($target_path)) {
                                 mkdir($target_path, 0777, true);
                             }
-                            /* continue to next entry */
                             continue;
                         }
 
-                        /* whitelist file extensions for extracted files */
-                        $entry_extension = mb_strtolower(pathinfo($entry_name, PATHINFO_EXTENSION));
-                        if(!in_array($entry_extension, \Altum\Uploads::$uploads['static']['inside_zip_whitelisted_file_extensions'])) {
-                            continue;
-                        }
-
-                        /* ensure directory exists */
-                        $target_directory = dirname($target_path);
-                        if(!is_dir($target_directory)) {
-                            mkdir($target_directory, 0777, true);
-                        }
-
-                        /* final zip slip guard using realpath on dir */
-                        $real_target_dir = realpath($target_directory);
-                        if($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
-                            $zip->close();
-                            Response::json(l('global.error_message.basic'), 'error');
+                        /* Create parent directory if it doesn't exist yet */
+                        $parent_dir = dirname($target_path);
+                        if (!is_dir($parent_dir)) {
+                            mkdir($parent_dir, 0777, true);
                         }
 
                         /* extract */
