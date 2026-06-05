@@ -1048,9 +1048,18 @@ class LinkAjax extends Controller {
                     }
 
                     $zip->close();
+                    @unlink($file_temp);
 
-                    /* Remove temp file */
-                    unlink($file_temp);
+                    /* Auto-flatten if the zip was wrapped in a single root folder */
+                    $extracted_items = array_values(array_diff(scandir($base_folder), ['.', '..']));
+                    if (count($extracted_items) == 1 && is_dir($base_folder . '/' . $extracted_items[0])) {
+                        $single_folder = $base_folder . '/' . $extracted_items[0];
+                        $sub_items = array_diff(scandir($single_folder), ['.', '..']);
+                        foreach ($sub_items as $sub_item) {
+                            rename($single_folder . '/' . $sub_item, $base_folder . '/' . $sub_item);
+                        }
+                        rmdir($single_folder);
+                    }
                 } else {
                     Response::json(l('global.error_message.basic'), 'error');
                 }
@@ -2567,33 +2576,25 @@ Hard rules:
 
             /* zip archive extraction */
             if($uploaded_file_extension == 'zip') {
-                $log_file = UPLOADS_PATH . 'zip_debug.log';
-                file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] START ZIP EXTRACT: " . $uploaded_file_temp . "\n", FILE_APPEND);
-
                 $zip = new \ZipArchive;
 
                 if($zip->open($uploaded_file_temp) === true) {
-                    file_put_contents($log_file, "  - Zip opened. Num files: " . $zip->numFiles . "\n", FILE_APPEND);
                     /* Too many files */
                     if($zip->numFiles > $maximum_files_amount) {
-                        file_put_contents($log_file, "  - FAILED: Too many files\n", FILE_APPEND);
                         $zip->close();
                         Response::json(l('global.error_message.basic'), 'error');
                     }
 
                     /* secure base path */
                     $real_base_folder = realpath($base_folder);
-                    file_put_contents($log_file, "  - Real base folder: " . $real_base_folder . "\n", FILE_APPEND);
 
                     /* create directories and extract files */
                     for($file_index = 0; $file_index < $zip->numFiles; $file_index++) {
                         $entry_name = $zip->getNameIndex($file_index);
                         $entry_info = $zip->statIndex($file_index);
-                        file_put_contents($log_file, "  -> Processing entry: " . $entry_name . "\n", FILE_APPEND);
 
                         /* skip macos junk and directory entries */
                         if(str_contains($entry_info['name'], '__MACOSX')) { 
-                            file_put_contents($log_file, "     - Skipped: __MACOSX\n", FILE_APPEND);
                             continue; 
                         }
 
@@ -2605,7 +2606,6 @@ Hard rules:
                         /* whitelist file extensions for extracted files */
                         $entry_extension = mb_strtolower(pathinfo($entry_name, PATHINFO_EXTENSION));
                         if(!$is_directory && !in_array($entry_extension, \Altum\Uploads::$uploads['static']['inside_zip_whitelisted_file_extensions'])) {
-                            file_put_contents($log_file, "     - Skipped: invalid extension ($entry_extension)\n", FILE_APPEND);
                             continue;
                         }
 
@@ -2615,7 +2615,6 @@ Hard rules:
                             if(!is_dir($target_path)) {
                                 mkdir($target_path, 0777, true);
                             }
-                            file_put_contents($log_file, "     - Skipped: is directory. Created.\n", FILE_APPEND);
                             continue;
                         }
 
@@ -2628,16 +2627,11 @@ Hard rules:
                         /* Prevent zip slip attack safely */
                         $real_target_dir = realpath($parent_dir);
                         if ($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
-                            file_put_contents($log_file, "     - FAILED ZIP SLIP: real_target_dir=$real_target_dir\n", FILE_APPEND);
                             continue;
                         }
 
                         /* extract */
-                        if(copy('zip://' . $uploaded_file_temp . '#' . $entry_name, $target_path)) {
-                            file_put_contents($log_file, "     - EXTRACTED: " . $target_path . "\n", FILE_APPEND);
-                        } else {
-                            file_put_contents($log_file, "     - FAILED COPY: " . $target_path . "\n", FILE_APPEND);
-                        }
+                        copy('zip://' . $uploaded_file_temp . '#' . $entry_name, $target_path);
 
                         /* keep connection alive on big archives */
                         if($file_index % 100 == 0) {
@@ -2648,9 +2642,18 @@ Hard rules:
 
                     $zip->close();
                     @unlink($uploaded_file_temp);
-                    file_put_contents($log_file, "  - DONE extraction.\n", FILE_APPEND);
+                    
+                    /* Auto-flatten if the zip was wrapped in a single root folder */
+                    $extracted_items = array_values(array_diff(scandir($base_folder), ['.', '..']));
+                    if (count($extracted_items) == 1 && is_dir($base_folder . '/' . $extracted_items[0])) {
+                        $single_folder = $base_folder . '/' . $extracted_items[0];
+                        $sub_items = array_diff(scandir($single_folder), ['.', '..']);
+                        foreach ($sub_items as $sub_item) {
+                            rename($single_folder . '/' . $sub_item, $base_folder . '/' . $sub_item);
+                        }
+                        rmdir($single_folder);
+                    }
                 } else {
-                    file_put_contents($log_file, "  - FAILED to open zip.\n", FILE_APPEND);
                     Response::json(l('global.error_message.basic'), 'error');
                 }
             }
