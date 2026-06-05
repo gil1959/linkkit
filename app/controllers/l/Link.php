@@ -797,6 +797,9 @@ class Link extends Controller {
             }
         }
 
+		/* Stop execution to prevent Controller::run() from appending wrapper HTML after the file content */
+		die();
+
 	}
 
 	private function process_link() {
