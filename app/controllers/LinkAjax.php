@@ -1021,26 +1021,22 @@ class LinkAjax extends Controller {
                         /* Only allow whitelisted file types */
                         if (in_array($entry_extension, \Altum\Uploads::$uploads['static']['inside_zip_whitelisted_file_extensions'])) {
 
-                            $target_file = $base_folder . '/' . $entry_info['name'];
+                            $target_path = $base_folder . '/' . $entry_info['name'];
 
-                            /* Prevent zip slip attack using string-based normalization (works even if directory doesn't exist yet) */
-                            $normalized_target = str_replace(['\\', '/./'], ['/', '/'], $target_file);
-                            /* Collapse ../ traversal */
-                            while (str_contains($normalized_target, '/../')) {
-                                $normalized_target = preg_replace('#[^/]+/\.\./\.\./|[^/]+/\.\./|^\.\./|/\.$#', '/', $normalized_target);
-                            }
-                            if (strpos($normalized_target, $real_base_folder) !== 0) {
-                                continue; /* Skip this file silently - it's a zip slip attempt */
-                            }
-
-                            /* Create parent directory if it doesn't exist yet (handles ZIPs without explicit folder entries) */
-                            $parent_dir = dirname($target_file);
+                            /* Create parent directory if it doesn't exist yet */
+                            $parent_dir = dirname($target_path);
                             if (!is_dir($parent_dir)) {
                                 mkdir($parent_dir, 0777, true);
                             }
 
+                            /* Prevent zip slip attack safely */
+                            $real_target_dir = realpath($parent_dir);
+                            if ($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
+                                continue;
+                            }
+
                             /* Extract file */
-                            copy('zip://' . $file_temp . '#' . $entry_name, $target_file);
+                            copy('zip://' . $file_temp . '#' . $entry_name, $target_path);
                             $files[] = $entry_info['name'];
                         }
 
@@ -2604,15 +2600,6 @@ Hard rules:
 
                         $target_path = $base_folder . '/' . $relative_path;
 
-                        /* Prevent zip slip attack using string-based normalization */
-                        $normalized_target = str_replace(['\\', '/./'], ['/', '/'], $target_path);
-                        while (str_contains($normalized_target, '/../')) {
-                            $normalized_target = preg_replace('#[^/]+/\.\./\.\./|[^/]+/\.\./|^\.\./|/\.$#', '/', $normalized_target);
-                        }
-                        if (strpos($normalized_target, $real_base_folder) !== 0) {
-                            continue; /* Skip silently */
-                        }
-
                         if($is_directory) {
                             if(!is_dir($target_path)) {
                                 mkdir($target_path, 0777, true);
@@ -2624,6 +2611,12 @@ Hard rules:
                         $parent_dir = dirname($target_path);
                         if (!is_dir($parent_dir)) {
                             mkdir($parent_dir, 0777, true);
+                        }
+
+                        /* Prevent zip slip attack safely */
+                        $real_target_dir = realpath($parent_dir);
+                        if ($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
+                            continue;
                         }
 
                         /* extract */
