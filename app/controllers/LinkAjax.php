@@ -1022,12 +1022,21 @@ class LinkAjax extends Controller {
                         if (in_array($entry_extension, \Altum\Uploads::$uploads['static']['inside_zip_whitelisted_file_extensions'])) {
 
                             $target_file = $base_folder . '/' . $entry_info['name'];
-                            $real_target_file = realpath(dirname($target_file));
 
-                            /* Prevent zip slip attack */
-                            if (strpos($real_target_file, $real_base_folder) !== 0) {
-                                $zip->close();
-                                Response::json(l('global.error_message.basic'), 'error');
+                            /* Prevent zip slip attack using string-based normalization (works even if directory doesn't exist yet) */
+                            $normalized_target = str_replace(['\\', '/./'], ['/', '/'], $target_file);
+                            /* Collapse ../ traversal */
+                            while (str_contains($normalized_target, '/../')) {
+                                $normalized_target = preg_replace('#[^/]+/\.\./\.\./|[^/]+/\.\./|^\.\./|/\.$#', '/', $normalized_target);
+                            }
+                            if (strpos($normalized_target, $real_base_folder) !== 0) {
+                                continue; /* Skip this file silently - it's a zip slip attempt */
+                            }
+
+                            /* Create parent directory if it doesn't exist yet (handles ZIPs without explicit folder entries) */
+                            $parent_dir = dirname($target_file);
+                            if (!is_dir($parent_dir)) {
+                                mkdir($parent_dir, 0777, true);
                             }
 
                             /* Extract file */
