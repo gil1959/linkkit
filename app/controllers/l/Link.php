@@ -775,7 +775,7 @@ class Link extends Controller {
 		}
 
 		/* Other headers */
-		header('Cache-Control: max-age=' . 86400 * 30);
+		header('Cache-Control: max-age=' . 86400 * 30 . ', no-transform');
 		header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * 60 * 24 * 30)));
 		//header('Content-length: ' . filesize($full_requested_file));
 
