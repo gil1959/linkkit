@@ -752,6 +752,7 @@ class Link extends Controller {
 
 		/* Prepare important content type header */
 		$mime_types = [
+			'html' => 'text/html',
 			'svg' => 'image/svg+xml',
 			'css' => 'text/css',
 			'js' => 'application/javascript',

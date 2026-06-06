@@ -1031,7 +1031,7 @@ class LinkAjax extends Controller {
 
                             /* Prevent zip slip attack safely */
                             $real_target_dir = realpath($parent_dir);
-                            if ($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
+                            if ($real_target_dir === false || stripos($real_target_dir, $real_base_folder) !== 0) {
                                 continue;
                             }
 
@@ -2626,7 +2626,7 @@ Hard rules:
 
                         /* Prevent zip slip attack safely */
                         $real_target_dir = realpath($parent_dir);
-                        if ($real_target_dir === false || strpos($real_target_dir, $real_base_folder) !== 0) {
+                        if ($real_target_dir === false || stripos($real_target_dir, $real_base_folder) !== 0) {
                             continue;
                         }
 
