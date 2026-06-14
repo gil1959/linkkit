@@ -67,6 +67,36 @@ class Pay extends Controller {
 
                 break;
 
+            case 'deposit':
+                $amount = isset($_SESSION['deposit_amount']) ? (float)$_SESSION['deposit_amount'] : 0;
+                if ($amount < 10000) {
+                    Alerts::add_error('Minimal deposit adalah Rp 10.000');
+                    redirect('account-deposit');
+                }
+
+                $this->plan = new \stdClass();
+                $this->plan->plan_id = 'deposit';
+                $this->plan->name = 'Deposit Saldo';
+                $this->plan->status = 1;
+                $this->plan->trial_days = 0;
+                $this->plan->taxes_ids = null;
+                $this->plan->settings = json_encode(['deposit' => true]);
+                
+                $this->plan->prices = new \stdClass();
+                $this->plan->prices->monthly = new \stdClass();
+                $this->plan->prices->monthly->{currency()} = $amount;
+                $this->plan->prices->quarterly = new \stdClass();
+                $this->plan->prices->quarterly->{currency()} = 0;
+                $this->plan->prices->biannual = new \stdClass();
+                $this->plan->prices->biannual->{currency()} = 0;
+                $this->plan->prices->annual = new \stdClass();
+                $this->plan->prices->annual->{currency()} = 0;
+                $this->plan->prices->lifetime = new \stdClass();
+                $this->plan->prices->lifetime->{currency()} = 0;
+
+                $this->plan_taxes = [];
+                break;
+
             default:
 
                 $this->plan_id = (int) $this->plan_id;

@@ -12,6 +12,7 @@
         <?php endif ?>
 
         <option value="<?= url('account-payments') ?>" <?= \Altum\Router::$controller_key == 'account-payments' ? 'selected="selected"' : null ?>>💳 <?= l('account_payments.menu') ?></option>
+        <option value="<?= url('account-deposit') ?>" <?= \Altum\Router::$controller_key == 'account-deposit' ? 'selected="selected"' : null ?>>💰 Deposit Saldo</option>
 
         <?php if(\Altum\Plugin::is_active('affiliate') && settings()->affiliate->is_enabled): ?>
             <option value="<?= url('referrals') ?>" <?= \Altum\Router::$controller_key == 'referrals' ? 'selected="selected"' : null ?>>🤝 <?= l('referrals.menu') ?></option>
@@ -69,6 +70,12 @@
         <div class="col-lg-4 p-2 text-truncate">
             <a class="btn btn-block btn-custom text-truncate  <?= \Altum\Router::$controller_key == 'account-payments' ? 'active' : null ?>" href="<?= url('account-payments') ?>">
                 <i class="fas fa-fw fa-sm fa-credit-card mr-2"></i> <?= l('account_payments.menu') ?>
+            </a>
+        </div>
+
+        <div class="col-lg-4 p-2 text-truncate">
+            <a class="btn btn-block btn-custom text-truncate  <?= \Altum\Router::$controller_key == 'account-deposit' ? 'active' : null ?>" href="<?= url('account-deposit') ?>">
+                <i class="fas fa-fw fa-sm fa-coins mr-2"></i> Deposit Saldo
             </a>
         </div>
 

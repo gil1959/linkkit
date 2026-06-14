@@ -86,7 +86,7 @@ class WebhookPaypal extends Controller {
                 /* Parse metadata */
                 $metadata = explode('&', $response->body->purchase_units[0]->payments->captures[0]->custom_id);
                 $user_id = (int) $metadata[0];
-                $plan_id = (int) $metadata[1];
+                $plan_id = (string) $metadata[1];
                 $payment_frequency = $metadata[2];
                 $base_amount = $metadata[3];
                 $code = $metadata[4];
@@ -143,7 +143,7 @@ class WebhookPaypal extends Controller {
                     /* Parse metadata */
                     $metadata = explode('&', $response->body->custom_id);
                     $user_id = (int) $metadata[0];
-                    $plan_id = (int) $metadata[1];
+                    $plan_id = (string) $metadata[1];
                     $payment_frequency = $metadata[2];
                     $base_amount = $metadata[3];
                     $code = $metadata[4];
@@ -156,7 +156,7 @@ class WebhookPaypal extends Controller {
 
                     if(isset($extra[0], $extra[1], $extra[2])) {
                         $user_id = (int) $extra[0];
-                        $plan_id = (int) $extra[1];
+                        $plan_id = (string) $extra[1];
                         $payment_frequency = $extra[2];
                         $code = $extra[3];
                         $discount_amount = 0;
@@ -165,7 +165,7 @@ class WebhookPaypal extends Controller {
                         $extra = explode('!!', $response->body->plan->name);
 
                         $user_id = (int) $extra[0];
-                        $plan_id = (int) $extra[1];
+                        $plan_id = (string) $extra[1];
                         $base_amount = $extra[2];
                         $payment_frequency = $extra[3];
                         $code = $extra[4];

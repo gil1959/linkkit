@@ -258,6 +258,7 @@
 
                     <?php if(settings()->payment->is_enabled): ?>
                         <a class="dropdown-item <?= in_array(\Altum\Router::$controller, ['AccountPayments']) ? 'active' : null ?>" href="<?= url('account-payments') ?>"><i class="fas fa-fw fa-sm fa-credit-card mr-2"></i> <?= l('account_payments.menu') ?></a>
+                        <a class="dropdown-item <?= in_array(\Altum\Router::$controller, ['AccountDeposit']) ? 'active' : null ?>" href="<?= url('account-deposit') ?>"><i class="fas fa-fw fa-sm fa-coins mr-2"></i> Deposit Saldo</a>
 
                         <?php if(\Altum\Plugin::is_active('affiliate') && settings()->affiliate->is_enabled): ?>
                             <a class="dropdown-item <?= in_array(\Altum\Router::$controller, ['Referrals']) ? 'active' : null ?>" href="<?= url('referrals') ?>"><i class="fas fa-fw fa-sm fa-wallet mr-2"></i> <?= l('referrals.menu') ?></a>

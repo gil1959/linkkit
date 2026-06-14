@@ -22,11 +22,18 @@ class Payments extends Model {
 
     public function webhook_process_payment($payment_processor, $external_payment_id, $payment_total, $payment_currency, $user_id, $plan_id, $payment_frequency, $code, $discount_amount, $base_amount, $taxes_ids, $payment_type, $payment_subscription_id, $payer_email, $payer_name) {
         /* Get the plan details */
-        $plan = db()->where('plan_id', $plan_id)->getOne('plans');
+        if ($plan_id === 'deposit') {
+            $plan = new \stdClass();
+            $plan->plan_id = 'deposit';
+            $plan->name = 'Deposit Saldo';
+            $plan->settings = json_encode(['deposit' => true]);
+        } else {
+            $plan = db()->where('plan_id', $plan_id)->getOne('plans');
 
-        /* Just make sure the plan is still existing */
-        if(!$plan) {
-            http_response_code(400);die('Plan from the app does not exist anymore');
+            /* Just make sure the plan is still existing */
+            if(!$plan) {
+                http_response_code(400);die('Plan from the app does not exist anymore');
+            }
         }
 
         /* Make sure the transaction is not already existing */
@@ -129,29 +136,39 @@ class Payments extends Model {
             'datetime' => $payment_datetime
         ]);
 
-        /* Update the user with the new plan */
-        $current_plan_expiration_date = $plan_id == $user->plan_id ? $user->plan_expiration_date : '';
-        $modifier = match ($payment_frequency) {
-            'monthly' => '+30 days +12 hours',
-            'quarterly' => '+3 months +12 hours',
-            'biannual' => '+6 months +12 hours',
-            'annual' => '+12 months +12 hours',
-            'lifetime' => '+100 years +12 hours',
-        };
-        $plan_expiration_date = (new \DateTime($current_plan_expiration_date))->modify($modifier)->format('Y-m-d H:i:s');
+        /* Update the user with the new plan or deposit */
+        if ($plan_id === 'deposit') {
+            $plan_expiration_date = $user->plan_expiration_date;
+            db()->where('user_id', $user_id)->update('users', [
+                'withdrawable_funds' => db()->inc($payment_total),
+                'payment_processor' => $payment_processor,
+                'payment_total_amount' => $payment_total,
+                'payment_currency' => $payment_currency,
+            ]);
+        } else {
+            $current_plan_expiration_date = $plan_id == $user->plan_id ? $user->plan_expiration_date : '';
+            $modifier = match ($payment_frequency) {
+                'monthly' => '+30 days +12 hours',
+                'quarterly' => '+3 months +12 hours',
+                'biannual' => '+6 months +12 hours',
+                'annual' => '+12 months +12 hours',
+                'lifetime' => '+100 years +12 hours',
+            };
+            $plan_expiration_date = (new \DateTime($current_plan_expiration_date))->modify($modifier)->format('Y-m-d H:i:s');
 
-        /* Database query */
-        db()->where('user_id', $user_id)->update('users', [
-            'plan_id' => $plan_id,
-            'plan_settings' => $plan->settings,
-            'plan_expiration_date' => $plan_expiration_date,
-            'plan_expiry_reminder' => 0,
-            'plan_trial_done' => 1,
-            'payment_subscription_id' => $payment_subscription_id,
-            'payment_processor' => $payment_processor,
-            'payment_total_amount' => $payment_total,
-            'payment_currency' => $payment_currency,
-        ]);
+            /* Database query */
+            db()->where('user_id', $user_id)->update('users', [
+                'plan_id' => $plan_id,
+                'plan_settings' => $plan->settings,
+                'plan_expiration_date' => $plan_expiration_date,
+                'plan_expiry_reminder' => 0,
+                'plan_trial_done' => 1,
+                'payment_subscription_id' => $payment_subscription_id,
+                'payment_processor' => $payment_processor,
+                'payment_total_amount' => $payment_total,
+                'payment_currency' => $payment_currency,
+            ]);
+        }
 
         /* Run potential hooks */
         \Altum\CustomHooks::user_payment_finished(['user' => $user, 'plan' => $plan]);

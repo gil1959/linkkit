@@ -75,6 +75,17 @@ class User extends Model {
                     $data->plan_settings = json_decode($data->plan_settings);
                 }
             }
+
+            /* Fill missing settings with defaults to avoid errors and feature loss */
+            if(isset($data->plan_settings) && is_object($data->plan_settings)) {
+                $available_plan_features = require APP_PATH . 'includes/available_plan_features.php';
+                $free_settings = settings()->plan_free->settings ?? new \stdClass();
+                foreach($available_plan_features as $key) {
+                    if(!property_exists($data->plan_settings, $key)) {
+                        $data->plan_settings->$key = $free_settings->$key ?? (str_ends_with($key, '_limit') ? 0 : false);
+                    }
+                }
+            }
         }
 
         return $data;

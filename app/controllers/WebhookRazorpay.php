@@ -70,7 +70,7 @@ class WebhookRazorpay extends Controller {
             /* Process meta data */
             $metadata = $data->payload->payment_link->entity->notes;
             $user_id = (int) $metadata->user_id;
-            $plan_id = (int) $metadata->plan_id;
+            $plan_id = (string) $metadata->plan_id;
             $payment_frequency = $metadata->payment_frequency;
             $code = isset($metadata->code) ? $metadata->code : '';
             $discount_amount = isset($metadata->discount_amount) ? $metadata->discount_amount : 0;
@@ -114,7 +114,7 @@ class WebhookRazorpay extends Controller {
             /* Process meta data */
             $metadata = $data->payload->subscription->entity->notes;
             $user_id = (int) $metadata->user_id;
-            $plan_id = (int) $metadata->plan_id;
+            $plan_id = (string) $metadata->plan_id;
             $payment_frequency = $metadata->payment_frequency;
             $code = isset($metadata->code) ? $metadata->code : '';
             $discount_amount = isset($metadata->discount_amount) ? $metadata->discount_amount : 0;

@@ -207,7 +207,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
 
                                     <div class="card">
                                         <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
-                                            <div class="card-title mb-0"><?= l('pay.custom_plan.monthly') ?></div>
+                                            <div class="card-title mb-0"><?= $data->plan_id === 'deposit' ? 'Nominal Deposit' : l('pay.custom_plan.monthly') ?></div>
 
                                             <div>
                                                 <div id="monthly_price_discount_case_wrapper" class="font-size-small text-muted text-right d-none">
@@ -532,10 +532,11 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
                         <?php endif ?>
                     <?php endif ?>
 
-                    <h2 class="h5 mt-5 mb-4"><i class="fas fa-fw fa-sm fa-dollar-sign mr-2"></i> <?= l('pay.custom_plan.payment_type') ?></h2>
+                    <?php if($data->plan_id !== 'deposit'): ?>
+                        <h2 class="h5 mt-5 mb-4"><i class="fas fa-fw fa-sm fa-dollar-sign mr-2"></i> <?= l('pay.custom_plan.payment_type') ?></h2>
 
-                    <div>
-                        <div class="row d-flex align-items-stretch mx-n2">
+                        <div>
+                            <div class="row d-flex align-items-stretch mx-n2">
 
                             <label class="col-12 p-2 custom-radio-box m-0" id="one_time_type_label" <?= in_array(settings()->payment->type, ['one_time', 'both']) ? null : 'style="display: none"' ?>>
                                 <input type="radio" id="one_time_type" name="payment_type" value="one_time" class="custom-control-input" required="required">
@@ -571,6 +572,9 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
 
                         </div>
                     </div>
+                    <?php else: ?>
+                        <input type="hidden" name="payment_type" value="one_time" required="required">
+                    <?php endif ?>
 
                 </div>
 

@@ -127,7 +127,8 @@ input[type=radio].pm-radio{display:none}
                         <label class="pm-card <?= $first ? 'selected' : '' ?>" for="pm_<?= $ch->code ?>">
                             <input type="radio" class="pm-radio" name="_pm" id="pm_<?= $ch->code ?>"
                                    value="<?= $ch->code ?>" <?= $first ? 'checked' : '' ?>
-                                   onchange="selectMethod('<?= $ch->code ?>')">
+                                   data-sufficient="<?= ($ch->code === 'balance' && !$ch->_sufficient) ? '0' : '1' ?>"
+                                   onchange="selectMethod('<?= $ch->code ?>', <?= ($ch->code === 'balance' && !$ch->_sufficient) ? 'false' : 'true' ?>)">
                             <?php if(!empty($ch->icon_url)): ?>
                                 <img src="<?= htmlspecialchars($ch->icon_url) ?>" class="pm-icon" alt="<?= htmlspecialchars($ch->name) ?>"
                                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -141,9 +142,9 @@ input[type=radio].pm-radio{display:none}
                     </div>
                     <?php endforeach ?>
 
-                    <button type="submit" class="btn-pay">
+                    <button type="submit" class="btn-pay" id="btnPay">
                         <i class="fas fa-lock"></i>
-                        Bayar Sekarang — Rp <?= number_format($data->grand_total, 0, ',', '.') ?>
+                        <span id="btnPayText">Bayar Sekarang — Rp <?= number_format($data->grand_total, 0, ',', '.') ?></span>
                     </button>
                 </div>
             </div>
@@ -188,12 +189,24 @@ input[type=radio].pm-radio{display:none}
 </div>
 
 <script>
-function selectMethod(code) {
+function selectMethod(code, sufficient) {
     document.getElementById('selectedMethod').value = code;
     document.querySelectorAll('.pm-card').forEach(function(c){ c.classList.remove('selected'); });
     var radio = document.getElementById('pm_' + code);
     if(radio) radio.closest('.pm-card').classList.add('selected');
+
+    var btnText = document.getElementById('btnPayText');
+    if (btnText) {
+        if (code === 'balance') {
+            btnText.innerHTML = sufficient ? 'Bayar dengan Saldo' : 'Top Up Saldo';
+        } else {
+            btnText.innerHTML = 'Bayar Sekarang — Rp <?= number_format($data->grand_total, 0, ',', '.') ?>';
+        }
+    }
 }
 var firstRadio = document.querySelector('.pm-radio');
-if(firstRadio) selectMethod(firstRadio.value);
+if(firstRadio) {
+    var isSuff = firstRadio.getAttribute('data-sufficient') === '1';
+    selectMethod(firstRadio.value, isSuff);
+}
 </script>

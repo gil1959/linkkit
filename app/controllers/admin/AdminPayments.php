@@ -257,7 +257,18 @@ class AdminPayments extends Controller {
 
             $plan_expiration_date = null;
 
-            if(!$is_shop_order && $user && $plan) {
+            if ($payment->plan_id === 'deposit' && $user) {
+                /* Update the user withdrawable_funds */
+                db()->where('user_id', $user->user_id)->update('users', [
+                    'withdrawable_funds' => db()->inc($payment->total_amount),
+                    'payment_processor' => $payment->processor,
+                    'payment_total_amount' => $payment->total_amount,
+                    'payment_currency' => $payment->currency,
+                ]);
+
+                /* Clear the cache */
+                cache()->deleteItemsByTag('user_id=' . $user->user_id);
+            } elseif(!$is_shop_order && $user && $plan) {
                 /* Update the user with the new plan */
                 $current_plan_expiration_date = $payment->plan_id == $user->plan_id ? $user->plan_expiration_date : '';
                 $modifier = match ($payment->frequency) {

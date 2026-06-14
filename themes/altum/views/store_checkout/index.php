@@ -276,7 +276,7 @@ input[type=radio].pm-radio{display:none}
                     <?php if($balance_channel && !$balance_channel->_sufficient): ?>
                     <div id="balance_insufficient_warn" data-sufficient="0" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;margin-top:14px;font-size:.8rem;color:#dc2626;align-items:center;gap:8px">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <span>Saldo kamu tidak mencukupi untuk membayar item ini. Silakan gunakan metode pembayaran lain atau <a href="<?= url('account-plan') ?>" style="color:#dc2626;font-weight:700">top up saldo</a> terlebih dahulu.</span>
+                        <span>Saldo kamu tidak mencukupi untuk membayar pesanan ini. Lanjut klik tombol di bawah untuk <strong>top up saldo</strong>.</span>
                     </div>
                     <?php elseif($balance_channel && $balance_channel->_sufficient): ?>
                     <div id="balance_insufficient_warn" data-sufficient="1" style="display:none"></div>
@@ -472,7 +472,7 @@ function selectMethod(code, name, logoWrapEl) {
         var sufficient = balanceWarn.getAttribute('data-sufficient') === '1';
         if(!sufficient) {
             balanceWarn.style.display = 'flex';
-            document.getElementById('btnPay').disabled = true;
+            document.getElementById('btnPay').disabled = false;
         } else {
             balanceWarn.style.display = 'none';
             document.getElementById('btnPay').disabled = false;
@@ -484,7 +484,11 @@ function selectMethod(code, name, logoWrapEl) {
 
     var btnText = document.getElementById('btnPayText');
     if(btnText) {
-        btnText.textContent = (code === 'balance') ? 'Bayar dengan Saldo' : 'Bayar Sekarang';
+        if(code === 'balance') {
+            btnText.textContent = (!balanceWarn || balanceWarn.getAttribute('data-sufficient') === '1') ? 'Bayar dengan Saldo' : 'Top Up Saldo';
+        } else {
+            btnText.textContent = 'Bayar Sekarang';
+        }
     }
 }
 

@@ -312,7 +312,10 @@ class StoreCheckout extends Controller {
                     $current_balance = $fresh_user ? (float)$fresh_user->withdrawable_funds : 0;
 
                     if($current_balance < $grand_total) {
-                        Alerts::add_error('Saldo tidak mencukupi. Saldo kamu: Rp ' . number_format($current_balance, 0, ',', '.') . '. Silakan top up terlebih dahulu.');
+                        Alerts::add_info('Saldo tidak mencukupi untuk membeli produk ini. Silakan top up terlebih dahulu.');
+                        $_SESSION['deposit_amount'] = ceil($grand_total - $current_balance);
+                        $_SESSION['deposit_return_url'] = 'store-checkout/' . $shop->url . '/' . $item->url;
+                        redirect('account-deposit');
                     } else {
                         /* Deduct saldo dari user */
                         database()->query("UPDATE `users` SET `withdrawable_funds` = `withdrawable_funds` - {$grand_total} WHERE `user_id` = " . (int)$logged_user->user_id . " AND `withdrawable_funds` >= {$grand_total}");

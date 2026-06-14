@@ -134,6 +134,26 @@ class StoreCartCheckout extends Controller {
             if (!$primary_gateway) $primary_gateway = 'offline_payment';
         }
 
+        /* ── Tambah opsi bayar dengan saldo ── */
+        $logged_user = \Altum\Authentication::get();
+        if ($logged_user) {
+            $fresh_user = database()->query("SELECT `withdrawable_funds` FROM `users` WHERE `user_id` = " . (int)$logged_user->user_id)->fetch_object();
+            $user_balance = $fresh_user ? (float)$fresh_user->withdrawable_funds : 0;
+            
+            array_unshift($payment_channels, (object)[
+                'code'        => 'balance',
+                'name'        => 'Saldo Kamu (Rp ' . number_format($user_balance, 0, ',', '.') . ')',
+                'group'       => 'Saldo Akun',
+                'icon_url'    => '',
+                'total_fee'   => (object)['flat' => 0, 'percent' => 0],
+                '_gateway'    => 'balance',
+                '_balance'    => $user_balance,
+                '_sufficient' => $user_balance >= $grand_total,
+            ]);
+        } else {
+            $user_balance = 0;
+        }
+
         $is_demo = empty($primary_gateway);
         if ($is_demo) $primary_gateway = 'demo';
 
@@ -313,6 +333,46 @@ class StoreCartCheckout extends Controller {
                         exit;
                     } else {
                         Alerts::add_error('Tripay: ' . ($response_obj->message ?? 'Unknown error'));
+                    }
+
+                } elseif ($method === 'balance') {
+                    $logged_user = \Altum\Authentication::get();
+                    if(!$logged_user) {
+                        redirect('login?redirect=store-cart-checkout/' . $shop->url);
+                    }
+                    $fresh_user = database()->query("SELECT `withdrawable_funds` FROM `users` WHERE `user_id` = " . (int)$logged_user->user_id)->fetch_object();
+                    $current_balance = $fresh_user ? (float)$fresh_user->withdrawable_funds : 0;
+
+                    if($current_balance < $grand_total) {
+                        Alerts::add_info('Saldo tidak mencukupi untuk membayar pesanan ini. Silakan top up terlebih dahulu.');
+                        $_SESSION['deposit_amount'] = ceil($grand_total - $current_balance);
+                        $_SESSION['deposit_return_url'] = 'store-cart-checkout/' . $shop->url;
+                        redirect('account-deposit');
+                    } else {
+                        /* Deduct saldo dari user */
+                        database()->query("UPDATE `users` SET `withdrawable_funds` = `withdrawable_funds` - {$grand_total} WHERE `user_id` = " . (int)$logged_user->user_id . " AND `withdrawable_funds` >= {$grand_total}");
+
+                        /* Update orders as paid */
+                        $datetime_now = \Altum\Date::$date;
+                        foreach ($order_ids as $oid) {
+                            database()->query("UPDATE `shop_orders` SET `status` = 'paid', `paid_date` = '{$datetime_now}' WHERE `id` = {$oid}");
+                            
+                            $order = database()->query("SELECT `grand_total`, `service_fee`, `item_id` FROM `shop_orders` WHERE `id` = {$oid}")->fetch_object();
+                            if($order) {
+                                $seller_revenue = $order->grand_total - $order->service_fee;
+                                database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$shop->user_id}");
+                                $item_data = database()->query("SELECT * FROM `shop_items` WHERE `id` = {$order->item_id}")->fetch_object();
+                                if ($item_data) {
+                                    (new \Altum\Controllers\StoreCheckout())->fulfill_order($oid, $item_data, $customer_id);
+                                }
+                            }
+                        }
+                        database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$grand_total} WHERE `id` = {$customer_id}");
+                        
+                        /* Empty cart */
+                        \Altum\Models\Cart::empty_cart($shop->id);
+
+                        redirect('store-checkout-success/' . $invoice_number);
                     }
 
                 } elseif ($is_demo || $method === 'demo') {

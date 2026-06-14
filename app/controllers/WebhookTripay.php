@@ -343,7 +343,7 @@ class WebhookTripay extends Controller {
         }
 
         $user_id           = (int)   $metadata_parts[0];
-        $plan_id           = (int)   $metadata_parts[1];
+        $plan_id = (string) $metadata_parts[1];
         $payment_frequency = trim($metadata_parts[2]);
         $base_amount       = isset($metadata_parts[3]) ? (float) $metadata_parts[3] : 0;
         $code              = isset($metadata_parts[4]) ? trim($metadata_parts[4]) : null;
@@ -358,7 +358,7 @@ class WebhookTripay extends Controller {
         $payer_email              = $data['customer_email'] ?? '';
         $payer_name               = $data['customer_name'] ?? '';
 
-        if(empty($external_payment_id) || $user_id <= 0 || $plan_id <= 0) {
+        if(empty($external_payment_id) || $user_id <= 0 || empty($plan_id)) {
             http_response_code(400);
             die('INVALID_DATA');
         }

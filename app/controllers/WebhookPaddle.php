@@ -84,7 +84,7 @@ class WebhookPaddle extends Controller {
         /* Parse metadata */
         $metadata = explode('&', $_POST['passthrough']);
         $user_id = (int) $metadata[0];
-        $plan_id = (int) $metadata[1];
+        $plan_id = (string) $metadata[1];
         $payment_frequency = $metadata[2];
         $base_amount = $metadata[3];
         $code = $metadata[4];

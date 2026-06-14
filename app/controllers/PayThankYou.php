@@ -41,6 +41,22 @@ class PayThankYou extends Controller {
 
                 break;
 
+            case 'deposit':
+
+                if (isset($_SESSION['deposit_return_url'])) {
+                    $return_url = $_SESSION['deposit_return_url'];
+                    unset($_SESSION['deposit_return_url']);
+                    redirect($return_url);
+                }
+
+                $plan = new \stdClass();
+                $plan->plan_id = 'deposit';
+                $plan->name = 'Deposit Saldo';
+                $plan->status = 1;
+                $plan->settings = json_encode(['deposit' => true]);
+
+                break;
+
             default:
 
                 $plan_id = (int) $plan_id;

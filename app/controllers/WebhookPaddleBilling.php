@@ -124,7 +124,7 @@ class WebhookPaddleBilling extends Controller {
                 $metadata = $data->items[0]->price->custom_data ?? null;
 
                 $user_id = (int) $metadata->user_id;
-                $plan_id = (int) $metadata->plan_id;
+                $plan_id = (string) $metadata->plan_id;
                 $payment_frequency = $metadata->payment_frequency;
                 $code = $metadata->code ?? '';
                 $discount_amount = $metadata->discount_amount ?? 0;
@@ -163,7 +163,7 @@ class WebhookPaddleBilling extends Controller {
                 $metadata = $data->items[0]->price->custom_data ?? null;
 
                 $user_id = (int) $metadata->user_id;
-                $plan_id = (int) $metadata->plan_id;
+                $plan_id = (string) $metadata->plan_id;
                 $payment_frequency = $metadata->payment_frequency;
                 $code = $metadata->code ?? '';
                 $discount_amount = $metadata->discount_amount ?? 0;

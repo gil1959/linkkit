@@ -381,7 +381,7 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
         <div class="login-gate-icon">🔐</div>
         <div class="login-gate-title">Login Dulu, Yuk!</div>
         <div class="login-gate-desc">Kamu perlu login atau daftar akun terlebih dahulu untuk melanjutkan pembelian di toko ini.</div>
-        <a id="loginGateBtn" href="<?= url('login') ?>?redirect=<?= urlencode(SITE_URL . 'store/' . $data->shop->url) ?>" class="login-gate-btn">
+        <a id="loginGateBtn" href="<?= url('login') ?>?redirect=<?= urlencode('store/' . $data->shop->url) ?>" class="login-gate-btn">
             <i class="fas fa-sign-in-alt" style="margin-right:6px"></i>Login / Daftar Sekarang
         </a>
         <span class="login-gate-secondary" onclick="document.getElementById('popupLoginRequired').classList.remove('show')">Tutup</span>
@@ -419,7 +419,7 @@ var STORE_URL = '<?= SITE_URL ?>store-checkout/';
 var CART_CHECKOUT_URL = '<?= SITE_URL ?>store-cart-checkout';
 var SITE_URL = '<?= SITE_URL ?>';
 var IS_LOGGED_IN = <?= \Altum\Authentication::check() ? 'true' : 'false' ?>;
-var LOGIN_URL = '<?= url('login') ?>?redirect=<?= urlencode(SITE_URL . 'store/' . $data->shop->url) ?>';
+var LOGIN_URL = '<?= url('login') ?>?redirect=<?= urlencode('store/' . $data->shop->url) ?>';
 var PRODUCTS = <?= json_encode(array_map(function($i){
     return [
         'id'                  => $i->id,
