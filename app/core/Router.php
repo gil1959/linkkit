@@ -847,6 +847,14 @@ class Router {
                 ]
             ],
 
+            'account-deposit' => [
+                'controller' => 'AccountDeposit',
+                'settings' => [
+                    'wrapper' => 'app_wrapper',
+                    'allow_team_access' => false,
+                ]
+            ],
+
             'account-logs' => [
                 'controller' => 'AccountLogs',
                 'settings' => [

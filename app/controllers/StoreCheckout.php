@@ -210,7 +210,7 @@ class StoreCheckout extends Controller {
         $preview_price = (!empty($item->has_discount) && !empty($item->discount_price)) ? (float)$item->discount_price : (float)$item->price;
         $preview_total = $preview_price * $get_qty_for_balance;
 
-        if($logged_user && $user_balance > 0) {
+        if($logged_user) {
             array_unshift($payment_channels, (object)[
                 'code'      => 'balance',
                 'name'      => 'Saldo Kamu (Rp ' . number_format($user_balance, 0, ',', '.') . ')',
