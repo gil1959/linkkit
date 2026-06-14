@@ -135,7 +135,7 @@ class StoreCartCheckout extends Controller {
         }
 
         /* ── Tambah opsi bayar dengan saldo ── */
-        $logged_user = \Altum\Authentication::get();
+        $logged_user = \Altum\Authentication::$user;
         if ($logged_user) {
             $fresh_user = database()->query("SELECT `withdrawable_funds` FROM `users` WHERE `user_id` = " . (int)$logged_user->user_id)->fetch_object();
             $user_balance = $fresh_user ? (float)$fresh_user->withdrawable_funds : 0;
@@ -336,7 +336,7 @@ class StoreCartCheckout extends Controller {
                     }
 
                 } elseif ($method === 'balance') {
-                    $logged_user = \Altum\Authentication::get();
+                    $logged_user = \Altum\Authentication::$user;
                     if(!$logged_user) {
                         redirect('login?redirect=store-cart-checkout/' . $shop->url);
                     }
