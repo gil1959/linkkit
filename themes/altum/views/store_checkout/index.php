@@ -91,6 +91,18 @@ input[type=radio].pm-radio{display:none}
     </a>
 </nav>
 
+<?php if($data->logged_user): ?>
+<div style="background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;padding:8px 24px;font-size:.8rem;display:flex;align-items:center;gap:12px">
+    <i class="fas fa-user-circle"></i>
+    <span>Login sebagai <strong><?= htmlspecialchars($data->logged_user->name) ?></strong></span>
+    <?php if($data->user_balance > 0): ?>
+    <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;margin-left:auto">
+        <i class="fas fa-wallet" style="margin-right:4px"></i>Saldo: <strong>Rp <?= number_format($data->user_balance, 0, ',', '.') ?></strong>
+    </span>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
 <div class="co-page">
     <!-- LEFT: FORM -->
     <div>
@@ -117,12 +129,12 @@ input[type=radio].pm-radio{display:none}
                 <div class="co-card-body">
                     <div class="form-group">
                         <label class="form-label">Alamat Email <span class="req">*</span></label>
-                        <input type="email" name="email" class="form-control" required placeholder="email@kamu.com">
+                        <input type="email" name="email" class="form-control" required placeholder="email@kamu.com" value="<?= htmlspecialchars($data->logged_user->email ?? '') ?>">
                         <div class="form-hint"><i class="fas fa-info-circle fa-xs"></i> Produk digital akan dikirim ke email ini.</div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nama Lengkap <span class="req">*</span></label>
-                        <input type="text" name="full_name" class="form-control" required placeholder="John Doe">
+                        <input type="text" name="full_name" class="form-control" required placeholder="John Doe" value="<?= htmlspecialchars($data->logged_user->name ?? '') ?>">
                     </div>
                     <div class="form-group">
                         <label class="form-label">No. WhatsApp</label>
@@ -210,7 +222,9 @@ input[type=radio].pm-radio{display:none}
                                    onchange="selectMethod('<?= $ch->code ?>', '<?= addslashes($ch->name) ?>', this.closest('.pm-card').querySelector('.pm-logo-wrap'))"
                             >
                             <div class="pm-logo-wrap">
-                                <?php if(!empty($ch->icon_url)): ?>
+                                <?php if($ch->code === 'balance'): ?>
+                                    <div class="pm-icon-ph" style="background:linear-gradient(135deg,#10b981,#059669);font-size:.6rem;line-height:1.2;padding:3px"><?= $ch->_sufficient ? '✅ Cukup' : '⚠️ Kurang' ?></div>
+                                <?php elseif(!empty($ch->icon_url)): ?>
                                     <img
                                         src="<?= htmlspecialchars($ch->icon_url) ?>"
                                         class="pm-icon"
@@ -224,13 +238,17 @@ input[type=radio].pm-radio{display:none}
                             </div>
                             <div class="pm-name"><?= htmlspecialchars($ch->name) ?></div>
                             <?php
-                            $flat = $ch->total_fee->flat ?? 0;
-                            $pct  = $ch->total_fee->percent ?? 0;
-                            if($flat > 0)      $fee_label = 'Biaya Rp ' . number_format($flat,0,',','.');
-                            elseif($pct > 0)   $fee_label = 'Biaya ' . $pct . '%';
-                            else               $fee_label = 'Tanpa biaya';
+                            if($ch->code === 'balance') {
+                                echo '<div class="pm-fee" style="color:' . ($ch->_sufficient ? '#059669' : '#ef4444') . '">' . ($ch->_sufficient ? 'Saldo cukup' : 'Saldo kurang') . '</div>';
+                            } else {
+                                $flat = $ch->total_fee->flat ?? 0;
+                                $pct  = $ch->total_fee->percent ?? 0;
+                                if($flat > 0)      $fee_label = 'Biaya Rp ' . number_format($flat,0,',','.');
+                                elseif($pct > 0)   $fee_label = 'Biaya ' . $pct . '%';
+                                else               $fee_label = 'Tanpa biaya';
+                                echo '<div class="pm-fee">' . $fee_label . '</div>';
+                            }
                             ?>
-                            <div class="pm-fee"><?= $fee_label ?></div>
                         </label>
                         <?php $first = false; endforeach ?>
                     </div>
@@ -247,6 +265,22 @@ input[type=radio].pm-radio{display:none}
                         <div class="form-hint"><?= sprintf(l('global.accessibility.whitelisted_file_extensions'), \Altum\Uploads::get_whitelisted_file_extensions_accept('offline_payment_proofs')) . ' ' . sprintf(l('global.accessibility.file_size_limit'), settings()->offline_payment->proof_size_limit) ?></div>
                     </div>
 
+                    <?php
+                    /* Cek apakah ada balance channel dan tidak cukup */
+                    $balance_channel = null;
+                    foreach($data->payment_channels as $ch) {
+                        if($ch->code === 'balance') { $balance_channel = $ch; break; }
+                    }
+                    ?>
+
+                    <?php if($balance_channel && !$balance_channel->_sufficient): ?>
+                    <div id="balance_insufficient_warn" data-sufficient="0" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;margin-top:14px;font-size:.8rem;color:#dc2626;align-items:center;gap:8px">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Saldo kamu tidak mencukupi untuk membayar item ini. Silakan gunakan metode pembayaran lain atau <a href="<?= url('account-plan') ?>" style="color:#dc2626;font-weight:700">top up saldo</a> terlebih dahulu.</span>
+                    </div>
+                    <?php elseif($balance_channel && $balance_channel->_sufficient): ?>
+                    <div id="balance_insufficient_warn" data-sufficient="1" style="display:none"></div>
+                    <?php endif ?>
 
                     <button type="submit" class="btn-pay" id="btnPay">
                         <i class="fas fa-lock"></i>
@@ -432,8 +466,26 @@ function selectMethod(code, name, logoWrapEl) {
         proof_input.required = false;
     }
 
+    /* Handle balance method */
+    var balanceWarn = document.getElementById('balance_insufficient_warn');
+    if(code === 'balance' && balanceWarn) {
+        var sufficient = balanceWarn.getAttribute('data-sufficient') === '1';
+        if(!sufficient) {
+            balanceWarn.style.display = 'flex';
+            document.getElementById('btnPay').disabled = true;
+        } else {
+            balanceWarn.style.display = 'none';
+            document.getElementById('btnPay').disabled = false;
+        }
+    } else if(balanceWarn) {
+        balanceWarn.style.display = 'none';
+        document.getElementById('btnPay').disabled = false;
+    }
+
     var btnText = document.getElementById('btnPayText');
-    if(btnText) btnText.textContent = 'Bayar Sekarang';
+    if(btnText) {
+        btnText.textContent = (code === 'balance') ? 'Bayar dengan Saldo' : 'Bayar Sekarang';
+    }
 }
 
 /* init with first channel */

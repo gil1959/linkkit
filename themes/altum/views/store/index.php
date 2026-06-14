@@ -158,6 +158,17 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 /* ── FOOTER ── */
 .s-footer{text-align:center;padding:20px;font-size:.75rem;color:#d1d5db;border-top:1px solid #f3f4f6;margin-top:20px}
 .s-footer a{color:#9ca3af;text-decoration:none}
+/* ── LOGIN GATE POPUP ── */
+.login-gate-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1200;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.login-gate-overlay.show{display:flex}
+.login-gate-box{background:#fff;border-radius:20px;padding:32px 28px;max-width:360px;width:92%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.2);animation:popIn .22s ease}
+.login-gate-icon{font-size:3rem;margin-bottom:14px}
+.login-gate-title{font-weight:800;font-size:1.1rem;color:#1e293b;margin-bottom:8px}
+.login-gate-desc{font-size:.85rem;color:#6b7280;margin-bottom:22px;line-height:1.5}
+.login-gate-btn{display:block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;margin-bottom:10px;transition:.2s}
+.login-gate-btn:hover{background:linear-gradient(135deg,#3730a3,#4f46e5);color:#fff}
+.login-gate-secondary{font-size:.8rem;color:#94a3b8;cursor:pointer;text-decoration:underline}
+.login-gate-secondary:hover{color:#4f46e5}
 </style>
 
 <!-- TOPBAR -->
@@ -364,6 +375,19 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
     </div>
 </div>
 
+<!-- POPUP: Login Required -->
+<div class="login-gate-overlay" id="popupLoginRequired" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="login-gate-box">
+        <div class="login-gate-icon">🔐</div>
+        <div class="login-gate-title">Login Dulu, Yuk!</div>
+        <div class="login-gate-desc">Kamu perlu login atau daftar akun terlebih dahulu untuk melanjutkan pembelian di toko ini.</div>
+        <a id="loginGateBtn" href="<?= url('login') ?>?redirect=<?= urlencode(SITE_URL . 'store/' . $data->shop->url) ?>" class="login-gate-btn">
+            <i class="fas fa-sign-in-alt" style="margin-right:6px"></i>Login / Daftar Sekarang
+        </a>
+        <span class="login-gate-secondary" onclick="document.getElementById('popupLoginRequired').classList.remove('show')">Tutup</span>
+    </div>
+</div>
+
 <!-- ORDERS PANEL -->
 <div class="cart-panel" id="ordersPanel">
     <div class="cart-panel-head">
@@ -394,6 +418,8 @@ body{background:#f8fafc;font-family:'Inter',sans-serif;color:#111827;margin:0}
 var STORE_URL = '<?= SITE_URL ?>store-checkout/';
 var CART_CHECKOUT_URL = '<?= SITE_URL ?>store-cart-checkout';
 var SITE_URL = '<?= SITE_URL ?>';
+var IS_LOGGED_IN = <?= \Altum\Authentication::check() ? 'true' : 'false' ?>;
+var LOGIN_URL = '<?= url('login') ?>?redirect=<?= urlencode(SITE_URL . 'store/' . $data->shop->url) ?>';
 var PRODUCTS = <?= json_encode(array_map(function($i){
     return [
         'id'                  => $i->id,
@@ -590,6 +616,11 @@ function openDetail(id){
     /* attach listeners setelah render */
     if(document.getElementById('btnAddCart_'+id)) {
         document.getElementById('btnAddCart_'+id).onclick = function(){
+            if(!IS_LOGGED_IN) {
+                document.getElementById('popupLoginRequired').classList.add('show');
+                closeDetail();
+                return;
+            }
             var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
             var pr = document.getElementById('s_price_'+id) ? parseFloat(document.getElementById('s_price_'+id).value) || finalPrice : finalPrice;
             
@@ -608,6 +639,11 @@ function openDetail(id){
         };
     }
     document.getElementById('btnBuyNow_'+id).onclick = function(){
+        if(!IS_LOGGED_IN) {
+            document.getElementById('popupLoginRequired').classList.add('show');
+            closeDetail();
+            return;
+        }
         var q = document.getElementById('s_qty_'+id) ? parseInt(document.getElementById('s_qty_'+id).value) || 1 : 1;
         if(q > maxQty) { alert('Maksimal pembelian ' + maxQty + ' item per transaksi.'); return; }
         window.location.href = STORE_URL + id + '?qty=' + q;
@@ -712,6 +748,10 @@ function addCart(id, qty, price){
     updateCartUI();
 }
 function quickAddCart(id){
+    if(!IS_LOGGED_IN) {
+        document.getElementById('popupLoginRequired').classList.add('show');
+        return;
+    }
     addCart(id);
     showCart();
 }
@@ -822,6 +862,11 @@ function toggleOrders(){
     document.getElementById('cartPanel').classList.remove('open');
 }
 function doCheckout(){
+    /* Cek login dulu */
+    if(!IS_LOGGED_IN) {
+        document.getElementById('popupLoginRequired').classList.add('show');
+        return;
+    }
     /* Ambil item yang dicentang */
     var selected = cart.filter(function(c){ return c.checked !== false; });
     if(selected.length === 0){

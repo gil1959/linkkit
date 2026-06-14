@@ -91,6 +91,16 @@ class StoreCheckout extends Controller {
         $item_id = isset($this->params[0]) ? (int) $this->params[0] : null;
         if(!$item_id) redirect();
 
+        /* ── REQUIRE LOGIN: redirect ke halaman login jika belum login ── */
+        if(!\Altum\Authentication::check()) {
+            $return_url = SITE_URL . 'store-checkout/' . $item_id . (isset($_GET['qty']) ? '?qty=' . (int)$_GET['qty'] : '');
+            redirect('login?redirect=' . urlencode($return_url));
+        }
+
+        /* ── Ambil data user untuk cek saldo ── */
+        $logged_user = database()->query("SELECT `user_id`, `email`, `name`, `withdrawable_funds` FROM `users` WHERE `user_id` = " . (int)\Altum\Authentication::$user->user_id)->fetch_object() ?? null;
+        $user_balance = $logged_user ? (float)$logged_user->withdrawable_funds : 0;
+
         $item = database()->query("SELECT * FROM `shop_items` WHERE `id` = {$item_id} AND `status` = 1")->fetch_object() ?? null;
         if(!$item) redirect();
 
@@ -194,6 +204,25 @@ class StoreCheckout extends Controller {
             $primary_gateway = 'demo';
         }
 
+        /* ── Tambah opsi bayar dengan saldo jika user punya saldo ── */
+        $get_qty_for_balance = isset($_GET['qty']) ? (int) $_GET['qty'] : 1;
+        if($get_qty_for_balance < 1) $get_qty_for_balance = 1;
+        $preview_price = (!empty($item->has_discount) && !empty($item->discount_price)) ? (float)$item->discount_price : (float)$item->price;
+        $preview_total = $preview_price * $get_qty_for_balance;
+
+        if($logged_user && $user_balance > 0) {
+            array_unshift($payment_channels, (object)[
+                'code'      => 'balance',
+                'name'      => 'Saldo Kamu (Rp ' . number_format($user_balance, 0, ',', '.') . ')',
+                'group'     => 'Saldo Akun',
+                'icon_url'  => '',
+                'total_fee' => (object)['flat' => 0, 'percent' => 0],
+                '_gateway'  => 'balance',
+                '_balance'  => $user_balance,
+                '_sufficient' => $user_balance >= $preview_total,
+            ]);
+        }
+
         /* Read qty from GET, or fallback to POST hidden input (_qty) */
         $get_qty = isset($_GET['qty']) ? (int) $_GET['qty'] : (isset($_POST['_qty']) ? (int) $_POST['_qty'] : 1);
         if($get_qty < 1) $get_qty = 1;
@@ -276,7 +305,69 @@ class StoreCheckout extends Controller {
             }
 
             if(!Alerts::has_errors()) {
-                /* Customer */
+                /* ── Bayar dengan Saldo ── */
+                if($method === 'balance') {
+                    /* Re-check saldo terkini dari DB */
+                    $fresh_user = database()->query("SELECT `withdrawable_funds` FROM `users` WHERE `user_id` = " . (int)$logged_user->user_id)->fetch_object();
+                    $current_balance = $fresh_user ? (float)$fresh_user->withdrawable_funds : 0;
+
+                    if($current_balance < $grand_total) {
+                        Alerts::add_error('Saldo tidak mencukupi. Saldo kamu: Rp ' . number_format($current_balance, 0, ',', '.') . '. Silakan top up terlebih dahulu.');
+                    } else {
+                        /* Deduct saldo dari user */
+                        database()->query("UPDATE `users` SET `withdrawable_funds` = `withdrawable_funds` - {$grand_total} WHERE `user_id` = " . (int)$logged_user->user_id . " AND `withdrawable_funds` >= {$grand_total}");
+
+                        /* Buat customer record jika belum ada */
+                        $bal_email    = $logged_user->email;
+                        $bal_name     = $logged_user->name;
+                        $bal_phone    = '';
+                        $customer_bal = database()->query("SELECT `id` FROM `shop_customers` WHERE `shop_id` = {$shop->id} AND `email` = '" . database()->real_escape_string($bal_email) . "'")->fetch_object() ?? null;
+                        if(!$customer_bal) {
+                            $stmt = database()->prepare("INSERT INTO `shop_customers` (`shop_id`, `email`, `full_name`, `phone`) VALUES (?, ?, ?, ?)");
+                            $stmt->bind_param('isss', $shop->id, $bal_email, $bal_name, $bal_phone);
+                            $stmt->execute();
+                            $customer_id = $stmt->insert_id;
+                            $stmt->close();
+                        } else {
+                            $customer_id = $customer_bal->id;
+                        }
+
+                        /* Insert order */
+                        $datetime   = \Altum\Date::$date;
+                        $stmt = database()->prepare("INSERT INTO `shop_orders`
+                            (`shop_id`, `item_id`, `customer_id`, `invoice_number`, `qty`,
+                             `total_amount`, `service_fee`, `grand_total`, `discount_amount`, `voucher_id`,
+                             `shipping_address`, `shipping_courier`, `shipping_service`, `shipping_cost`,
+                             `payment_processor`, `payment_proof`, `status`, `paid_date`, `datetime`)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', '', 0, 'balance', NULL, 'paid', ?, ?)");
+                        $stmt->bind_param(
+                            'iiisiddddiiss',
+                            $shop->id, $item->id, $customer_id,
+                            $invoice_number, $qty,
+                            $base_total, $service_fee, $grand_total, $discount_amount, $voucher_id,
+                            $datetime, $datetime
+                        );
+                        $stmt->execute();
+                        $order_id = $stmt->insert_id;
+                        $stmt->close();
+
+                        if($voucher_id) {
+                            database()->query("UPDATE `shop_vouchers` SET `used` = `used` + 1 WHERE `id` = {$voucher_id}");
+                        }
+
+                        /* Update stats */
+                        database()->query("UPDATE `shop_customers` SET `total_orders` = `total_orders` + 1, `total_spent` = `total_spent` + {$grand_total} WHERE `id` = {$customer_id}");
+                        $seller_revenue = $grand_total - $service_fee;
+                        database()->query("UPDATE `users` SET `pending_funds` = `pending_funds` + {$seller_revenue} WHERE `user_id` = {$shop->user_id}");
+
+                        /* Fulfill order */
+                        $this->fulfill_order($order_id, $item, $customer_id);
+
+                        redirect('store-checkout-success/' . $invoice_number);
+                    }
+                }
+
+                if(!Alerts::has_errors()) {
                 $customer = database()->query("SELECT `id` FROM `shop_customers`
                     WHERE `shop_id` = {$shop->id} AND `email` = '" . database()->real_escape_string($email) . "'"
                 )->fetch_object() ?? null;
@@ -489,7 +580,8 @@ class StoreCheckout extends Controller {
                 } else {
                     Alerts::add_error('Metode pembayaran belum didukung untuk toko ini.');
                 }
-            }
+            } /* end !Alerts::has_errors() - balance check */
+            } /* end !Alerts::has_errors() - main */
         }
 
         Title::set('Checkout - ' . $item->name);
@@ -504,6 +596,8 @@ class StoreCheckout extends Controller {
             'primary_gateway'  => $primary_gateway,
             'is_demo'          => $is_demo,
             'payment_method'   => $method ?? null,
+            'user_balance'     => $user_balance,
+            'logged_user'      => $logged_user,
         ];
 
         $view = new \Altum\View('store_checkout/index', (array) $this);

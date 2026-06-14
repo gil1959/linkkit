@@ -255,6 +255,38 @@ class AdminPayments extends Controller {
                 }
             }
 
+            $plan_expiration_date = null;
+
+            if(!$is_shop_order && $user && $plan) {
+                /* Update the user with the new plan */
+                $current_plan_expiration_date = $payment->plan_id == $user->plan_id ? $user->plan_expiration_date : '';
+                $modifier = match ($payment->frequency) {
+                    'monthly' => '+30 days +12 hours',
+                    'quarterly' => '+3 months +12 hours',
+                    'biannual' => '+6 months +12 hours',
+                    'annual' => '+12 months +12 hours',
+                    'lifetime' => '+100 years +12 hours',
+                    default => '+0 days',
+                };
+                $plan_expiration_date = (new \DateTime($current_plan_expiration_date))->modify($modifier)->format('Y-m-d H:i:s');
+
+                /* Database query */
+                db()->where('user_id', $user->user_id)->update('users', [
+                    'plan_id' => $payment->plan_id,
+                    'plan_settings' => $plan->settings,
+                    'plan_expiration_date' => $plan_expiration_date,
+                    'plan_expiry_reminder' => 0,
+                    'plan_trial_done' => 1,
+                    'payment_subscription_id' => '',
+                    'payment_processor' => $payment->processor,
+                    'payment_total_amount' => $payment->total_amount,
+                    'payment_currency' => $payment->currency,
+                ]);
+
+                /* Clear the cache */
+                cache()->deleteItemsByTag('user_id=' . $user->user_id);
+            }
+
             /* Send webhook notification if needed (plan payments only) */
             if(!$is_shop_order && settings()->webhooks->payment_new && $user && $plan) {
                 fire_and_forget('post', settings()->webhooks->payment_new, [
@@ -262,7 +294,7 @@ class AdminPayments extends Controller {
                     'email' => $user->email,
                     'name' => $user->name,
                     'plan_id' => $plan->plan_id ?? null,
-                    'plan_expiration_date' => null,
+                    'plan_expiration_date' => $plan_expiration_date,
                     'payment_id' => $payment_id,
                     'payment_processor' => $payment->processor,
                     'payment_type' => $payment->type,
