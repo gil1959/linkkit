@@ -94,7 +94,7 @@ $currency_decimals = $selected_currency->currency_decimals ?? 2;
             <div class="row"><div class="col-12 col-xl-8"></div></div>
         </form>
 
-    <?php elseif(is_numeric($data->plan_id)): ?>
+    <?php elseif(is_numeric($data->plan_id) || $data->plan_id === 'deposit'): ?>
 
         <div class="d-flex align-items-center mb-5">
             <h1 class="h3 m-0"><?= sprintf(l('pay.custom_plan.header'), $data->plan->translations->{\Altum\Language::$name}->name ?? $data->plan->name) ?></h1>
