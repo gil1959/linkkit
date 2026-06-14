@@ -280,7 +280,7 @@ class StoreCartCheckout extends Controller {
                         Alerts::add_error('Midtrans: ' . $err);
                     }
 
-                } elseif ($primary_gateway === 'tripay' && !in_array($method, ['bca_va', 'echannel', 'bni_va', 'bri_va', 'cimb_va', 'permata_va', 'danamon_va', 'other_va', 'qris', 'gopay', 'shopeepay', 'credit_card', 'alfamart', 'indomaret'])) {
+                } elseif ($primary_gateway === 'tripay' && !in_array($method, ['bca_va', 'echannel', 'bni_va', 'bri_va', 'cimb_va', 'permata_va', 'danamon_va', 'other_va', 'qris', 'gopay', 'shopeepay', 'credit_card', 'alfamart', 'indomaret', 'balance', 'demo', 'offline_payment'])) {
                     $tripay_items = array_map(fn($ci) => [
                         'sku'      => 'ITEM-' . $ci['item']->id,
                         'name'     => $ci['item']->name . ' (x' . $ci['qty'] . ')',

@@ -51,6 +51,10 @@
                     <a href="<?= url('shop-orders') ?>"><i class="fas fa-fw fa-sm fa-shopping-bag mr-2"></i> Pesanan Saya</a>
                 </li>
 
+                <li class="<?= \Altum\Router::$controller == 'AccountDeposit' ? 'active' : null ?>">
+                    <a href="<?= url('account-deposit') ?>"><i class="fas fa-fw fa-sm fa-coins mr-2"></i> Deposit Saldo</a>
+                </li>
+
                 <?php if(settings()->links->biolinks_is_enabled): ?>
                     <li class="<?= (\Altum\Router::$controller == 'Links' && ($_GET['type'] ?? null) == 'biolink') || (\Altum\Router::$controller == 'Link' && $this->link->type == 'biolink') ? 'active' : null ?>">
                         <a href="<?= url('links?type=biolink') ?>"><i class="fas fa-fw fa-sm fa-hashtag mr-2"></i> <?= l('links.menu.biolink') ?></a>
