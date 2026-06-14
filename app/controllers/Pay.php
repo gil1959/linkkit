@@ -155,7 +155,8 @@ class Pay extends Controller {
         }
 
         if(
-            settings()->payment->taxes_and_billing_is_enabled
+            $this->plan_id !== 'deposit'
+            && settings()->payment->taxes_and_billing_is_enabled
             && ($this->user->plan_trial_done || !$this->plan->trial_days || isset($_GET['trial_skip']))
             && (empty($this->user->billing->name) || empty($this->user->billing->address) || empty($this->user->billing->city) || empty($this->user->billing->county) || empty($this->user->billing->zip))
         ) {
