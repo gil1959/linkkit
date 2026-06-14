@@ -57,7 +57,7 @@ class AccountDeposit extends Controller {
 
         $view = new \Altum\View('account-deposit/index', (array) $this);
 
-        $this->add_info_message();
+
 
         $this->view($view->run($data));
 
