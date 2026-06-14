@@ -192,7 +192,7 @@ class Router {
                 'controller' => 'Store',
                 'settings' => [
                     'wrapper' => 'store_wrapper',
-                    'no_authentication_check' => true,
+                    'no_authentication_check' => false,
                     'has_view' => true,
                 ]
             ],
@@ -201,7 +201,7 @@ class Router {
                 'controller' => 'StoreCheckout',
                 'settings' => [
                     'wrapper' => 'store_wrapper',
-                    'no_authentication_check' => true,
+                    'no_authentication_check' => false,
                     'has_view' => true,
                 ]
             ],
@@ -209,7 +209,7 @@ class Router {
                 'controller' => 'StoreCheckoutSuccess',
                 'settings' => [
                     'wrapper' => 'store_wrapper',
-                    'no_authentication_check' => true,
+                    'no_authentication_check' => false,
                     'has_view' => true,
                 ]
             ],
@@ -218,7 +218,7 @@ class Router {
                 'controller' => 'StoreCartCheckout',
                 'settings' => [
                     'wrapper' => 'store_wrapper',
-                    'no_authentication_check' => true,
+                    'no_authentication_check' => false,
                     'has_view' => true,
                 ]
             ],
