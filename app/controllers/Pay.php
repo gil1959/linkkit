@@ -365,6 +365,9 @@ class Pay extends Controller {
                 }
 
                 else {
+                    if($this->plan_id === 'deposit') {
+                        $this->plan->name = 'Tagihan';
+                    }
                     $this->{$_POST['payment_processor']}();
                 }
             }
@@ -1986,7 +1989,7 @@ class Pay extends Controller {
                     'item_details' => [[
                         'price' => $formatted_price,
                         'quantity' => 1,
-                        'name' => settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency'])
+                        'name' => $this->plan_id === 'deposit' ? 'Tagihan' : settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency'])
                     ]],
                     'custom_field1' => $midtrans_custom_id
                 ];
@@ -2099,8 +2102,8 @@ class Pay extends Controller {
                         'customer_email' => $this->user->email,
                         'customer_phone' => '08123456789',
                         'order_items'    => [[
-                            'sku'         => 'PLAN-' . $this->plan_id,
-                            'name'        => settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency']),
+                            'sku'         => $this->plan_id === 'deposit' ? 'DEPOSIT' : 'PLAN-' . $this->plan_id,
+                            'name'        => $this->plan_id === 'deposit' ? 'Tagihan' : settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency']),
                             'price'       => $formatted_price,
                             'quantity'    => 1,
                         ]],
