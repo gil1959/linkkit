@@ -2101,12 +2101,12 @@ class Pay extends Controller {
                         'customer_name'  => $this->user->name,
                         'customer_email' => $this->user->email,
                         'customer_phone' => '08123456789',
-                        'order_items'    => [[
-                            'sku'         => $this->plan_id === 'deposit' ? 'DEPOSIT' : 'PLAN-' . $this->plan_id,
+                        'order_items'    => [array_filter([
+                            'sku'         => $this->plan_id === 'deposit' ? null : 'PLAN-' . $this->plan_id,
                             'name'        => $this->plan_id === 'deposit' ? 'Tagihan' : settings()->business->brand_name . ' - ' . $this->plan->name . ' - ' . l('plan.custom_plan.' . $_POST['payment_frequency']),
                             'price'       => $formatted_price,
                             'quantity'    => 1,
-                        ]],
+                        ])],
                         'return_url'   => $return_url,
                         'expired_time' => time() + (24 * 60 * 60),
                         'signature'    => $signature,
