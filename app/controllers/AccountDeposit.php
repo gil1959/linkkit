@@ -59,7 +59,7 @@ class AccountDeposit extends Controller {
 
 
 
-        $this->view($view->run($data));
+        $this->add_view_content('content', $view->run($data));
 
     }
 
