@@ -284,7 +284,7 @@ class AdminPayments extends Controller {
                 /* Database query */
                 db()->where('user_id', $user->user_id)->update('users', [
                     'plan_id' => $payment->plan_id,
-                    'plan_settings' => $plan->settings,
+                    'plan_settings' => json_encode($plan->settings ?? ''),
                     'plan_expiration_date' => $plan_expiration_date,
                     'plan_expiry_reminder' => 0,
                     'plan_trial_done' => 1,
