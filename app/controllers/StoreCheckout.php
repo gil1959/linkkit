@@ -109,7 +109,7 @@ class StoreCheckout extends Controller {
 
         /* ── Ensure payments.plan_id allows NULL for shop orders ── */
         try {
-            database()->query("ALTER TABLE `payments` MODIFY `plan_id` INT NULL DEFAULT NULL");
+            database()->query("ALTER TABLE `payments` MODIFY `plan_id` VARCHAR(64) NULL DEFAULT NULL");
         } catch(\Exception $e) {}
 
         /* ── Collect payment channels ── */
