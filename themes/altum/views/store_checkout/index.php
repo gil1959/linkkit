@@ -223,7 +223,9 @@ input[type=radio].pm-radio{display:none}
                             >
                             <div class="pm-logo-wrap">
                                 <?php if($ch->code === 'balance'): ?>
-                                    <div class="pm-icon-ph" style="background:linear-gradient(135deg,#10b981,#059669);font-size:.6rem;line-height:1.2;padding:3px"><?= $ch->_sufficient ? '✅ Cukup' : '⚠️ Kurang' ?></div>
+                                    <div class="pm-icon-ph" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
                                 <?php elseif(!empty($ch->icon_url)): ?>
                                     <img
                                         src="<?= htmlspecialchars($ch->icon_url) ?>"
@@ -446,7 +448,11 @@ function selectMethod(code, name, logoWrapEl) {
     document.getElementById('methodName').textContent = info.name;
     var img = document.getElementById('previewLogoImg');
     var txt = document.getElementById('previewLogoText');
-    if(info.iconUrl) {
+    if(code === 'balance') {
+        img.style.display = 'none';
+        txt.innerHTML = '<i class="fas fa-wallet fa-lg" style="color:#059669"></i>';
+        txt.style.display = 'block';
+    } else if(info.iconUrl) {
         img.src = info.iconUrl;
         img.style.display = '';
         txt.style.display = 'none';
