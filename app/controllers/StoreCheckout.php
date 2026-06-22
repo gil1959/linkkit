@@ -344,7 +344,7 @@ class StoreCheckout extends Controller {
                              `payment_processor`, `payment_proof`, `status`, `paid_date`, `datetime`)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '', '', 0, 'balance', NULL, 'paid', ?, ?)");
                         $stmt->bind_param(
-                            'iiisiddddiiss',
+                            'iiisiddddiss',
                             $shop->id, $item->id, $customer_id,
                             $invoice_number, $qty,
                             $base_total, $service_fee, $grand_total, $discount_amount, $voucher_id,
